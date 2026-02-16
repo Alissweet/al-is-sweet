@@ -32,31 +32,25 @@ def create_app(config_class=Config):
     # Créer le dossier uploads s'il n'existe pas
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     
-    # Enregistrement des routes
+    # Enregistrement des blueprints
     from app.routes import main
     app.register_blueprint(main)
     
-    # Enregistrement du blueprint Auth
     from app.auth import auth
     app.register_blueprint(auth)
-    
-    # ✅ AJOUT : Context processor global pour les catégories
-    @app.context_processor
-    def inject_categories():
-        """Rend les catégories disponibles dans tous les templates"""
-        from app.models import Category
-        def get_all_categories():
-            try:
-                return Category.query.order_by(Category.name).all()
-            except Exception as e:
-                logger.error(f"Erreur récupération catégories: {e}")
-                return []
-        return dict(get_all_categories=get_all_categories)
+
+    # ✅ SUPPRIMÉ : inject_categories retiré d'ici
+    # Il est géré de façon sécurisée dans routes.py (filtré par user)
+
+    # ✅ AJOUTÉ : Création des tables pour Neon au démarrage
+    with app.app_context():
+        db.create_all()
+
+    # ✅ DÉPLACÉ : user_loader à l'intérieur de la factory
+    from app import models
+
+    @login.user_loader
+    def load_user(id):
+        return models.User.query.get(int(id))
     
     return app
-
-# Loader utilisateur
-from app import models
-@login.user_loader
-def load_user(id):
-    return models.User.query.get(int(id))
