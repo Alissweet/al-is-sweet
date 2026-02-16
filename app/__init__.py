@@ -53,4 +53,19 @@ def create_app(config_class=Config):
     def load_user(id):
         return models.User.query.get(int(id))
     
+    @app.context_processor
+    def inject_categories():
+        def get_all_categories():
+            try:
+                from flask_login import current_user
+                from app.models import Category
+                if current_user.is_authenticated:
+                    return Category.query.filter_by(
+                        user_id=current_user.id).order_by(Category.name).all()
+                return []  # ✅ Retourne liste vide si non connecté (page login etc.)
+            except Exception as e:
+                logger.error(f"Erreur context processor: {e}")
+                return []
+        return dict(get_all_categories=get_all_categories)
+        
     return app
