@@ -1,0 +1,2286 @@
+/* ============================================
+   AL' IS SWEET - FINAL PREMIUM EDITION
+   Palette: Chocolat, Crème, Terracotta
+   ============================================ */
+
+:root {
+    /* --- PALETTE GOURMANDE --- */
+    --bg-body: #fdfbf7;           /* Coquille d'œuf */
+    --bg-card: #ffffff;
+    
+    /* Couleurs Principales */
+    --choco-dark: #3e2723;        /* Chocolat Noir (Textes & Ombres fortes) */
+    --choco-milk: #8d6e63;        /* Chocolat au lait (Haut du footer) */
+    --terracotta: #c59d85;        /* Accent principal (Boutons, Icônes) */
+    --terracotta-dark: #a67c65;   /* Accent foncé pour hover */
+    --cream: #efebe9;             /* Fond subtil */
+    --gold: #ffd54f;              /* Touches dorées (Étoiles, éclairs) */
+    
+    /* UI Elements */
+    --radius-pill: 50px;
+    --radius-card: 16px;
+    
+    /* OMBRES (La signature visuelle) */
+    --shadow-choco-sm: 0 5px 15px rgba(62, 39, 35, 0.08);
+    --shadow-choco-hover: 0 15px 35px rgba(62, 39, 35, 0.18);
+    --shadow-btn: 0 4px 15px rgba(197, 157, 133, 0.4);
+    --shadow-btn-hover: 0 8px 25px rgba(62, 39, 35, 0.3);
+}
+
+/* ============================================
+   RESET & BASE
+   ============================================ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-body);
+    color: var(--choco-dark);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color: var(--choco-dark);
+}
+
+a { text-decoration: none; color: inherit; transition: 0.3s; }
+
+/*═══════════════════════════════════════════════════════════
+  NAVBAR PREMIUM - Version Redesignée
+═══════════════════════════════════════════════════════════*/
+
+.navbar-premium {
+    background: linear-gradient(135deg, #ffffff 0%, #fdfbf7 100%);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(212, 165, 116, 0.1);
+}
+
+/*-- Logo & Brand --*/
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    text-decoration: none;
+    transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover {
+    transform: translateY(-2px);
+}
+
+.brand-logo {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+}
+
+.brand-text {
+    font-family: 'Pinyon Script', cursive;
+    font-size: 3rem;
+    background: linear-gradient(135deg, #d4a574 0%, #b8865f 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 400;
+	padding-right: 20px;
+    white-space: nowrap; 
+}
+
+/*-- Navigation Links --*/
+.navbar-nav .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #5a5a5a;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.navbar-nav .nav-link i {
+    font-size: 1.1rem;
+}
+
+.navbar-nav .nav-link:hover {
+    background: rgba(212, 165, 116, 0.1);
+    color: #d4a574;
+    transform: translateY(-1px);
+}
+
+.navbar-nav .nav-link.active {
+    background: linear-gradient(135deg, #d4a574 0%, #b8865f 100%);
+    color: white;
+}
+
+/*-- Navbar Actions Container --*/
+.navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-left: auto;
+}
+
+/*═══════════════════════════════════════════════════════════
+  SEARCH BAR PREMIUM
+═══════════════════════════════════════════════════════════*/
+
+.search-container {
+    position: relative;
+}
+
+.search-form-premium {
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 50px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-form-premium:focus-within {
+    box-shadow: 0 4px 20px rgba(212, 165, 116, 0.25);
+    transform: translateY(-1px);
+}
+
+.search-input-premium {
+    border: none;
+    outline: none;
+    padding: 10px 18px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    background: transparent;
+    color: #333;
+    width: 160px;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-input-premium::placeholder {
+    color: #999;
+}
+
+.search-input-premium:focus {
+    width: 260px;
+}
+
+.search-btn-premium {
+    background: linear-gradient(135deg, #d4a574 0%, #b8865f 100%);
+    border: none;
+    color: white;
+    padding: 10px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.search-btn-premium:hover {
+    background: linear-gradient(135deg, #b8865f 0%, #a07451 100%);
+}
+
+.search-btn-premium i {
+    font-size: 1rem;
+}
+
+/*═══════════════════════════════════════════════════════════
+  USER ACTIONS (Login/Logout/User Badge)
+═══════════════════════════════════════════════════════════*/
+
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/*-- User Badge (Quand connecté) --*/
+.user-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #d4a574 0%, #b8865f 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(212, 165, 116, 0.25);
+}
+
+.user-badge i {
+    font-size: 1.1rem;
+}
+
+/*-- Bouton Déconnexion --*/
+.btn-logout {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.25);
+}
+
+.btn-logout:hover {
+    background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.35);
+}
+
+.btn-logout i {
+    font-size: 1rem;
+}
+
+/*-- Boutons Connexion & Inscription --*/
+.btn-login {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 2px solid #d4a574;
+    color: #d4a574;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-login:hover {
+    background: #d4a574;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+}
+
+.btn-register {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #d4a574 0%, #b8865f 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(212, 165, 116, 0.25);
+}
+
+.btn-register:hover {
+    background: linear-gradient(135deg, #b8865f 0%, #a07451 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(212, 165, 116, 0.35);
+}
+
+/*═══════════════════════════════════════════════════════════
+  RESPONSIVE DESIGN
+═══════════════════════════════════════════════════════════*/
+
+@media (max-width: 991px) {
+    .navbar-actions {
+        flex-direction: column;
+        width: 100%;
+        gap: 12px;
+        margin-top: 20px;
+    }
+    
+    .search-container {
+        width: 100%;
+    }
+    
+    .search-form-premium {
+        width: 100%;
+    }
+    
+    .search-input-premium {
+        width: 100%;
+        flex: 1;
+    }
+    
+    .search-input-premium:focus {
+        width: 100%;
+    }
+    
+    .user-actions {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .btn-login,
+    .btn-register,
+    .btn-logout,
+    .user-badge {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+/*-- Navbar Toggler Custom --*/
+.navbar-toggler {
+    border: 2px solid #d4a574;
+    padding: 8px 12px;
+    border-radius: 8px;
+}
+
+.navbar-toggler:focus {
+    box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.2);
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(212, 165, 116, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* ============================================
+   COMMAND CENTER & BOUTONS
+   ============================================ */
+.command-center {
+    margin-bottom: 3rem;
+}
+
+/* Bouton "Créer une recette" Magique */
+.btn-add-recipe {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: var(--terracotta);
+    color: white !important;
+    font-weight: 600;
+    padding: 12px 28px;
+    border-radius: var(--radius-pill);
+    border: none;
+    box-shadow: var(--shadow-btn);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+}
+
+.btn-add-recipe:hover {
+    background: var(--choco-dark);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: var(--shadow-btn-hover);
+}
+
+.btn-add-recipe i {
+    font-size: 1.2rem;
+    transition: transform 0.4s;
+}
+
+.btn-add-recipe:hover i {
+    transform: rotate(90deg);
+}
+
+/* Navigation Catégories (Pillules) */
+.category-nav {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+}
+
+.cat-pill {
+    background: white;
+    color: var(--choco-dark);
+    padding: 8px 24px;
+    border-radius: var(--radius-pill);
+    font-weight: 500;
+    border: 1px solid transparent;
+    box-shadow: var(--shadow-choco-sm);
+    transition: all 0.3s;
+}
+
+.cat-pill:hover, .cat-pill.active {
+    background: var(--choco-dark);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-choco-hover);
+}
+
+/* ============================================
+   CARTES RECETTES (Ombre Chocolat)
+   ============================================ */
+.recipe-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    /* Ombre douce et chaude par défaut */
+    box-shadow: 0 10px 30px -5px rgba(62, 39, 35, 0.06);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    /* Bordure très subtile autour */
+    border: 1px solid rgba(197, 157, 133, 0.2);
+    /* La "Signature" : Bordure basse colorée */
+    border-bottom: 4px solid transparent; 
+    cursor: pointer;
+    position: relative;
+}
+
+.recipe-card:hover {
+    transform: translateY(-8px);
+    /* L'ombre devient plus intense et chocolatée */
+    box-shadow: 0 20px 40px -5px rgba(62, 39, 35, 0.15);
+    /* La bordure basse s'allume en Terracotta */
+    border-bottom-color: var(--terracotta);
+}
+
+.recipe-card-image {
+    height: 230px; /* Un peu plus haut pour l'élégance */
+    position: relative;
+    overflow: hidden;
+}
+
+.recipe-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.7s ease; /* Zoom très fluide */
+}
+
+.recipe-card:hover img {
+    transform: scale(1.08);
+}
+
+.recipe-card-image::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 60px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3), transparent);
+    pointer-events: none;
+}
+
+/* Badges sur l'image */
+.badge-category {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: #ffffff;
+    color: var(--choco-dark);
+    padding: 6px 16px;
+    /* Police un peu plus petite mais espacée (Style Luxe) */
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px; 
+    border-radius: 4px; /* Coins moins ronds, plus "étiquette" */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    z-index: 2;
+    border-bottom: 2px solid var(--terracotta); /* Rappel de couleur */
+}
+
+.badge-carbs {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(30, 30, 30, 0.85); /* Noir profond semi-transparent */
+    backdrop-filter: blur(4px);
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.badge-carbs i { 
+    color: var(--gold); 
+    font-size: 0.9rem;
+}
+
+/* CORPS DE LA CARTE */
+.recipe-card-body {
+    padding: 1.8rem 1.5rem 1.5rem; /* Plus d'espace */
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    background: white;
+}
+
+.recipe-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+    color: var(--choco-dark);
+    line-height: 1.2;
+    transition: color 0.3s;
+}
+
+.recipe-meta-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    color: #795548;
+    font-weight: 500;
+}
+
+.recipe-card-description {
+    font-size: 0.9rem;
+    color: #8d6e63;
+    margin-bottom: 1.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-footer-action {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--cream);
+    text-align: right;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--terracotta);
+    transition: 0.3s;
+}
+
+.recipe-card:hover .card-footer-action {
+    color: var(--choco-dark);
+    padding-right: 8px;
+}
+
+.recipe-card:hover .recipe-card-title {
+    color: var(--terracotta); /* Le titre change de couleur au survol */
+}
+
+/* Ligne de séparation élégante */
+.recipe-card-divider {
+    height: 1px;
+    width: 40px;
+    background-color: var(--terracotta);
+    margin: 10px 0 15px 0;
+    opacity: 0.5;
+}
+
+/* MÉTADONNÉES (Alignées et propres) */
+.recipe-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    color: var(--choco-milk); /* Couleur chocolat au lait */
+    font-weight: 500;
+}
+
+.recipe-meta-row span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.recipe-meta-row i { 
+    color: var(--terracotta); 
+    font-size: 1.1rem;
+}
+
+.recipe-card-description {
+    font-size: 0.95rem;
+    color: #7d7d7d;
+    margin-bottom: 1.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.6;
+    font-style: italic; /* Touche éditoriale */
+}
+
+/* FOOTER ACTION */
+.card-footer-action {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px dashed rgba(0,0,0,0.1); /* Ligne pointillée discrète */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--terracotta);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.action-arrow {
+    width: 30px;
+    height: 30px;
+    background: var(--bg-body);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.recipe-card:hover .action-arrow {
+    background: var(--terracotta);
+    color: white;
+    transform: translateX(5px);
+}
+
+/* ============================================
+   FORMULAIRES (Création & Edition)
+   ============================================ */
+.form-header-premium {
+    text-align: center;
+    padding: 3rem 0;
+    margin-bottom: 2rem;
+}
+
+.form-card-modern {
+    background: white;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-choco-sm);
+    border: 1px solid var(--cream);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.card-header-modern {
+    background: var(--terracotta);
+    color: white;
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-body-modern { padding: 2rem; }
+
+.form-control-modern, .form-select-modern {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    background: #fcfcfc;
+    transition: 0.3s;
+}
+
+.form-control-modern:focus {
+    border-color: var(--terracotta);
+    background: white;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(197, 157, 133, 0.1);
+}
+
+.form-label-modern {
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: block;
+    color: var(--choco-dark);
+}
+
+/* Zone Upload Photo */
+.photo-upload-modern {
+    border: 2px dashed var(--terracotta);
+    border-radius: var(--radius-card);
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+    background: var(--bg-body);
+    position: relative;
+    min-height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.photo-upload-modern:hover {
+    background: white;
+    transform: scale(1.01);
+}
+
+.photo-preview-zone img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+/* ============================================
+   FOOTER (Centré & Dégradé)
+   ============================================ */
+.footer {
+    margin-top: auto;
+    /* Dégradé Chocolat au lait -> Coquille d'œuf */
+    background: linear-gradient(180deg, var(--choco-milk) 0%, var(--bg-body) 100%);
+    padding: 4rem 0 2rem;
+    color: white;
+    text-align: center;
+}
+
+.footer-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.brand-logo-footer {
+    height: 100px; /* Grand logo */
+    margin-bottom: 0.5rem;
+    filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
+}
+
+.footer-brand span {
+    font-family: 'Pinyon Script', cursive;
+    font-size: 4rem;
+    color: white;
+    line-height: 1;
+    text-shadow: 0 4px 10px rgba(62, 39, 35, 0.3);
+}
+
+.footer-text {
+    font-size: 1.1rem;
+    opacity: 0.95;
+    margin-bottom: 2rem;
+    font-weight: 300;
+}
+
+.footer-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    width: 200px;
+    margin: 0 auto 2rem;
+}
+
+.footer-copyright {
+    color: var(--choco-dark); /* Texte foncé en bas du dégradé */
+    font-size: 0.9rem;
+    font-weight: 500;
+    opacity: 0.8;
+}
+
+.footer-copyright i {
+    color: #e53935;
+    animation: heartbeat 1.5s infinite;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .brand-logo { height: 65px; }
+    .brand-text { font-size: 2.4rem; }
+    .footer-brand span { font-size: 3rem; }
+    .brand-logo-footer { height: 80px; }
+    
+    .search-form .form-control { width: 140px; }
+    .search-form .form-control:focus { width: 200px; }
+    
+    .btn-add-recipe span { display: none; } /* Cache le texte sur mobile */
+    .btn-add-recipe { padding: 12px; border-radius: 50%; }
+}
+
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+
+/* ============================================
+   MODALE PARAMÈTRES
+   ============================================ */
+.bg-terracotta {
+    background-color: var(--terracotta);
+}
+
+.text-choco {
+    color: var(--choco-dark);
+}
+
+/* Navigation Onglets Verticale */
+.nav-pills .nav-link {
+    color: var(--choco-dark);
+    border-radius: 8px;
+    margin-bottom: 5px;
+    transition: all 0.2s;
+}
+
+.nav-pills .nav-link:hover {
+    background-color: rgba(197, 157, 133, 0.2);
+    color: var(--terracotta);
+}
+
+.nav-pills .nav-link.active {
+    background-color: var(--terracotta);
+    color: white;
+    box-shadow: var(--shadow-btn);
+}
+
+.nav-pills .nav-link i {
+    font-size: 1.1rem;
+}
+
+
+/* ============================================
+   RECIPE DETAIL - STYLE "COOKOMIX"
+   ============================================ */
+
+/* Le Cadre (Wrapper) : Définit la taille et le centrage */
+.recipe-image-wrapper {
+    position: relative; /* Pour positionner le badge glucides dedans */
+    width: 100%;
+    max-width: 800px; /* Largeur max pour ne pas être géant sur PC */
+    height: 450px;    /* Hauteur fixe pour l'uniformité parfaite */
+    margin: 0 auto 2rem auto; /* Centrage horizontal + Marge bas */
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    box-shadow: var(--shadow-choco-sm);
+    background-color: var(--cream); /* Fond si l'image charge mal */
+}
+
+/* L'Image : S'adapte au cadre */
+.recipe-hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* MAGIQUE : Remplit le cadre sans déformer l'image */
+    object-position: center; /* Centre le sujet de la photo */
+    display: block;
+}
+
+/* Responsive : Adaptation Mobile */
+@media (max-width: 768px) {
+    .recipe-image-wrapper {
+        height: 300px; /* Moins haut sur mobile */
+        max-width: 100%; /* Prend toute la largeur du téléphone */
+        border-radius: 12px;
+    }
+}
+
+.recipe-main-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    color: var(--choco-dark);
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+/* Boutons d'action principaux */
+.action-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.btn-action-big {
+    padding: 1.5rem;
+    border-radius: var(--radius-card);
+    border: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s;
+    box-shadow: var(--shadow-btn);
+}
+
+.btn-shopping {
+    background: white;
+    color: var(--choco-dark);
+    border: 2px solid var(--terracotta);
+}
+
+.btn-shopping:hover {
+    background: var(--cream);
+    transform: translateY(-3px);
+}
+
+.btn-cook {
+    background: var(--terracotta);
+    color: white;
+}
+
+.btn-cook:hover {
+    background: var(--choco-dark);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-btn-hover);
+}
+
+.btn-action-big i { font-size: 2rem; }
+
+/* --- MODE CUISINE (OVERLAY PLEIN ÉCRAN) --- */
+#cookingMode {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--bg-body);
+    z-index: 9999; /* Au-dessus de tout */
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    overflow-y: auto;
+    transition: transform 0.3s ease-in-out;
+}
+
+.cooking-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--terracotta);
+    padding-bottom: 1rem;
+}
+
+.step-card {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-choco-sm);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.step-number-big {
+    font-family: 'Pinyon Script', cursive;
+    font-size: 4rem;
+    color: var(--terracotta);
+    line-height: 1;
+    margin-bottom: 1rem;
+}
+
+.step-instruction-big {
+    font-size: 1.4rem;
+    color: var(--choco-dark);
+    line-height: 1.6;
+}
+
+.cooking-controls {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: auto;
+}
+
+.progress-bar-custom {
+    height: 6px;
+    background: var(--cream);
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--terracotta);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .recipe-hero-image { height: 250px; }
+    .recipe-main-title { font-size: 2rem; }
+    .step-instruction-big { font-size: 1.2rem; }
+    .action-grid { grid-template-columns: 1fr; } /* Boutons l'un sous l'autre sur mobile */
+}
+
+/* ============================================
+   ASTUCE DU CHEF (MODE CUISINE) - ROBUSTE
+   ============================================ */
+
+.cooking-controls {
+    display: grid;
+    /* 3 colonnes : Bouton (Auto) | Astuce (Prend la place) | Bouton (Auto) */
+    grid-template-columns: auto 1fr auto; 
+    align-items: center;
+    gap: 2rem;
+    margin-top: auto;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    width: 100%;
+}
+
+.chef-tip-box {
+    background: #fff5eb; /* Fond Crème/Pêche plus soutenu */
+    border: 1px solid #e6d2c4;
+    /* Bordure Signature à gauche pour la visibilité */
+    border-left: 5px solid var(--terracotta); 
+    border-radius: 8px; /* Coins un peu plus carrés pour le sérieux */
+    padding: 1rem 1rem 1rem 4rem; /* Place pour l'icône */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 90px;
+    box-shadow: 0 4px 12px rgba(197, 157, 133, 0.15); /* Ombre portée */
+}
+
+.chef-tip-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color: var(--terracotta);
+    font-size: 1.1rem;
+    margin-bottom: 0.2rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 2;
+}
+
+.chef-tip-text {
+    font-size: 1rem; /* Texte un peu plus grand */
+    color: var(--choco-dark);
+    line-height: 1.5;
+    margin: 0;
+    font-style: italic;
+    font-weight: 500;
+    z-index: 2;
+}
+
+/* L'icône SVG en filigrane (Plus visible) */
+.chef-hat-watermark {
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    transform: translateY(-50%) rotate(-10deg);
+    width: 85px;
+    height: 85px;
+    opacity: 0.15; /* Plus opaque pour qu'on la voie */
+    fill: var(--terracotta);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* RESPONSIVE : Mobile (< 992px) */
+@media (max-width: 992px) {
+    .cooking-controls {
+        display: flex;
+        flex-direction: column-reverse; /* Boutons en bas */
+        gap: 1.5rem;
+    }
+    
+    .chef-tip-box {
+        width: 100%;
+        padding: 1.2rem 1.2rem 1.2rem 4rem;
+    }
+    
+    /* Groupe de boutons sur mobile */
+    .mobile-btn-group {
+        display: flex;
+        width: 100%;
+        gap: 1rem;
+    }
+    
+    .mobile-btn-group .btn {
+        flex: 1; /* 50% chacun */
+    }
+}
+
+/* ============================================
+   RECIPE FORM - PREMIUM EDITION
+   Style moderne et UX-oriented
+   Classes ultra-spécifiques pour éviter conflits
+   ============================================ */
+
+/* Container principal - SPÉCIFIQUE AU FORMULAIRE */
+.recipe-form-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--bg-body) 0%, var(--cream) 100%);
+    padding-bottom: 4rem;
+}
+
+/* Limite tous les styles au container du formulaire */
+.recipe-form-container * {
+    box-sizing: border-box;
+}
+
+/* ============================================
+   HERO HEADER PREMIUM
+   ============================================ */
+.recipe-form-container .form-hero-header {
+    background: linear-gradient(135deg, var(--choco-dark) 0%, var(--choco-milk) 100%);
+    padding: 3rem 0 4rem;
+    margin-bottom: -2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.recipe-form-container .form-hero-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M54.627 0l.83.828-1.415 1.415L51.8 0h2.827zM5.373 0l-.83.828L5.96 2.243 8.2 0H5.374zM48.97 0l3.657 3.657-1.414 1.414L46.143 0h2.828zM11.03 0L7.372 3.657 8.787 5.07 13.857 0H11.03zm32.284 0L49.8 6.485 48.384 7.9l-7.9-7.9h2.83zM16.686 0L10.2 6.485 11.616 7.9l7.9-7.9h-2.83zm20.97 0l9.315 9.314-1.414 1.414L34.828 0h2.83zM22.344 0L13.03 9.314l1.414 1.414L25.172 0h-2.83zM32 0l12.142 12.142-1.414 1.414L30 .828 17.272 13.556 15.858 12.14 28 0zm0 3.657l10.728 10.728-1.414 1.414L32 7.484 22.686 16.8l-1.414-1.414L32 3.657z' fill='%23ffffff' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+    opacity: 0.3;
+}
+
+.recipe-form-container .hero-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+}
+
+.recipe-form-container .hero-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.recipe-form-container .hero-icon i {
+    font-size: 2.5rem;
+    color: var(--gold);
+    animation: float-recipe-form 3s ease-in-out infinite;
+}
+
+@keyframes float-recipe-form {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.recipe-form-container .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    color: white;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+}
+
+.recipe-form-container .hero-subtitle {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 400;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ============================================
+   PROGRESS INDICATOR
+   ============================================ */
+.recipe-form-container .form-progress {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 0 3rem;
+    position: relative;
+    z-index: 10;
+}
+
+.recipe-form-container .progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    transition: all 0.4s ease;
+}
+
+.recipe-form-container .step-circle {
+    width: 60px;
+    height: 60px;
+    background: white;
+    border: 3px solid var(--cream);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 15px rgba(62, 39, 35, 0.1);
+}
+
+.recipe-form-container .step-circle i {
+    font-size: 1.5rem;
+    color: var(--choco-milk);
+    transition: all 0.3s;
+}
+
+.recipe-form-container .progress-step.active .step-circle {
+    background: var(--terracotta);
+    border-color: var(--terracotta);
+    transform: scale(1.15);
+    box-shadow: 0 8px 25px rgba(197, 157, 133, 0.4);
+}
+
+.recipe-form-container .progress-step.active .step-circle i {
+    color: white;
+    transform: scale(1.1);
+}
+
+.recipe-form-container .step-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--choco-dark);
+    opacity: 0.6;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.recipe-form-container .progress-step.active .step-label {
+    opacity: 1;
+    color: var(--terracotta);
+}
+
+.recipe-form-container .progress-line {
+    width: 120px;
+    height: 3px;
+    background: var(--cream);
+    position: relative;
+    top: -15px;
+}
+
+/* ============================================
+   FORM CARDS PREMIUM
+   ============================================ */
+.recipe-form-container .form-card-modern {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(62, 39, 35, 0.08);
+    overflow: hidden;
+    border: 1px solid rgba(197, 157, 133, 0.15);
+    margin-bottom: 2rem;
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.recipe-form-container .form-card-modern:hover {
+    box-shadow: 0 20px 60px rgba(62, 39, 35, 0.12);
+    transform: translateY(-5px) !important;
+}
+
+/* Card Header Elegant */
+.recipe-form-container .card-header-elegant {
+    background: linear-gradient(135deg, var(--choco-dark) 0%, var(--choco-milk) 100%);
+    padding: 1.5rem;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.recipe-form-container .header-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.recipe-form-container .header-icon {
+    font-size: 1.5rem;
+    color: var(--gold);
+}
+
+.recipe-form-container .header-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: white;
+    margin: 0;
+    font-weight: 600;
+}
+
+.recipe-form-container .header-decoration {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--terracotta) 0%, var(--gold) 100%);
+}
+
+.recipe-form-container .ingredient-counter {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    padding: 0.5rem 1rem;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.recipe-form-container .counter-number {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: white;
+}
+
+.recipe-form-container .counter-label {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Card Body */
+.recipe-form-container .card-body-modern {
+    padding: 2rem;
+}
+
+/* ============================================
+   PHOTO UPLOAD PREMIUM
+   ============================================ */
+.recipe-form-container .photo-upload-premium {
+    margin-bottom: 2rem;
+    cursor: pointer;
+    position: relative;
+}
+
+.recipe-form-container .photo-preview-zone {
+    width: 100%;
+    height: 280px;
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(135deg, var(--cream) 0%, #f5f5f5 100%);
+    border: 3px dashed var(--terracotta);
+    transition: all 0.4s ease;
+}
+
+.recipe-form-container .photo-upload-premium:hover .photo-preview-zone {
+    border-color: var(--choco-dark);
+    transform: scale(1.02);
+}
+
+.recipe-form-container .photo-upload-premium.dragover .photo-preview-zone {
+    border-color: var(--gold);
+    background: linear-gradient(135deg, rgba(255, 213, 79, 0.1) 0%, rgba(197, 157, 133, 0.1) 100%);
+    border-style: solid;
+}
+
+.recipe-form-container .photo-preview-zone img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.3s ease;
+}
+
+.recipe-form-container .photo-preview-zone img.preview-hidden {
+    display: none;
+}
+
+.recipe-form-container .photo-preview-zone img.preview-visible {
+    display: block;
+}
+
+.recipe-form-container .upload-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.95);
+    transition: all 0.3s ease;
+}
+
+.recipe-form-container .upload-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--terracotta) 0%, var(--terracotta-dark) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    box-shadow: 0 10px 30px rgba(197, 157, 133, 0.3);
+}
+
+.recipe-form-container .upload-icon-wrapper i {
+    font-size: 2rem;
+    color: white;
+}
+
+.recipe-form-container .upload-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--choco-dark);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.recipe-form-container .upload-hint {
+    font-size: 0.95rem;
+    color: var(--choco-milk);
+    margin-bottom: 0.5rem;
+}
+
+.recipe-form-container .upload-format {
+    font-size: 0.8rem;
+    color: var(--choco-milk);
+    opacity: 0.7;
+}
+
+
+/* Animation pour l'indicateur de succès */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* ============================================
+   FORM GROUPS PREMIUM
+   ============================================ */
+.recipe-form-container .form-group-premium {
+    margin-bottom: 1.5rem;
+}
+
+.recipe-form-container .form-label-premium {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--choco-dark);
+    font-size: 0.9rem;
+}
+
+.recipe-form-container .label-icon {
+    font-size: 1rem;
+}
+
+.recipe-form-container .label-text {
+    flex: 1;
+}
+
+.recipe-form-container .label-required {
+    color: #e53935;
+    font-size: 1.2rem;
+}
+
+.recipe-form-container .form-control-premium,
+.recipe-form-container .form-select-premium {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--cream);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    color: var(--choco-dark);
+    background: white;
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+}
+
+.recipe-form-container .form-control-premium:focus,
+.recipe-form-container .form-select-premium:focus {
+    outline: none;
+    border-color: var(--terracotta);
+    box-shadow: 0 0 0 4px rgba(197, 157, 133, 0.1);
+}
+
+.recipe-form-container .form-control-premium::placeholder {
+    color: rgba(62, 39, 35, 0.4);
+}
+
+.recipe-form-container .textarea-premium {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.6;
+}
+
+/* Select custom */
+.recipe-form-container .select-wrapper {
+    position: relative;
+}
+
+.recipe-form-container .select-wrapper .form-select-premium {
+    appearance: none;
+    padding-right: 2.5rem;
+    cursor: pointer;
+}
+
+.recipe-form-container .select-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--terracotta);
+    font-size: 1rem;
+}
+
+/* Char counter */
+.recipe-form-container .char-counter {
+    text-align: right;
+    font-size: 0.75rem;
+    color: var(--choco-milk);
+    margin-top: 0.25rem;
+}
+
+.recipe-form-container .char-count {
+    font-weight: 600;
+    color: var(--terracotta);
+}
+
+/* ============================================
+   TIME & SERVINGS GRID
+   ============================================ */
+.recipe-form-container .time-servings-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.recipe-form-container .time-input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.recipe-form-container .input-with-unit {
+    position: relative;
+}
+
+.recipe-form-container .input-with-unit input {
+    padding-right: 3.5rem;
+}
+
+.recipe-form-container .unit-badge {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--terracotta);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    pointer-events: none;
+}
+
+/* Highlight Input (Glucides) */
+.recipe-form-container .highlight-input {
+    background: linear-gradient(135deg, rgba(255, 213, 79, 0.08) 0%, rgba(197, 157, 133, 0.08) 100%);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 2px solid rgba(255, 213, 79, 0.3);
+}
+
+.recipe-form-container .input-with-unit-large {
+    position: relative;
+}
+
+.recipe-form-container .input-with-unit-large input {
+    padding-right: 3rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.recipe-form-container .unit-badge-large {
+    position: absolute;
+    right: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--gold);
+    color: var(--choco-dark);
+    padding: 0.4rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    pointer-events: none;
+}
+
+.recipe-form-container .form-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--choco-milk);
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    font-style: italic;
+}
+
+/* ============================================
+   INGREDIENTS LIST PREMIUM
+   ============================================ */
+.recipe-form-container .ingredients-scroll-premium {
+    max-height: 600px;
+    overflow-y: auto;
+    padding: 1.5rem;
+}
+
+.recipe-form-container .ingredients-scroll-premium::-webkit-scrollbar {
+    width: 8px;
+}
+
+.recipe-form-container .ingredients-scroll-premium::-webkit-scrollbar-track {
+    background: var(--cream);
+    border-radius: 10px;
+}
+
+.recipe-form-container .ingredients-scroll-premium::-webkit-scrollbar-thumb {
+    background: var(--terracotta);
+    border-radius: 10px;
+}
+
+.recipe-form-container .ingredients-list-premium {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.recipe-form-container .ingredient-item-premium {
+    display: flex;
+    align-items: stretch;
+    gap: 0.75rem;
+    background: var(--bg-body);
+    padding: 1rem;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.recipe-form-container .ingredient-item-premium:hover {
+    border-color: var(--terracotta);
+    background: white;
+    box-shadow: 0 4px 15px rgba(197, 157, 133, 0.15);
+}
+
+.recipe-form-container .ingredient-drag-handle {
+    display: flex;
+    align-items: center;
+    color: var(--choco-milk);
+    cursor: grab;
+    opacity: 0.5;
+    transition: all 0.3s;
+}
+
+.recipe-form-container .ingredient-item-premium:hover .ingredient-drag-handle {
+    opacity: 1;
+    color: var(--terracotta);
+}
+
+.recipe-form-container .ingredient-drag-handle:active {
+    cursor: grabbing;
+}
+
+.recipe-form-container .ingredient-inputs {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.recipe-form-container .ingredient-name {
+    font-weight: 500;
+}
+
+.recipe-form-container .ingredient-quantity-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.recipe-form-container .ingredient-qty {
+    text-align: center;
+}
+
+.recipe-form-container .btn-remove-premium {
+    background: transparent;
+    border: 2px solid var(--cream);
+    color: var(--choco-milk);
+    border-radius: 10px;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    align-self: center;
+}
+
+.recipe-form-container .btn-remove-premium:hover {
+    background: #fee;
+    border-color: #e53935;
+    color: #e53935;
+    transform: scale(1.1) rotate(90deg);
+}
+
+/* ============================================
+   STEPS LIST PREMIUM
+   ============================================ */
+.recipe-form-container .steps-scroll-premium {
+    max-height: 600px;
+    overflow-y: auto;
+    padding: 1.5rem;
+}
+
+.recipe-form-container .steps-scroll-premium::-webkit-scrollbar {
+    width: 8px;
+}
+
+.recipe-form-container .steps-scroll-premium::-webkit-scrollbar-track {
+    background: var(--cream);
+    border-radius: 10px;
+}
+
+.recipe-form-container .steps-scroll-premium::-webkit-scrollbar-thumb {
+    background: var(--terracotta);
+    border-radius: 10px;
+}
+
+.recipe-form-container .steps-list-premium {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.recipe-form-container .step-item-premium {
+    background: var(--bg-body);
+    padding: 1.25rem;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.recipe-form-container .step-item-premium:hover {
+    border-color: var(--terracotta);
+    background: white;
+    box-shadow: 0 4px 15px rgba(197, 157, 133, 0.15);
+}
+
+.recipe-form-container .step-header-premium {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.recipe-form-container .step-number-circle {
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(135deg, var(--terracotta) 0%, var(--terracotta-dark) 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(197, 157, 133, 0.3);
+}
+
+.recipe-form-container .step-duration-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.recipe-form-container .step-duration {
+    width: 80px;
+    text-align: center;
+}
+
+.recipe-form-container .duration-unit {
+    font-size: 0.85rem;
+    color: var(--choco-milk);
+    font-weight: 600;
+}
+
+.recipe-form-container .step-textarea {
+    border: 2px dashed var(--cream);
+}
+
+.recipe-form-container .step-textarea:focus {
+    border-style: solid;
+}
+
+/* ============================================
+   ADD BUTTONS
+   ============================================ */
+.recipe-form-container .btn-add-premium {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--terracotta) 0%, var(--terracotta-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 15px rgba(197, 157, 133, 0.3);
+}
+
+.recipe-form-container .btn-add-premium:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(197, 157, 133, 0.4);
+}
+
+.recipe-form-container .btn-add-premium i {
+    font-size: 1.2rem;
+    transition: transform 0.3s;
+}
+
+.recipe-form-container .btn-add-premium:hover i {
+    transform: rotate(90deg);
+}
+
+/* ============================================
+   FORM ACTIONS PREMIUM
+   ============================================ */
+.recipe-form-container .form-actions-premium {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem 0;
+    margin-top: 2rem;
+    border-top: 2px solid var(--cream);
+}
+
+.recipe-form-container .actions-left,
+.recipe-form-container .actions-right {
+    display: flex;
+    gap: 1rem;
+}
+
+.recipe-form-container .btn-cancel-premium,
+.recipe-form-container .btn-preview-premium,
+.recipe-form-container .btn-submit-premium {
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: none;
+    text-decoration: none;
+}
+
+.recipe-form-container .btn-cancel-premium {
+    background: white;
+    color: var(--choco-dark);
+    border: 2px solid var(--cream);
+}
+
+.recipe-form-container .btn-cancel-premium:hover {
+    background: var(--cream);
+    transform: translateX(-5px);
+}
+
+.recipe-form-container .btn-preview-premium {
+    background: white;
+    color: var(--terracotta);
+    border: 2px solid var(--terracotta);
+}
+
+.recipe-form-container .btn-preview-premium:hover {
+    background: var(--terracotta);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(197, 157, 133, 0.3);
+}
+
+.recipe-form-container .btn-submit-premium {
+    background: linear-gradient(135deg, var(--choco-dark) 0%, var(--choco-milk) 100%);
+    color: white;
+    box-shadow: 0 8px 25px rgba(62, 39, 35, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.recipe-form-container .btn-submit-premium::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s;
+}
+
+.recipe-form-container .btn-submit-premium:hover::before {
+    left: 100%;
+}
+
+.recipe-form-container .btn-submit-premium:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 12px 35px rgba(62, 39, 35, 0.4);
+}
+
+.recipe-form-container .btn-submit-premium i {
+    font-size: 1.2rem;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 992px) {
+    .recipe-form-container .hero-title {
+        font-size: 2.2rem;
+    }
+    
+    .recipe-form-container .form-progress {
+        padding: 1.5rem 1rem 2rem;
+    }
+    
+    .recipe-form-container .progress-line {
+        width: 80px;
+    }
+    
+    .recipe-form-container .step-circle {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .recipe-form-container .step-circle i {
+        font-size: 1.2rem;
+    }
+    
+    .recipe-form-container .time-servings-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .recipe-form-container .form-actions-premium {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .recipe-form-container .actions-left,
+    .recipe-form-container .actions-right {
+        width: 100%;
+        flex-direction: column;
+    }
+    
+    .recipe-form-container .btn-cancel-premium,
+    .recipe-form-container .btn-preview-premium,
+    .recipe-form-container .btn-submit-premium {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .recipe-form-container .hero-title {
+        font-size: 1.8rem;
+    }
+    
+    .recipe-form-container .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .recipe-form-container .form-progress {
+        gap: 0.5rem;
+    }
+    
+    .recipe-form-container .progress-line {
+        width: 40px;
+    }
+    
+    .recipe-form-container .step-label {
+        font-size: 0.7rem;
+    }
+    
+    .recipe-form-container .card-body-modern {
+        padding: 1.5rem;
+    }
+    
+    .recipe-form-container .ingredient-inputs {
+        gap: 0.5rem;
+    }
+    
+    .recipe-form-container .ingredient-quantity-group {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* =======================================
+   PAGE ALL RECIPES
+   =====================================*/
+@media print {
+    .btn, nav, footer, .no-print {
+        display: none !important;
+    }
+    
+    .table {
+        font-size: 10pt;
+    }
+    
+    .table td, .table th {
+        padding: 0.3rem !important;
+    }
+    
+    img {
+        max-width: 40px !important;
+        max-height: 40px !important;
+    }
+    
+    .collapse {
+        display: block !important;
+    }
+    
+    body {
+        background: white !important;
+    }
+}
+
+.bg-terracotta-light {
+    background-color: rgba(197, 157, 133, 0.2);
+}
+
+.sortable:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+
+/* ============================================
+   AUTHENTIFICATION (Login / Register)
+   ============================================ */
+
+.auth-container {
+    min-height: 80vh; /* Centre verticalement */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
+}
+
+.card-auth {
+    border: none;
+    border-radius: var(--radius-card);
+    box-shadow: 0 10px 40px rgba(62, 39, 35, 0.1);
+    overflow: hidden;
+    background: white;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.auth-logo {
+    width: 80px;
+    margin-bottom: 1rem;
+    mix-blend-mode: multiply;
+}
+
+/* Boutons Terracotta */
+.btn-terracotta {
+    background-color: var(--terracotta);
+    border-color: var(--terracotta);
+    color: white;
+    font-weight: 600;
+    border-radius: var(--radius-pill);
+    padding: 0.8rem 1.5rem;
+    transition: all 0.3s;
+}
+
+.btn-terracotta:hover {
+    background-color: var(--choco-dark);
+    border-color: var(--choco-dark);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-btn-hover);
+}
+
+.text-terracotta {
+    color: var(--terracotta) !important;
+}
+
+.text-terracotta:hover {
+    color: var(--choco-dark) !important;
+    text-decoration: underline;
+}
+
+/* Barre de force du mot de passe */
+.password-strength {
+    height: 4px;
+    background: var(--cream);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.password-strength-bar {
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.bg-weak { background-color: #e53935; }
+.bg-medium { background-color: #fdd835; }
+.bg-strong { background-color: #43a047; }
+
+
+
+/*-- Custom Styles pour les boutons utilisateur --*/
+.user-info-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px; /* Réduit de 8px à 6px */
+    background: linear-gradient(135deg, #d4a574 0%, #b8865f 100%);
+    border: none;
+    color: white;
+    padding: 8px 16px; /* Réduit de 10px 20px à 8px 16px */
+    border-radius: 50px;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.875rem; /* Ajout : texte plus petit */
+    cursor: default;
+    box-shadow: 0 2px 8px rgba(212, 165, 116, 0.25);
+    white-space: nowrap;
+}
+
+.user-info-btn i {
+    font-size: 1.1rem; /* Réduit de 1.3rem à 1.1rem */
+}
+
+.btn-logout-premium {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px; /* Réduit de 8px à 6px */
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    border: none;
+    color: white;
+    padding: 8px 16px; /* Réduit de 10px 20px à 8px 16px */
+    border-radius: 50px;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.875rem; /* Ajout : texte plus petit */
+    transition: all 0.3s ease;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.25);
+    white-space: nowrap;
+}
+
+.btn-logout-premium:hover {
+    background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+}
+
+.btn-logout-premium i {
+    font-size: 1rem; /* Réduit de 1.1rem à 1rem */
+}
+
+.auth-buttons-group {
+    display: flex;
+    gap: 10px; /* Réduit de 12px à 10px */
+    align-items: center;
+    margin-left: auto;
+}
+
+.btn-login-premium {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 2px solid #d4a574;
+    color: #d4a574;
+    padding: 8px 16px; /* Réduit */
+    border-radius: 50px;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.875rem; /* Ajout */
+    transition: all 0.3s ease;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn-login-premium:hover {
+    background: #d4a574;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+}
+
+
+.btn-register-premium {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #d4a574 0%, #b8865f 100%);
+    border: none;
+    color: white;
+    padding: 8px 16px; /* Réduit */
+    border-radius: 50px;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.875rem; /* Ajout */
+    transition: all 0.3s ease;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(212, 165, 116, 0.25);
+    white-space: nowrap;
+}
+
+.btn-register-premium:hover {
+    background: linear-gradient(135deg, #b8865f 0%, #a07451 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(212, 165, 116, 0.4);
+}
+
+/* Ajout pour l'alignement général du navbar */
+.navbar-collapse {
+    align-items: center;
+}

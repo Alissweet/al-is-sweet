@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: alsweet_db
+    environment:
+      POSTGRES_DB: al_is_sweet
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: sweetpassword123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: alsweet_app
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:sweetpassword123@db:5432/al_is_sweet
+      - SECRET_KEY=al-is-sweet-docker-secret-key-2024
+      - FLASK_ENV=development
+    volumes:
+      - .:/app
+      - uploads_data:/app/app/static/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  uploads_data:

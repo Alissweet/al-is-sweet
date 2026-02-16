@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Mes Recettes - Al' is Sweet{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    
+    <!-- COMMAND CENTER : Épuré et Fonctionnel -->
+    <section class="command-center text-center">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0">Mes Recettes</h1>
+            <a href="{{ url_for('main.recipe_new') }}" class="btn-add-recipe">
+                <i class="bi bi-plus-circle-fill"></i> Créer une recette
+            </a>
+        </div>
+
+        <!-- Navigation Pillules -->
+        <div class="category-nav">
+            <a href="{{ url_for('main.index') }}" 
+               class="cat-pill {{ 'active' if not current_category else '' }}">
+                Toutes
+            </a>
+            {% for cat in categories %}
+            <a href="{{ url_for('main.index', category=cat) }}" 
+               class="cat-pill {{ 'active' if current_category == cat else '' }}">
+                {{ cat }}
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- GRILLE DES RECETTES (Premium Edition) -->
+    <section class="recipes-grid">
+        {% if recipes.items %}
+        <div class="row g-4">
+            {% for recipe in recipes.items %}
+            <div class="col-md-6 col-lg-4">
+                <!-- La carte entière est cliquable -->
+                <div class="recipe-card" onclick="window.location='{{ url_for('main.recipe_detail', id=recipe.id) }}';">
+                    
+                    <!-- 1. IMAGE + BADGES -->
+                    <div class="recipe-card-image">
+                        {% if recipe.image_filename %}
+							{% if recipe.image_filename.startswith('http') %}
+								<img src="{{ recipe.image_filename }}" alt="{{ recipe.title }}" loading="lazy">
+							{% else %}
+								<img src="{{ url_for('static', filename='uploads/' + recipe.image_filename) }}" alt="{{ recipe.title }}" loading="lazy">
+							{% endif %}
+						{% else %}
+							<!-- Placeholder -->
+							<div class="d-flex align-items-center justify-content-center h-100 bg-light text-muted">
+								<i class="bi bi-camera fs-1"></i>
+							</div>
+						{% endif %}
+                        
+                        <!-- Badge Catégorie (Haut Gauche) -->
+                        <div class="badge-category">
+                            {{ recipe.category or 'Recette' }}
+                        </div>
+                        
+                        <!-- Badge Glucides (Haut Droite) -->
+                        <div class="badge-carbs">
+                            <i class="bi bi-lightning-fill"></i>
+                            {{ "%.0f"|format(recipe.total_carbs) }}g
+                        </div>
+                    </div>
+
+                    <!-- 2. CORPS DE LA CARTE -->
+                    <div class="recipe-card-body">
+                        <h3 class="recipe-card-title">{{ recipe.title }}</h3>
+                        
+                        <!-- NOUVEAU : Ligne de séparation élégante -->
+                        <div class="recipe-card-divider"></div>
+                        
+                        <!-- Ligne Méta : Temps | Parts | Difficulté -->
+                        <div class="recipe-meta-row">
+                            <span><i class="bi bi-clock"></i> {{ recipe.total_time }} min</span>
+                            <span><i class="bi bi-people"></i> {{ recipe.servings }}</span>
+                            <span><i class="bi bi-bar-chart"></i> {{ recipe.difficulty }}</span>
+                        </div>
+
+                        <!-- Description avec style citation -->
+                        {% if recipe.description %}
+                        <p class="recipe-card-description">
+                            "{{ recipe.description }}"
+                        </p>
+                        {% endif %}
+
+                        <!-- NOUVEAU : Footer Action avec flèche ronde -->
+                        <div class="card-footer-action">
+                            <span>Découvrir</span>
+                            <div class="action-arrow">
+                                <i class="bi bi-arrow-right"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if recipes.pages > 1 %}
+        <div class="mt-5 d-flex justify-content-center">
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-pill">
+                    {% if recipes.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('main.index', page=recipes.prev_num, category=current_category, search=search) }}">Précédent</a>
+                    </li>
+                    {% endif %}
+                    <li class="page-item disabled"><span class="page-link">{{ recipes.page }} / {{ recipes.pages }}</span></li>
+                    {% if recipes.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('main.index', page=recipes.next_num, category=current_category, search=search) }}">Suivant</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <!-- État vide -->
+        <div class="text-center py-5">
+            <div class="mb-3 opacity-50">
+                <i class="bi bi-basket3 display-1 text-muted"></i>
+            </div>
+            <h3 class="text-muted">Aucune recette trouvée...</h3>
+            <p class="text-muted">Il est temps de sortir le fouet et le tablier !</p>
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

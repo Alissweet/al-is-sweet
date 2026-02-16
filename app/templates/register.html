@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Inscription - Al' is Sweet{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center min-vh-100 align-items-center py-5">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-5">
+                    <!-- Logo et titre -->
+                    <div class="text-center mb-4">
+                        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" style="width: 80px;" class="mb-3">
+                        <h2 class="font-playfair text-choco-dark mb-2">Créer un compte</h2>
+                        <p class="text-muted">Rejoignez la communauté des gourmands</p>
+                    </div>
+                    
+                    <!-- Formulaire d'inscription -->
+                    <form method="POST" action="{{ url_for('auth.register') }}" autocomplete="on" id="registerForm">
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        
+                        <!-- Nom d'utilisateur -->
+                        <div class="mb-3">
+                            <label for="username" class="form-label fw-medium">
+                                <i class="bi bi-person me-1"></i> Nom d'utilisateur
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="username" 
+                                   name="username" 
+                                   placeholder="JohnDoe"
+                                   autocomplete="username"
+                                   minlength="3"
+                                   maxlength="50"
+                                   pattern="[a-zA-Z0-9_-]+"
+                                   required>
+                            <small class="text-muted">3-50 caractères, lettres, chiffres, - et _ uniquement</small>
+                        </div>
+                        
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label fw-medium">
+                                <i class="bi bi-envelope me-1"></i> Email
+                            </label>
+                            <input type="email" 
+                                   class="form-control" 
+                                   id="email" 
+                                   name="email" 
+                                   placeholder="votre@email.com"
+                                   autocomplete="email"
+                                   required>
+                        </div>
+                        
+                        <!-- Mot de passe -->
+                        <div class="mb-3">
+                            <label for="password" class="form-label fw-medium">
+                                <i class="bi bi-lock me-1"></i> Mot de passe
+                            </label>
+                            <input type="password" 
+                                   class="form-control" 
+                                   id="password" 
+                                   name="password" 
+                                   placeholder="••••••••"
+                                   autocomplete="new-password"
+                                   minlength="8"
+                                   required>
+                            <small class="text-muted">
+                                Min. 8 caractères avec majuscule, minuscule et chiffre
+                            </small>
+                            <!-- Indicateur de force -->
+                            <div class="password-strength mt-2" style="display: none;">
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <small class="strength-text text-muted"></small>
+                            </div>
+                        </div>
+                        
+                        <!-- Confirmation mot de passe -->
+                        <div class="mb-4">
+                            <label for="password_confirm" class="form-label fw-medium">
+                                <i class="bi bi-lock-fill me-1"></i> Confirmer le mot de passe
+                            </label>
+                            <input type="password" 
+                                   class="form-control" 
+                                   id="password_confirm" 
+                                   name="password_confirm" 
+                                   placeholder="••••••••"
+                                   autocomplete="new-password"
+                                   required>
+                            <small class="match-indicator text-danger" style="display: none;">
+                                Les mots de passe ne correspondent pas
+                            </small>
+                        </div>
+                        
+                        <!-- Bouton d'inscription -->
+                        <button type="submit" class="btn btn-terracotta btn-lg w-100 mb-3" id="submitBtn">
+                            <i class="bi bi-person-plus me-2"></i>Créer mon compte
+                        </button>
+                        
+                        <!-- Lien connexion -->
+                        <div class="text-center">
+                            <p class="text-muted mb-0">
+                                Déjà inscrit ? 
+                                <a href="{{ url_for('auth.login') }}" class="text-terracotta text-decoration-none fw-medium">
+                                    Se connecter
+                                </a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Validation en temps réel du mot de passe
+const passwordInput = document.getElementById('password');
+const passwordConfirm = document.getElementById('password_confirm');
+const strengthIndicator = document.querySelector('.password-strength');
+const strengthBar = strengthIndicator.querySelector('.progress-bar');
+const strengthText = strengthIndicator.querySelector('.strength-text');
+const matchIndicator = document.querySelector('.match-indicator');
+const submitBtn = document.getElementById('submitBtn');
+
+passwordInput.addEventListener('input', function() {
+    const password = this.value;
+    strengthIndicator.style.display = password.length > 0 ? 'block' : 'none';
+    
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^a-zA-Z0-9]/.test(password)) strength++;
+    
+    const percentage = (strength / 5) * 100;
+    strengthBar.style.width = percentage + '%';
+    
+    if (strength <= 2) {
+        strengthBar.className = 'progress-bar bg-danger';
+        strengthText.textContent = 'Faible';
+    } else if (strength === 3) {
+        strengthBar.className = 'progress-bar bg-warning';
+        strengthText.textContent = 'Moyen';
+    } else {
+        strengthBar.className = 'progress-bar bg-success';
+        strengthText.textContent = 'Fort';
+    }
+    
+    checkPasswordMatch();
+});
+
+passwordConfirm.addEventListener('input', checkPasswordMatch);
+
+function checkPasswordMatch() {
+    if (passwordConfirm.value.length > 0) {
+        if (passwordInput.value === passwordConfirm.value) {
+            matchIndicator.style.display = 'none';
+            passwordConfirm.classList.remove('is-invalid');
+            passwordConfirm.classList.add('is-valid');
+        } else {
+            matchIndicator.style.display = 'block';
+            passwordConfirm.classList.remove('is-valid');
+            passwordConfirm.classList.add('is-invalid');
+        }
+    } else {
+        matchIndicator.style.display = 'none';
+        passwordConfirm.classList.remove('is-valid', 'is-invalid');
+    }
+}
+
+// Validation avant soumission
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    if (passwordInput.value !== passwordConfirm.value) {
+        e.preventDefault();
+        alert('Les mots de passe ne correspondent pas');
+        return false;
+    }
+});
+</script>
+{% endblock %}

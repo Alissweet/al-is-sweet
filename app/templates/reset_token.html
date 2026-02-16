@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Nouveau mot de passe - Al' is Sweet{% endblock %}
+
+{% block content %}
+<div class="container auth-container">
+    <div class="col-md-5">
+        <div class="card card-auth p-5">
+            <div class="auth-header">
+                <h2 class="font-playfair mb-2">Nouveau mot de passe</h2>
+            </div>
+            
+            <form method="POST">
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div class="mb-3">
+                    <label class="form-label fw-bold small text-muted">NOUVEAU MOT DE PASSE</label>
+                    <input type="password" name="password" class="form-control form-control-lg" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-bold small text-muted">CONFIRMER</label>
+                    <input type="password" name="confirm_password" class="form-control form-control-lg" required>
+                </div>
+                <button type="submit" class="btn btn-terracotta w-100">Valider</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

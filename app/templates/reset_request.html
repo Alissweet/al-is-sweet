@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Mot de passe oublié - Al' is Sweet{% endblock %}
+
+{% block content %}
+<div class="container auth-container">
+    <div class="col-md-5">
+        <div class="card card-auth p-5">
+            <div class="auth-header">
+                <h2 class="font-playfair mb-2">Récupération</h2>
+                <p class="text-muted">Entrez votre email pour réinitialiser votre mot de passe</p>
+            </div>
+            
+            <form method="POST">
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div class="mb-4">
+                    <label class="form-label fw-bold small text-muted">EMAIL</label>
+                    <input type="email" name="email" class="form-control form-control-lg" required>
+                </div>
+                <button type="submit" class="btn btn-terracotta w-100">Envoyer le lien</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,793 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Modifier' if recipe else 'Nouvelle' }} Recette - Al' is Sweet{% endblock %}
+
+{% block content %}
+<div class="recipe-form-container">
+    <!-- Hero Header Premium -->
+    <div class="form-hero-header">
+        <div class="container">
+            <div class="hero-content">
+                {% if recipe %}
+                <div class="hero-icon">
+                    <i class="bi bi-pencil-square"></i>
+                </div>
+                <h1 class="hero-title">Modifier votre recette</h1>
+                <p class="hero-subtitle">Perfectionnez chaque détail de votre création gourmande</p>
+                {% else %}
+                <div class="hero-icon">
+                    <i class="bi bi-stars"></i>
+                </div>
+                <h1 class="hero-title">Créer une nouvelle recette</h1>
+                <p class="hero-subtitle">Partagez votre savoir-faire pâtissier avec la communauté</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" id="recipeForm">
+        {{ form.csrf_token if form else '' }}
+        
+        <div class="container">
+            <!-- Progress Indicator -->
+            <div class="form-progress">
+                <div class="progress-step active" data-step="1">
+                    <div class="step-circle">
+                        <i class="bi bi-info-circle-fill"></i>
+                    </div>
+                    <span class="step-label">Infos</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-circle">
+                        <i class="bi bi-basket-fill"></i>
+                    </div>
+                    <span class="step-label">Ingrédients</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-circle">
+                        <i class="bi bi-list-check"></i>
+                    </div>
+                    <span class="step-label">Étapes</span>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- ========================================
+                     COLONNE GAUCHE - Infos générales + Photo
+                     ======================================== -->
+                <div class="col-lg-4">
+                    <div class="form-card-modern" data-section="1">
+                        <div class="card-header-elegant">
+                            <div class="header-content">
+                                <i class="bi bi-info-circle-fill header-icon"></i>
+                                <h3 class="header-title">Informations générales</h3>
+                            </div>
+                            <div class="header-decoration"></div>
+                        </div>
+                        
+                        <div class="card-body-modern">
+                            <!-- Photo Upload Zone Premium -->
+							<div class="photo-upload-premium" id="imageUploadZone">
+								<div class="photo-preview-zone">
+									{% if recipe and recipe.image_filename %}
+										{% if recipe.image_filename.startswith('http') %}
+											<img src="{{ recipe.image_filename }}" alt="Preview" id="imagePreview" class="preview-visible">
+										{% else %}
+											<img src="{{ url_for('static', filename='uploads/' + recipe.image_filename) }}" alt="Preview" id="imagePreview" class="preview-visible">
+										{% endif %}
+									{% else %}
+										<img src="" alt="Preview" id="imagePreview" class="preview-hidden">
+									{% endif %}
+
+									<!-- L'overlay est caché si une image existe déjà -->
+									<div class="upload-overlay" id="uploadPlaceholder" 
+										 style="{{ 'display: none;' if recipe and recipe.image_filename else '' }}">
+										<div class="upload-icon-wrapper">
+											<i class="bi bi-camera-fill"></i>
+										</div>
+										<p class="upload-title">Ajoutez une belle photo</p>
+										<span class="upload-hint">Cliquez ou glissez votre image ici</span>
+										<span class="upload-format">PNG, JPG jusqu'à 10MB</span>
+									</div>
+								</div>
+								<input type="file" name="image" id="imageInput" accept="image/*" class="d-none">
+							</div>
+                            
+                            <!-- Nom de la recette -->
+                            <div class="form-group-premium">
+                                <label class="form-label-premium">
+                                    <span class="label-text">Nom de la recette</span>
+                                    <span class="label-required">*</span>
+                                </label>
+                                <input type="text" name="title" class="form-control-premium" 
+                                       value="{{ recipe.title if recipe else '' }}" 
+                                       placeholder="Ex: Tarte au citron meringuée" required>
+                            </div>
+                            
+                            <!-- Description -->
+                            <div class="form-group-premium">
+                                <label class="form-label-premium">
+                                    <span class="label-text">Description</span>
+                                </label>
+                                <textarea name="description" class="form-control-premium textarea-premium" rows="3" 
+                                          placeholder="Décrivez votre recette en quelques mots...">{{ recipe.description if recipe else '' }}</textarea>
+                                <div class="char-counter">
+                                    <span class="char-count">0</span> / 200 caractères
+                                </div>
+                            </div>
+                            
+                            <!-- Catégorie et Difficulté -->
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <div class="form-group-premium">
+                                        <label class="form-label-premium">
+                                            <span class="label-text">Catégorie</span>
+                                        </label>
+                                        <div class="select-wrapper">
+                                            <select name="category" class="form-select-premium">
+                                                <option value="" disabled {{ 'selected' if not recipe or not recipe.category else '' }}>Choisir...</option>
+                                                {% if categories %}
+                                                    {% for cat in categories %}
+                                                    <option value="{{ cat }}" {{ 'selected' if recipe and recipe.category == cat else '' }}>
+                                                        {{ cat }}
+                                                    </option>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <option value="Autre">Autre</option>
+                                                {% endif %}
+                                            </select>
+                                            <i class="bi bi-chevron-down select-icon"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-group-premium">
+                                        <label class="form-label-premium">
+                                            <span class="label-text">Difficulté</span>
+                                        </label>
+                                        <div class="select-wrapper">
+                                            <select name="difficulty" class="form-select-premium">
+                                                {% for diff in ['Facile', 'Moyen', 'Difficile'] %}
+                                                <option value="{{ diff }}" {{ 'selected' if recipe and recipe.difficulty == diff else '' }}>{{ diff }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <i class="bi bi-chevron-down select-icon"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Temps et portions -->
+                            <div class="time-servings-grid">
+                                <div class="time-input-group">
+                                    <label class="form-label-premium">
+                                        <i class="bi bi-clock-fill label-icon"></i>
+                                        <span class="label-text">Préparation</span>
+                                    </label>
+                                    <div class="input-with-unit">
+                                        <input type="number" name="prep_time" class="form-control-premium" 
+                                               value="{{ recipe.prep_time if recipe else '' }}" min="0" placeholder="0">
+                                        <span class="unit-badge">min</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="time-input-group">
+                                    <label class="form-label-premium">
+                                        <i class="bi bi-fire label-icon"></i>
+                                        <span class="label-text">Cuisson</span>
+                                    </label>
+                                    <div class="input-with-unit">
+                                        <input type="number" name="cook_time" class="form-control-premium" 
+                                               value="{{ recipe.cook_time if recipe else '' }}" min="0" placeholder="0">
+                                        <span class="unit-badge">min</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="time-input-group">
+                                    <label class="form-label-premium">
+                                        <i class="bi bi-people-fill label-icon"></i>
+                                        <span class="label-text">Portions</span>
+                                    </label>
+                                    <div class="input-with-unit">
+                                        <input type="number" name="servings" class="form-control-premium" 
+                                               value="{{ recipe.servings if recipe else 4 }}" min="1" placeholder="4">
+                                        <span class="unit-badge">parts</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Glucides totaux -->
+                            <div class="form-group-premium highlight-input">
+                                <label class="form-label-premium">
+                                    <i class="bi bi-lightning-charge-fill label-icon text-warning"></i>
+                                    <span class="label-text">Glucides totaux</span>
+                                </label>
+                                <div class="input-with-unit-large">
+                                    <input type="number" name="total_carbs" class="form-control-premium" 
+                                           value="{{ recipe.total_carbs if recipe else 0 }}" 
+                                           step="0.1" min="0" placeholder="0">
+                                    <span class="unit-badge-large">g</span>
+                                </div>
+                                <small class="form-hint">
+                                    <i class="bi bi-info-circle"></i> Pour l'ensemble de la recette
+                                </small>
+                            </div>
+                            
+                            <!-- Astuces -->
+                            <div class="form-group-premium">
+                                <label class="form-label-premium">
+                                    <i class="bi bi-lightbulb-fill label-icon text-warning"></i>
+                                    <span class="label-text">Astuces & Conseils</span>
+                                </label>
+                                <textarea name="tips" class="form-control-premium textarea-premium" rows="4" 
+                                          placeholder="Partagez vos secrets pour réussir cette recette à coup sûr...">{{ recipe.tips if recipe else '' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ========================================
+                     COLONNE CENTRALE - Ingrédients
+                     ======================================== -->
+                <div class="col-lg-4">
+                    <div class="form-card-modern" data-section="2">
+                        <div class="card-header-elegant">
+                            <div class="header-content">
+                                <i class="bi bi-basket-fill header-icon"></i>
+                                <h3 class="header-title">Ingrédients</h3>
+                            </div>
+                            <div class="ingredient-counter">
+                                <span class="counter-number">{{ recipe.ingredients.count() if recipe else 0 }}</span>
+                                <span class="counter-label">items</span>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body-modern ingredients-scroll-premium">
+                            <div id="ingredientsList" class="ingredients-list-premium">
+                                {% if recipe and recipe.ingredients.count() > 0 %}
+                                    {% for ing in recipe.ingredients %}
+                                    <div class="ingredient-item-premium">
+                                        <div class="ingredient-drag-handle">
+                                            <i class="bi bi-grip-vertical"></i>
+                                        </div>
+                                        <div class="ingredient-inputs">
+                                            <input type="text" name="ingredient_name[]" class="form-control-premium ingredient-name" 
+                                                   value="{{ ing.name }}" placeholder="Ingrédient" required>
+                                            <div class="ingredient-quantity-group">
+                                                <input type="number" name="ingredient_quantity[]" class="form-control-premium ingredient-qty" 
+                                                       value="{{ ing.quantity }}" placeholder="Qté" step="0.1">
+                                                <select name="ingredient_unit[]" class="form-select-premium ingredient-unit">
+                                                    <option value="g" {{ 'selected' if ing.unit == 'g' else '' }}>g</option>
+                                                    <option value="kg" {{ 'selected' if ing.unit == 'kg' else '' }}>kg</option>
+                                                    <option value="ml" {{ 'selected' if ing.unit == 'ml' else '' }}>ml</option>
+                                                    <option value="L" {{ 'selected' if ing.unit == 'L' else '' }}>L</option>
+                                                    <option value="pièce" {{ 'selected' if ing.unit == 'pièce' else '' }}>pièce</option>
+                                                    <option value="c.à.s" {{ 'selected' if ing.unit == 'c.à.s' else '' }}>c.à.s</option>
+                                                    <option value="c.à.c" {{ 'selected' if ing.unit == 'c.à.c' else '' }}>c.à.c</option>
+                                                    <option value="pincée" {{ 'selected' if ing.unit == 'pincée' else '' }}>pincée</option>
+                                                    <option value="tasse" {{ 'selected' if ing.unit == 'tasse' else '' }}>tasse</option>
+                                                    <option value="sachet" {{ 'selected' if ing.unit == 'sachet' else '' }}>sachet</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn-remove-premium" onclick="removeRow(this)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="ingredient-item-premium">
+                                        <div class="ingredient-drag-handle">
+                                            <i class="bi bi-grip-vertical"></i>
+                                        </div>
+                                        <div class="ingredient-inputs">
+                                            <input type="text" name="ingredient_name[]" class="form-control-premium ingredient-name" 
+                                                   placeholder="Ingrédient">
+                                            <div class="ingredient-quantity-group">
+                                                <input type="number" name="ingredient_quantity[]" class="form-control-premium ingredient-qty" 
+                                                       placeholder="Qté" step="0.1">
+                                                <select name="ingredient_unit[]" class="form-select-premium ingredient-unit">
+                                                    <option value="g">g</option>
+                                                    <option value="kg">kg</option>
+                                                    <option value="ml">ml</option>
+                                                    <option value="L">L</option>
+                                                    <option value="pièce">pièce</option>
+                                                    <option value="c.à.s">c.à.s</option>
+                                                    <option value="c.à.c">c.à.c</option>
+                                                    <option value="pincée">pincée</option>
+                                                    <option value="tasse">tasse</option>
+                                                    <option value="sachet">sachet</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn-remove-premium" onclick="removeRow(this)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <button type="button" class="btn-add-premium" onclick="addIngredient()">
+                                <i class="bi bi-plus-circle-fill"></i>
+                                <span>Ajouter un ingrédient</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ========================================
+                     COLONNE DROITE - Étapes de préparation
+                     ======================================== -->
+                <div class="col-lg-4">
+                    <div class="form-card-modern" data-section="3">
+                        <div class="card-header-elegant">
+                            <div class="header-content">
+                                <i class="bi bi-list-check header-icon"></i>
+                                <h3 class="header-title">Étapes de préparation</h3>
+                            </div>
+                            <div class="ingredient-counter">
+                                <span class="counter-number">{{ recipe.steps.count() if recipe else 0 }}</span>
+                                <span class="counter-label">étapes</span>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body-modern steps-scroll-premium">
+                            <div id="stepsList" class="steps-list-premium">
+                                {% if recipe and recipe.steps.count() > 0 %}
+                                    {% for step in recipe.steps %}
+                                    <div class="step-item-premium">
+                                        <div class="step-header-premium">
+                                            <div class="step-number-circle">{{ loop.index }}</div>
+                                            <div class="step-duration-wrapper">
+                                                <input type="number" name="step_duration[]" class="form-control-premium step-duration" 
+                                                       value="{{ step.duration }}" placeholder="0">
+                                                <span class="duration-unit">min</span>
+                                            </div>
+                                            <button type="button" class="btn-remove-premium" onclick="removeRow(this)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                        <textarea name="step_instruction[]" class="form-control-premium textarea-premium step-textarea" 
+                                                  rows="3" placeholder="Décrivez cette étape en détail..." required>{{ step.instruction }}</textarea>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="step-item-premium">
+                                        <div class="step-header-premium">
+                                            <div class="step-number-circle">1</div>
+                                            <div class="step-duration-wrapper">
+                                                <input type="number" name="step_duration[]" class="form-control-premium step-duration" placeholder="0">
+                                                <span class="duration-unit">min</span>
+                                            </div>
+                                            <button type="button" class="btn-remove-premium" onclick="removeRow(this)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                        <textarea name="step_instruction[]" class="form-control-premium textarea-premium step-textarea" 
+                                                  rows="3" placeholder="Décrivez cette étape en détail..."></textarea>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <button type="button" class="btn-add-premium" onclick="addStep()">
+                                <i class="bi bi-plus-circle-fill"></i>
+                                <span>Ajouter une étape</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Actions Footer Premium -->
+            <div class="form-actions-premium">
+                <div class="actions-left">
+                    <a href="{{ url_for('main.index') }}" class="btn-cancel-premium">
+                        <i class="bi bi-arrow-left"></i>
+                        <span>Retour</span>
+                    </a>
+                </div>
+                <div class="actions-right">
+                    <button type="button" class="btn-preview-premium" onclick="previewRecipe()">
+                        <i class="bi bi-eye"></i>
+                        <span>Aperçu</span>
+                    </button>
+                    <button type="submit" class="btn-submit-premium">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>{{ 'Enregistrer les modifications' if recipe else 'Créer la recette' }}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- ============================================
+     MODALE APERÇU (PREVIEW)
+     ============================================ -->
+<div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content border-0">
+            <div class="modal-header bg-terracotta text-white">
+                <h5 class="modal-title"><i class="bi bi-eye me-2"></i>Aperçu de votre recette</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body bg-body">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            
+                            <!-- 1. PHOTO HERO -->
+                            <div class="recipe-image-wrapper">
+                                <img id="previewHeroImage" src="" class="recipe-hero-image" style="display: none;">
+                                <div id="previewPlaceholder" class="d-flex align-items-center justify-content-center h-100 bg-light text-muted">
+                                    <i class="bi bi-camera display-1 opacity-25"></i>
+                                </div>
+                                
+                                <!-- Badge Glucides -->
+                                <div class="badge-carbs" style="top: 20px; right: 20px; font-size: 1rem; padding: 8px 18px;">
+                                    <i class="bi bi-lightning-fill text-warning"></i>
+                                    <span id="previewCarbs">0</span>g <span class="fw-light ms-1 small opacity-75">totaux</span>
+                                </div>
+                            </div>
+
+                            <!-- 2. TITRE & INFOS -->
+                            <div class="text-center mb-5">
+                                <span class="text-uppercase text-muted small ls-2 fw-bold" id="previewCategory">CATÉGORIE</span>
+                                <h1 class="recipe-main-title" id="previewTitle">Titre de la recette</h1>
+                                
+                                <div class="d-flex justify-content-center gap-4 text-muted fw-medium">
+                                    <span><i class="bi bi-clock text-terracotta"></i> <span id="previewTime">0</span> min</span>
+                                    <span><i class="bi bi-people text-terracotta"></i> <span id="previewServings">4</span> pers.</span>
+                                    <span><i class="bi bi-bar-chart text-terracotta"></i> <span id="previewDifficulty">Facile</span></span>
+                                </div>
+                                
+                                <p class="mt-3 text-muted fst-italic" id="previewDescription"></p>
+                            </div>
+
+                            <!-- 3. INGRÉDIENTS & ÉTAPES (Aperçu rapide) -->
+                            <div class="row g-4 text-start">
+                                <!-- Ingrédients -->
+                                <div class="col-md-6">
+                                    <div class="p-4 bg-white rounded-4 shadow-sm border h-100">
+                                        <h5 class="font-playfair text-terracotta mb-3"><i class="bi bi-basket2 me-2"></i>Ingrédients</h5>
+                                        <ul class="list-unstyled" id="previewIngredientsList">
+                                            <!-- Rempli par JS -->
+                                        </ul>
+                                    </div>
+                                </div>
+                                <!-- Étapes -->
+                                <div class="col-md-6">
+                                    <div class="p-4 bg-white rounded-4 shadow-sm border h-100">
+                                        <h5 class="font-playfair text-terracotta mb-3"><i class="bi bi-list-ol me-2"></i>Préparation</h5>
+                                        <div id="previewStepsList">
+                                            <!-- Rempli par JS -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 4. ASTUCES -->
+                            <div id="previewTipsContainer" class="mt-4 d-none">
+                                <div class="chef-tip-box">
+                                    <div class="chef-tip-title">
+                                        <i class="bi bi-lightbulb-fill"></i> Le conseil du Chef
+                                    </div>
+                                    <p class="chef-tip-text" id="previewTips"></p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+	// Gestion de l'upload d'image
+	const imageUploadZone = document.getElementById('imageUploadZone');
+	const imageInput = document.getElementById('imageInput');
+	const imagePreview = document.getElementById('imagePreview');
+	const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+
+	imageUploadZone.addEventListener('click', () => imageInput.click());
+
+	imageUploadZone.addEventListener('dragover', (e) => {
+		e.preventDefault();
+		imageUploadZone.classList.add('dragover');
+	});
+
+	imageUploadZone.addEventListener('dragleave', () => {
+		imageUploadZone.classList.remove('dragover');
+	});
+
+	imageUploadZone.addEventListener('drop', (e) => {
+		e.preventDefault();
+		imageUploadZone.classList.remove('dragover');
+		if (e.dataTransfer.files.length) {
+			imageInput.files = e.dataTransfer.files;
+			previewImage(e.dataTransfer.files[0]);
+		}
+	});
+
+	imageInput.addEventListener('change', (e) => {
+		if (e.target.files.length) {
+			previewImage(e.target.files[0]);
+		}
+	});
+
+	function previewImage(file) {
+		const reader = new FileReader();
+		reader.onload = (e) => {
+			// Afficher l'image
+			imagePreview.src = e.target.result;
+			imagePreview.classList.remove('preview-hidden');
+			imagePreview.classList.add('preview-visible');
+			
+			// Masquer le placeholder avec transition
+			uploadPlaceholder.style.transition = 'opacity 0.3s ease';
+			uploadPlaceholder.style.opacity = '0';
+			setTimeout(() => {
+				uploadPlaceholder.style.display = 'none';
+			}, 300);
+			
+			// Ajouter une indication de succès
+			if (!document.getElementById('uploadSuccess')) {
+				const successIndicator = document.createElement('div');
+				successIndicator.id = 'uploadSuccess';
+				successIndicator.style.cssText = 'position: absolute; top: 10px; right: 10px; background: rgba(40, 167, 69, 0.95); color: white; padding: 8px 16px; border-radius: 25px; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); z-index: 10; animation: slideInRight 0.4s ease;';
+				successIndicator.innerHTML = '<i class="bi bi-check-circle-fill"></i> Photo ajoutée';
+				imageUploadZone.querySelector('.photo-preview-zone').appendChild(successIndicator);
+				
+				// Faire disparaître l'indicateur après 3 secondes
+				setTimeout(() => {
+					successIndicator.style.opacity = '0';
+					successIndicator.style.transition = 'opacity 0.3s ease';
+					setTimeout(() => successIndicator.remove(), 300);
+				}, 3000);
+			}
+		};
+		reader.readAsDataURL(file);
+	}
+
+    // Ajout d'ingrédients
+    function addIngredient() {
+        const container = document.getElementById('ingredientsList');
+        const newItem = document.createElement('div');
+        newItem.className = 'ingredient-item-premium';
+        newItem.innerHTML = '<div class="ingredient-drag-handle"><i class="bi bi-grip-vertical"></i></div>' +
+            '<div class="ingredient-inputs">' +
+            '<input type="text" name="ingredient_name[]" class="form-control-premium ingredient-name" placeholder="Ingrédient">' +
+            '<div class="ingredient-quantity-group">' +
+            '<input type="number" name="ingredient_quantity[]" class="form-control-premium ingredient-qty" placeholder="Qté" step="0.1">' +
+            '<select name="ingredient_unit[]" class="form-select-premium ingredient-unit">' +
+            '<option value="g">g</option>' +
+            '<option value="kg">kg</option>' +
+            '<option value="ml">ml</option>' +
+            '<option value="L">L</option>' +
+            '<option value="pièce">pièce</option>' +
+            '<option value="c.à.s">c.à.s</option>' +
+            '<option value="c.à.c">c.à.c</option>' +
+            '<option value="pincée">pincée</option>' +
+            '<option value="tasse">tasse</option>' +
+            '<option value="sachet">sachet</option>' +
+            '</select></div></div>' +
+            '<button type="button" class="btn-remove-premium" onclick="removeRow(this)"><i class="bi bi-trash"></i></button>';
+        container.appendChild(newItem);
+        newItem.querySelector('input').focus();
+        updateIngredientCounter();
+    }
+
+    // Ajout d'étapes
+    function addStep() {
+        const container = document.getElementById('stepsList');
+        const stepCount = container.querySelectorAll('.step-item-premium').length + 1;
+        const newItem = document.createElement('div');
+        newItem.className = 'step-item-premium';
+        newItem.innerHTML = '<div class="step-header-premium">' +
+            '<div class="step-number-circle">' + stepCount + '</div>' +
+            '<div class="step-duration-wrapper">' +
+            '<input type="number" name="step_duration[]" class="form-control-premium step-duration" placeholder="0">' +
+            '<span class="duration-unit">min</span></div>' +
+            '<button type="button" class="btn-remove-premium" onclick="removeRow(this)"><i class="bi bi-trash"></i></button>' +
+            '</div>' +
+            '<textarea name="step_instruction[]" class="form-control-premium textarea-premium step-textarea" rows="3" placeholder="Décrivez cette étape en détail..."></textarea>';
+        container.appendChild(newItem);
+        newItem.querySelector('textarea').focus();
+        updateStepNumbers();
+    }
+
+    // Suppression de ligne
+    function removeRow(btn) {
+        const item = btn.closest('.ingredient-item-premium, .step-item-premium');
+        if (item) {
+            item.style.opacity = '0';
+            item.style.transform = 'translateX(20px)';
+            setTimeout(() => {
+                item.remove();
+                updateStepNumbers();
+                updateIngredientCounter();
+            }, 300);
+        }
+    }
+
+    // Mise à jour des numéros d'étapes
+    function updateStepNumbers() {
+        document.querySelectorAll('.step-item-premium').forEach((item, index) => {
+            const circle = item.querySelector('.step-number-circle');
+            if (circle) circle.textContent = index + 1;
+        });
+        updateStepCounter();
+    }
+
+    // Mise à jour du compteur d'ingrédients
+    function updateIngredientCounter() {
+        const count = document.querySelectorAll('.ingredient-item-premium').length;
+        const counter = document.querySelector('[data-section="2"] .counter-number');
+        if (counter) counter.textContent = count;
+    }
+
+    // Mise à jour du compteur d'étapes
+    function updateStepCounter() {
+        const count = document.querySelectorAll('.step-item-premium').length;
+        const counter = document.querySelector('[data-section="3"] .counter-number');
+        if (counter) counter.textContent = count;
+    }
+
+    // Compteur de caractères pour description
+    const descriptionTextarea = document.querySelector('textarea[name="description"]');
+    if (descriptionTextarea) {
+        const charCount = document.querySelector('.char-count');
+        descriptionTextarea.addEventListener('input', (e) => {
+            charCount.textContent = e.target.value.length;
+        });
+        // Init
+        charCount.textContent = descriptionTextarea.value.length;
+    }
+
+    // Fonction Aperçu Réaliste
+    function previewRecipe() {
+        // 1. Récupération des valeurs simples
+        const title = document.querySelector('input[name="title"]').value || 'Sans titre';
+        const description = document.querySelector('textarea[name="description"]').value;
+        const category = document.querySelector('select[name="category"]').value || 'Recette';
+        const difficulty = document.querySelector('select[name="difficulty"]').value;
+        const prepTime = parseInt(document.querySelector('input[name="prep_time"]').value || 0);
+        const cookTime = parseInt(document.querySelector('input[name="cook_time"]').value || 0);
+        const servings = document.querySelector('input[name="servings"]').value || 4;
+        const carbs = parseFloat(document.querySelector('input[name="total_carbs"]').value || 0).toFixed(0);
+        const tips = document.querySelector('textarea[name="tips"]').value;
+
+        // 2. Injection dans la modale
+        document.getElementById('previewTitle').textContent = title;
+        document.getElementById('previewDescription').textContent = description ? '"' + description + '"' : '';
+        document.getElementById('previewCategory').textContent = category;
+        document.getElementById('previewDifficulty').textContent = difficulty;
+        document.getElementById('previewTime').textContent = prepTime + cookTime;
+        document.getElementById('previewServings').textContent = servings;
+        document.getElementById('previewCarbs').textContent = carbs;
+
+        // 3. Gestion de l'image
+        const fileInput = document.getElementById('imageInput');
+        const previewImg = document.getElementById('previewHeroImage');
+        const placeholder = document.getElementById('previewPlaceholder');
+        
+        // Priorité : 1. Nouvelle image uploadée, 2. Image existante (si mode edit), 3. Placeholder
+        if (fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                previewImg.style.display = 'block';
+                placeholder.style.display = 'none';
+            }
+            reader.readAsDataURL(fileInput.files[0]);
+        } else {
+            // Vérifier si une image existe déjà (via la preview du formulaire)
+            const existingImg = document.getElementById('imagePreview');
+            if (existingImg && !existingImg.classList.contains('preview-hidden') && existingImg.src) {
+                previewImg.src = existingImg.src;
+                previewImg.style.display = 'block';
+                placeholder.style.display = 'none';
+            } else {
+                previewImg.style.display = 'none';
+                placeholder.style.display = 'flex';
+            }
+        }
+
+        // 4. Gestion des Ingrédients (Boucle)
+        const ingList = document.getElementById('previewIngredientsList');
+        ingList.innerHTML = '';
+        const ingNames = document.querySelectorAll('input[name="ingredient_name[]"]');
+        const ingQties = document.querySelectorAll('input[name="ingredient_quantity[]"]');
+        const ingUnits = document.querySelectorAll('select[name="ingredient_unit[]"]');
+
+        ingNames.forEach((input, index) => {
+            if (input.value.trim()) {
+                const qty = ingQties[index].value;
+                const unit = ingUnits[index].value;
+                const li = document.createElement('li');
+                li.className = 'mb-2 border-bottom pb-2';
+                li.innerHTML = '<span class="fw-bold text-terracotta">' + (qty || '') + ' ' + unit + '</span> ' + input.value;
+                ingList.appendChild(li);
+            }
+        });
+
+        // 5. Gestion des Étapes (Boucle)
+        const stepList = document.getElementById('previewStepsList');
+        stepList.innerHTML = '';
+        const stepInstr = document.querySelectorAll('textarea[name="step_instruction[]"]');
+        const stepDur = document.querySelectorAll('input[name="step_duration[]"]');
+
+        stepInstr.forEach((input, index) => {
+            if (input.value.trim()) {
+                const duration = stepDur[index].value;
+                const div = document.createElement('div');
+                div.className = 'd-flex gap-3 mb-3';
+                div.innerHTML = '<div class="flex-shrink-0">' +
+                    '<span class="badge rounded-circle bg-terracotta" style="width:25px;height:25px;display:flex;align-items:center;justify-content:center;">' + (index + 1) + '</span>' +
+                    '</div><div>' +
+                    '<p class="mb-1 small">' + input.value + '</p>' +
+                    (duration ? '<small class="text-muted"><i class="bi bi-clock"></i> ' + duration + ' min</small>' : '') +
+                    '</div>';
+                stepList.appendChild(div);
+            }
+        });
+
+        // 6. Gestion des Astuces
+        const tipsContainer = document.getElementById('previewTipsContainer');
+        if (tips.trim()) {
+            document.getElementById('previewTips').textContent = tips;
+            tipsContainer.classList.remove('d-none');
+        } else {
+            tipsContainer.classList.add('d-none');
+        }
+
+        // 7. Affichage de la modale
+        const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+        modal.show();
+    }
+
+    // Observer pour les sections visibles (indicateur de progression)
+    const observerOptions = {
+        threshold: 0.5,
+        rootMargin: '-100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const section = entry.target.dataset.section;
+                document.querySelectorAll('.progress-step').forEach(step => {
+                    step.classList.remove('active');
+                });
+                const activeStep = document.querySelector('.progress-step[data-step="' + section + '"]');
+                if (activeStep) activeStep.classList.add('active');
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('[data-section]').forEach(section => {
+        observer.observe(section);
+    });
+
+    // Animation d'entrée
+    document.addEventListener('DOMContentLoaded', () => {
+        const cards = document.querySelectorAll('.form-card-modern');
+        cards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 150);
+        });
+    });
+</script>
+{% endblock %}

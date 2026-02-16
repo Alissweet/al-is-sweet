@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+
+{% block title %}Toutes mes recettes - Al' is Sweet{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- En-tête avec actions -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="font-playfair text-choco-dark mb-2">
+                <i class="bi bi-journal-text me-2"></i>Toutes mes recettes
+            </h1>
+            <p class="text-muted">{{ recipe_data|length }} recette(s) au total</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <button class="btn btn-outline-terracotta me-2" onclick="window.print()">
+                <i class="bi bi-printer"></i> Imprimer
+            </button>
+            <button class="btn btn-terracotta" onclick="exportToPDF()">
+                <i class="bi bi-file-pdf"></i> Export PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label small text-muted">Rechercher</label>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Nom de recette...">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small text-muted">Famille</label>
+                    <select id="categoryFilter" class="form-select">
+                        <option value="">Toutes les familles</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.name }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small text-muted">Difficulté</label>
+                    <select id="difficultyFilter" class="form-select">
+                        <option value="">Toutes</option>
+                        <option value="Facile">Facile</option>
+                        <option value="Moyen">Moyen</option>
+                        <option value="Difficile">Difficile</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau des recettes -->
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="recipesTable">
+                <thead class="bg-terracotta text-white">
+                    <tr>
+                        <th class="sortable" data-column="image" style="width: 100px;">Photo</th>
+                        <th class="sortable" data-column="title" style="cursor: pointer;">
+                            Recette <i class="bi bi-chevron-expand ms-1"></i>
+                        </th>
+                        <th class="sortable" data-column="category" style="cursor: pointer;">
+                            Famille <i class="bi bi-chevron-expand ms-1"></i>
+                        </th>
+                        <th class="sortable" data-column="ingredients" style="cursor: pointer;">
+                            Ingrédients <i class="bi bi-chevron-expand ms-1"></i>
+                        </th>
+                        <th class="sortable text-center" data-column="time" style="cursor: pointer; width: 120px;">
+                            Temps <i class="bi bi-chevron-expand ms-1"></i>
+                        </th>
+                        <th class="sortable text-center" data-column="carbs" style="cursor: pointer; width: 120px;">
+                            Glucides <i class="bi bi-chevron-expand ms-1"></i>
+                        </th>
+                        <th class="text-center" style="width: 100px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for recipe in recipe_data %}
+                    <tr data-category="{{ recipe.category }}" data-difficulty="{{ recipe.difficulty }}">
+                        <!-- Photo -->
+                        <td>
+                            {% if recipe.image %}
+                                {% if recipe.image.startswith('http') %}
+                                    <img src="{{ recipe.image }}" alt="{{ recipe.title }}" 
+                                         class="rounded shadow-sm" style="width: 70px; height: 70px; object-fit: cover;">
+                                {% else %}
+                                    <img src="{{ url_for('static', filename='uploads/' + recipe.image) }}" alt="{{ recipe.title }}" 
+                                         class="rounded shadow-sm" style="width: 70px; height: 70px; object-fit: cover;">
+                                {% endif %}
+                            {% else %}
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                     style="width: 70px; height: 70px;">
+                                    <i class="bi bi-image text-muted"></i>
+                                </div>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Titre -->
+                        <td>
+                            <div class="fw-bold text-choco">{{ recipe.title }}</div>
+                            <small class="text-muted">
+                                <i class="bi bi-people"></i> {{ recipe.servings }} pers. 
+                                <span class="ms-2">
+                                    {% if recipe.difficulty == 'Facile' %}
+                                        <span class="badge bg-success">{{ recipe.difficulty }}</span>
+                                    {% elif recipe.difficulty == 'Moyen' %}
+                                        <span class="badge bg-warning text-dark">{{ recipe.difficulty }}</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">{{ recipe.difficulty }}</span>
+                                    {% endif %}
+                                </span>
+                            </small>
+                        </td>
+                        
+                        <!-- Catégorie -->
+                        <td>
+                            <span class="badge bg-terracotta-light text-choco-dark">
+                                {{ recipe.category }}
+                            </span>
+                        </td>
+                        
+                        <!-- Ingrédients -->
+                        <td>
+                            <button class="btn btn-link btn-sm p-0 text-decoration-none" 
+                                    type="button" 
+                                    data-bs-toggle="collapse" 
+                                    data-bs-target="#ingredients-{{ recipe.id }}">
+                                <i class="bi bi-basket2"></i> {{ recipe.ingredients|length }} ingrédient(s)
+                            </button>
+                            <div class="collapse mt-2" id="ingredients-{{ recipe.id }}">
+                                <ul class="list-unstyled small mb-0">
+                                    {% for ing in recipe.ingredients[:5] %}
+                                    <li><i class="bi bi-dot"></i> {{ ing }}</li>
+                                    {% endfor %}
+                                    {% if recipe.ingredients|length > 5 %}
+                                    <li class="text-muted fst-italic">+ {{ recipe.ingredients|length - 5 }} autre(s)...</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </td>
+                        
+                        <!-- Temps total -->
+                        <td class="text-center">
+                            <span class="badge bg-light text-dark border">
+                                <i class="bi bi-clock"></i> {{ recipe.total_time }} min
+                            </span>
+                        </td>
+                        
+                        <!-- Glucides -->
+                        <td class="text-center">
+                            <span class="badge bg-warning text-dark">
+                                <i class="bi bi-lightning-fill"></i> {{ recipe.total_carbs }}g
+                            </span>
+                        </td>
+                        
+                        <!-- Actions -->
+						<td class="text-center">
+							<a href="{{ url_for('main.recipe_detail', id=recipe.id) }}" 
+							   class="btn btn-sm btn-outline-primary me-1" 
+							   title="Voir">
+								<i class="bi bi-eye"></i>
+							</a>
+							<a href="{{ url_for('main.recipe_edit', id=recipe.id) }}" 
+							   class="btn btn-sm btn-outline-secondary" 
+							   title="Modifier">
+								<i class="bi bi-pencil"></i>
+							</a>
+						</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Message si vide -->
+    {% if not recipe_data %}
+    <div class="text-center py-5">
+        <i class="bi bi-journal-x display-1 text-muted"></i>
+        <p class="lead text-muted mt-3">Aucune recette pour le moment</p>
+        <a href="{{ url_for('main.recipe_new') }}" class="btn btn-terracotta">
+            <i class="bi bi-plus-circle"></i> Créer ma première recette
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+    // Filtrage en temps réel
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const difficultyFilter = document.getElementById('difficultyFilter');
+    const tableRows = document.querySelectorAll('#recipesTable tbody tr');
+
+    function filterTable() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const categoryValue = categoryFilter.value;
+        const difficultyValue = difficultyFilter.value;
+
+        tableRows.forEach(row => {
+            const title = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+            const category = row.dataset.category;
+            const difficulty = row.dataset.difficulty;
+
+            const matchSearch = title.includes(searchTerm);
+            const matchCategory = !categoryValue || category === categoryValue;
+            const matchDifficulty = !difficultyValue || difficulty === difficultyValue;
+
+            if (matchSearch && matchCategory && matchDifficulty) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    searchInput.addEventListener('input', filterTable);
+    categoryFilter.addEventListener('change', filterTable);
+    difficultyFilter.addEventListener('change', filterTable);
+
+    // Tri des colonnes
+    let sortDirection = {};
+    document.querySelectorAll('.sortable').forEach(header => {
+        sortDirection[header.dataset.column] = 1;
+        
+        header.addEventListener('click', function() {
+            const column = this.dataset.column;
+            const tbody = document.querySelector('#recipesTable tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+
+            rows.sort((a, b) => {
+                let aVal, bVal;
+
+                switch(column) {
+                    case 'title':
+                        aVal = a.querySelector('td:nth-child(2)').textContent.trim();
+                        bVal = b.querySelector('td:nth-child(2)').textContent.trim();
+                        break;
+                    case 'category':
+                        aVal = a.dataset.category;
+                        bVal = b.dataset.category;
+                        break;
+                    case 'time':
+                        aVal = parseInt(a.querySelector('td:nth-child(5)').textContent.match(/\d+/)[0]);
+                        bVal = parseInt(b.querySelector('td:nth-child(5)').textContent.match(/\d+/)[0]);
+                        break;
+                    case 'carbs':
+                        aVal = parseInt(a.querySelector('td:nth-child(6)').textContent.match(/\d+/)[0]);
+                        bVal = parseInt(b.querySelector('td:nth-child(6)').textContent.match(/\d+/)[0]);
+                        break;
+                    case 'ingredients':
+                        aVal = a.querySelector('td:nth-child(4)').textContent.match(/\d+/)[0];
+                        bVal = b.querySelector('td:nth-child(4)').textContent.match(/\d+/)[0];
+                        break;
+                    default:
+                        return 0;
+                }
+
+                if (typeof aVal === 'string') {
+                    return sortDirection[column] * aVal.localeCompare(bVal);
+                } else {
+                    return sortDirection[column] * (aVal - bVal);
+                }
+            });
+
+            sortDirection[column] *= -1;
+            rows.forEach(row => tbody.appendChild(row));
+
+            // Mise à jour de l'icône
+            document.querySelectorAll('.sortable i').forEach(i => i.className = 'bi bi-chevron-expand ms-1');
+            this.querySelector('i').className = sortDirection[column] === 1 ? 'bi bi-chevron-down ms-1' : 'bi bi-chevron-up ms-1';
+        });
+    });
+
+    // Export PDF
+    function exportToPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('l', 'mm', 'a4');
+
+        doc.setFontSize(18);
+        doc.text("Toutes mes recettes - Al' is Sweet", 14, 20);
+        doc.setFontSize(10);
+        doc.text('Généré le ' + new Date().toLocaleDateString('fr-FR'), 14, 26);
+
+        const tableData = [];
+        tableRows.forEach(row => {
+            if (row.style.display !== 'none') {
+                const cells = row.querySelectorAll('td');
+                tableData.push([
+                    cells[1].querySelector('.fw-bold').textContent,
+                    cells[2].textContent.trim(),
+                    cells[4].textContent.match(/\d+/)[0] + ' min',
+                    cells[5].textContent.match(/\d+/)[0] + 'g'
+                ]);
+            }
+        });
+
+        doc.autoTable({
+            head: [['Recette', 'Famille', 'Temps', 'Glucides']],
+            body: tableData,
+            startY: 32,
+            theme: 'grid',
+            headStyles: { fillColor: [197, 157, 133] },
+            styles: { fontSize: 9 }
+        });
+
+        doc.save('mes-recettes.pdf');
+    }
+</script>
+{% endblock %}

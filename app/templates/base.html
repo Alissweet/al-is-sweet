@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Al' is Sweet{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+	<!-- Google Fonts : Ajout de Pinyon Script -->
+	<link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar Premium Redesigned -->
+<nav class="navbar navbar-expand-lg navbar-premium">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand" href="{{ url_for('main.index') }}">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo AS" class="brand-logo">
+            <span class="brand-text">Al' is Sweet</span>
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.index') }}">
+                        <i class="bi bi-house-heart"></i>
+                        <span>Accueil</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.all_recipes') }}">
+                        <i class="bi bi-journal-text"></i>
+                        <span>Toutes mes recettes</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                        <i class="bi bi-gear"></i>
+                        <span>Paramètres</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="navbar-actions">
+                <!-- Smart Search Bar -->
+                <div class="search-container">
+                    <form action="{{ url_for('main.index') }}" method="GET" class="search-form-premium">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+						<input type="search" 
+                               name="search" 
+                               class="search-input-premium" 
+                               placeholder="Rechercher..."
+                               value="{{ request.args.get('search', '') }}" 
+                               autocomplete="off">
+                        <button type="submit" class="search-btn-premium">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- User Actions -->
+                {% if current_user.is_authenticated %}
+                <div class="user-actions">
+                    <div class="user-badge">
+                        <i class="bi bi-person-circle"></i>
+                        <span>{{ current_user.username }}</span>
+                    </div>
+                    <a href="{{ url_for('auth.logout') }}" class="btn-logout">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Déconnexion</span>
+                    </a>
+                </div>
+                {% else %}
+                <div class="user-actions">
+                    <a href="{{ url_for('auth.login') }}" class="btn-login">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        <span>Connexion</span>
+                    </a>
+                    <a href="{{ url_for('auth.register') }}" class="btn-register">
+                        <i class="bi bi-person-plus"></i>
+                        <span>Inscription</span>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
+
+    <!-- Messages Flash -->
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show shadow-sm border-0" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Contenu Principal -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer Centré & Dégradé -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-brand">
+				<img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo AS" class="brand-logo-footer">
+				<span>Al' is Sweet</span>
+			</div>
+            <p class="footer-text">Des recettes gourmandes, pour des moments sucrés.</p>
+            
+            <div class="footer-divider"></div>
+            
+            <p class="footer-copyright">
+                © 2026 Al' is Sweet. Fait avec <i class="bi bi-heart-fill"></i>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Modal Paramètres & Gestion -->
+	<div class="modal fade" id="settingsModal" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-lg">
+			<div class="modal-content border-0 shadow-lg overflow-hidden">
+				
+				<!-- Header Stylisé -->
+				<div class="modal-header bg-terracotta text-white border-0 p-4">
+					<h5 class="modal-title fw-bold font-family-sans">
+						<i class="bi bi-sliders me-2"></i>Paramètres de l'Atelier
+					</h5>
+					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+				</div>
+
+				<!-- Corps avec Onglets -->
+				<div class="modal-body p-0">
+					<div class="d-flex align-items-start">
+						
+						<!-- Navigation Verticale -->
+						<div class="nav flex-column nav-pills me-3 p-3 bg-light h-100" style="min-width: 200px;" id="v-pills-tab" role="tablist">
+							<button class="nav-link active text-start mb-2" data-bs-toggle="pill" data-bs-target="#tab-categories">
+								<i class="bi bi-tags-fill me-2"></i>Familles
+							</button>
+							<button class="nav-link text-start" data-bs-toggle="pill" data-bs-target="#tab-data">
+								<i class="bi bi-database-fill me-2"></i>Données
+							</button>
+						</div>
+
+						<!-- Contenu des Onglets -->
+						<div class="tab-content p-4 w-100" id="v-pills-tabContent">
+							
+							<!-- ONGLET 1 : GESTION DES FAMILLES -->
+							<div class="tab-pane fade show active" id="tab-categories">
+								<h6 class="fw-bold mb-3 text-choco">Gérer les familles de recettes</h6>
+								
+								<!-- ✅ Formulaire Ajout avec ID pour AJAX -->
+								<form action="{{ url_for('main.add_category') }}" method="POST" class="d-flex gap-2 mb-4">
+									<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+									<input type="text" name="category_name" class="form-control" placeholder="Nouvelle famille (ex: Macarons)" required>
+									<button type="submit" class="btn btn-sm btn-add-recipe px-3">
+										<i class="bi bi-plus-lg"></i>
+									</button>
+								</form>
+
+								<!-- Liste des catégories -->
+								<div class="category-list-container" style="max-height: 300px; overflow-y: auto;">
+									{% set all_cats = get_all_categories() %}
+									{% if all_cats %}
+										<div class="list-group list-group-flush">
+										{% for cat in all_cats %}
+											<div class="list-group-item px-0" id="cat-row-{{ cat.id }}">
+												
+												<!-- MODE AFFICHAGE (Par défaut) -->
+												<div class="d-flex justify-content-between align-items-center view-mode">
+													<span class="fw-medium text-choco">{{ cat.name }}</span>
+													<div class="btn-group">
+														<!-- Bouton Éditer -->
+														<button type="button" class="btn btn-link text-secondary p-0 me-3" 
+																onclick="toggleEdit('{{ cat.id }}')">
+															<i class="bi bi-pencil-square"></i>
+														</button>
+														<!-- ✅ Bouton Supprimer avec data-attributes pour AJAX -->
+														<button type="button" 
+																class="btn btn-link text-danger p-0 btnDeleteCategory"
+																data-category-id="{{ cat.id }}"
+																data-category-name="{{ cat.name }}">
+															<i class="bi bi-trash"></i>
+														</button>
+													</div>
+												</div>
+
+												<!-- ✅ MODE ÉDITION avec classe et data-attribute pour AJAX -->
+												<form class="edit-mode d-none formEditCategorie" data-category-id="{{ cat.id }}" method="POST">
+													<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+													<div class="input-group input-group-sm">
+														<input type="text" name="new_name" class="form-control" value="{{ cat.name }}" required>
+														<button type="submit" class="btn btn-success">
+															<i class="bi bi-check-lg"></i>
+														</button>
+														<button type="button" class="btn btn-outline-secondary" onclick="toggleEdit('{{ cat.id }}')">
+															<i class="bi bi-x-lg"></i>
+														</button>
+													</div>
+												</form>
+
+											</div>
+										{% endfor %}
+										</div>
+									{% else %}
+										<div class="text-center py-4 text-muted">
+											<p>Aucune famille définie.</p>
+											<a href="{{ url_for('main.init_categories') }}" class="btn btn-sm btn-outline-dark">
+												Initialiser les défauts
+											</a>
+										</div>
+									{% endif %}
+								</div>
+								<script>
+								function toggleEdit(id) {
+									const row = document.getElementById('cat-row-' + id);
+									row.querySelector('.view-mode').classList.toggle('d-none');
+									row.querySelector('.edit-mode').classList.toggle('d-none');
+								}
+								</script>
+							</div>
+
+							<!-- ONGLET 2 : IMPORT / EXPORT -->
+							<div class="tab-pane fade" id="tab-data">
+								<h6 class="fw-bold mb-3 text-choco">Sauvegarde & Partage</h6>
+								
+								<div class="card bg-light border-0 mb-3">
+									<div class="card-body text-center">
+										<p class="small text-muted mb-2">Sauvegarder mes recettes (JSON)</p>
+										<a href="{{ url_for('main.export_data') }}" class="btn btn-outline-dark rounded-pill w-100">
+											<i class="bi bi-download me-2"></i>Exporter
+										</a>
+									</div>
+								</div>
+
+								<div class="card bg-light border-0">
+									<div class="card-body text-center">
+										<p class="small text-muted mb-2">Importer des recettes</p>
+										<form action="{{ url_for('main.import_data') }}" method="POST" enctype="multipart/form-data">
+											<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+											<div class="mb-2">
+												<input class="form-control form-control-sm" type="file" name="file" accept=".json" required>
+											</div>
+											<button type="submit" class="btn btn-dark rounded-pill w-100">
+												<i class="bi bi-cloud-upload me-2"></i>Importer
+											</button>
+										</form>
+									</div>
+								</div>
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
