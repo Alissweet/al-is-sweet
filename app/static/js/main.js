@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialisation
     initAnimations();
     initTooltips();
-    // initCategoryManagement(); // <-- ON SUPPRIME CETTE LIGNE
+    initCategoryManagement();
 });
 
 /**

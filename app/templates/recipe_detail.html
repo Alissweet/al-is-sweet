@@ -213,10 +213,14 @@
         <div class="modal-content">
             <div class="modal-body text-center p-4">
                 <h5 class="mb-3">Supprimer cette recette ?</h5>
+                
                 <form action="{{ url_for('main.recipe_delete', id=recipe.id) }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    
                     <button type="button" class="btn btn-light me-2" data-bs-dismiss="modal">Non</button>
                     <button type="submit" class="btn btn-danger">Oui, supprimer</button>
                 </form>
+                
             </div>
         </div>
     </div>
