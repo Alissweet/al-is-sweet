@@ -2284,3 +2284,1143 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
 .navbar-collapse {
     align-items: center;
 }
+
+
+/* ============================================
+   AUTHENTIFICATION PREMIUM
+   Pages : login, register, reset
+   ============================================ */
+
+.auth-page {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: stretch;
+    background: var(--bg-body);
+}
+
+.auth-wrapper {
+    display: flex;
+    width: 100%;
+    max-width: 1000px;
+    margin: 2rem auto;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(62, 39, 35, 0.15);
+}
+
+/* ── Panneau décoratif gauche ── */
+.auth-deco {
+    flex: 0 0 40%;
+    background: linear-gradient(160deg, var(--choco-dark) 0%, var(--choco-milk) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-deco::before {
+    content: '';
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    top: -80px;
+    right: -80px;
+}
+
+.auth-deco::after {
+    content: '';
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    bottom: -60px;
+    left: -60px;
+}
+
+.auth-deco-content {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.deco-logo {
+    width: 90px;
+    height: 90px;
+    object-fit: contain;
+    margin-bottom: 1.2rem;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+}
+
+.deco-title {
+    font-family: 'Pinyon Script', cursive;
+    font-size: 2.8rem;
+    color: white;
+    font-weight: 400;
+    margin-bottom: 0.8rem;
+    line-height: 1.1;
+    -webkit-text-fill-color: white;
+    background: none;
+}
+
+.deco-subtitle {
+    color: rgba(255,255,255,0.75);
+    font-size: 0.95rem;
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+}
+
+.deco-dots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.deco-dots span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+}
+
+.deco-dots span:first-child {
+    background: var(--terracotta);
+}
+
+/* ── Panneau formulaire droit ── */
+.auth-form-panel {
+    flex: 1;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2.5rem;
+}
+
+.auth-form-inner {
+    width: 100%;
+    max-width: 380px;
+}
+
+.auth-form-header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.auth-form-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: var(--choco-dark);
+    margin-bottom: 0.4rem;
+}
+
+.auth-form-header p {
+    font-size: 0.9rem;
+}
+
+/* ── Icône cercle ── */
+.auth-icon-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--terracotta) 0%, var(--terracotta-dark) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    box-shadow: 0 4px 15px rgba(197, 157, 133, 0.4);
+}
+
+.auth-icon-circle i {
+    font-size: 1.6rem;
+    color: white;
+}
+
+/* ── Champs de formulaire ── */
+.auth-field {
+    position: relative;
+}
+
+.auth-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--choco-milk);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.4rem;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--cream);
+    border-radius: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    color: var(--choco-dark);
+    background: #fdfbf7;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.auth-input:focus {
+    border-color: var(--terracotta);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(197, 157, 133, 0.12);
+}
+
+.auth-input.is-valid {
+    border-color: #43a047;
+    background: white;
+}
+
+.auth-input.is-invalid {
+    border-color: #e53935;
+    background: white;
+}
+
+/* ── Input avec bouton œil ── */
+.auth-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.auth-input-group .auth-input {
+    padding-right: 3rem;
+}
+
+.auth-eye-btn {
+    position: absolute;
+    right: 0.75rem;
+    background: none;
+    border: none;
+    color: var(--choco-milk);
+    cursor: pointer;
+    padding: 0;
+    font-size: 1.1rem;
+    transition: color 0.2s;
+    line-height: 1;
+}
+
+.auth-eye-btn:hover {
+    color: var(--terracotta);
+}
+
+/* ── Feedback champs ── */
+.auth-field-feedback {
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+    min-height: 1rem;
+}
+
+.auth-hint {
+    color: #aaa;
+    font-size: 0.78rem;
+    display: block;
+    margin-top: 0.3rem;
+}
+
+/* ── Lien mot de passe oublié ── */
+.auth-link-small {
+    font-size: 0.8rem;
+    color: var(--terracotta);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.auth-link-small:hover {
+    color: var(--choco-dark);
+    text-decoration: underline;
+}
+
+/* ── Case à cocher ── */
+.auth-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--terracotta);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.auth-checkbox-label {
+    font-size: 0.88rem;
+    color: var(--choco-milk);
+    cursor: pointer;
+}
+
+/* ── Bouton principal ── */
+.auth-btn-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--terracotta) 0%, var(--terracotta-dark) 100%);
+    border: none;
+    color: white;
+    padding: 0.85rem 1.5rem;
+    border-radius: var(--radius-pill);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-btn);
+}
+
+.auth-btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--terracotta-dark) 0%, var(--choco-dark) 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-btn-hover);
+}
+
+.auth-btn-primary:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ── Texte de bascule ── */
+.auth-switch-text {
+    text-align: center;
+    font-size: 0.88rem;
+    color: var(--choco-milk);
+    margin-bottom: 0;
+}
+
+.auth-link {
+    color: var(--terracotta);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.auth-link:hover {
+    color: var(--choco-dark);
+    text-decoration: underline;
+}
+
+/* ── Barre de force ── */
+.password-strength-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.password-strength {
+    flex: 1;
+    height: 5px;
+    background: var(--cream);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 0;
+}
+
+.password-strength-bar {
+    height: 100%;
+    width: 0%;
+    border-radius: 3px;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.bg-weak   { background-color: #e53935; }
+.bg-medium { background-color: #fdd835; }
+.bg-strong { background-color: #43a047; }
+
+.strength-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+    min-width: 40px;
+}
+
+/* ── Checklist critères ── */
+.password-checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.check-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--choco-milk);
+}
+
+.check-item i {
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .auth-wrapper {
+        flex-direction: column;
+        margin: 0;
+        border-radius: 0;
+        min-height: calc(100vh - 80px);
+    }
+
+    .auth-deco {
+        flex: 0 0 auto;
+        padding: 2rem 1.5rem;
+    }
+
+    .deco-title { font-size: 2.2rem; }
+    .deco-logo  { width: 60px; height: 60px; }
+
+    .auth-form-panel {
+        padding: 2rem 1.5rem;
+        align-items: flex-start;
+    }
+
+    .auth-form-inner {
+        max-width: 100%;
+    }
+}
+
+/* Body spécifique aux pages auth — supprime le flex colonne du body global */
+.auth-body {
+    background: var(--bg-body);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Position des messages flash sur les pages auth */
+.auth-flash-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 320px;
+    max-width: 420px;
+}
+
+
+/* ---------------------------------------------------------------------------------
+   PAGE PARTAGE DE RECETTE
+   -------------------------------------------------------------------------------*/
+/* ── Header minimal page publique ── */
+.shared-header {
+	background: linear-gradient(135deg, #ffffff 0%, #fdfbf7 100%);
+	box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+	padding: 1rem 2rem;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	position: sticky;
+	top: 0;
+	z-index: 100;
+	border-bottom: 1px solid rgba(212,165,116,0.15);
+}
+
+.shared-brand {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	text-decoration: none;
+}
+
+.shared-brand img {
+	width: 40px;
+	height: 40px;
+	object-fit: contain;
+}
+
+.shared-brand span {
+	font-family: 'Pinyon Script', cursive;
+	font-size: 1.8rem;
+	background: linear-gradient(135deg, #d4a574 0%, #b8865f 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+.shared-banner {
+	background: linear-gradient(135deg, #fdf6f0 0%, #fdfbf7 100%);
+	border: 1px solid rgba(212,165,116,0.2);
+	border-radius: 12px;
+	padding: 1rem 1.5rem;
+	margin-bottom: 2rem;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+
+.shared-banner-text {
+	font-family: 'Poppins', sans-serif;
+	font-size: 0.9rem;
+	color: #8d6e63;
+}
+
+.shared-banner-text strong {
+	color: #3e2723;
+}
+
+.btn-join {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: linear-gradient(135deg, #d4a574 0%, #b8865f 100%);
+	color: white;
+	padding: 8px 20px;
+	border-radius: 50px;
+	font-family: 'Poppins', sans-serif;
+	font-size: 0.85rem;
+	font-weight: 600;
+	text-decoration: none;
+	transition: all 0.3s ease;
+	box-shadow: 0 2px 8px rgba(212,165,116,0.3);
+	white-space: nowrap;
+}
+
+.btn-join:hover {
+	background: linear-gradient(135deg, #b8865f 0%, #a07451 100%);
+	color: white;
+	transform: translateY(-1px);
+}
+
+/* ── Sections recette ── */
+.recipe-section {
+	background: white;
+	border-radius: 16px;
+	padding: 2rem;
+	margin-bottom: 1.5rem;
+	box-shadow: 0 5px 15px rgba(62,39,35,0.06);
+}
+
+.recipe-section-title {
+	font-family: 'Playfair Display', serif;
+	font-size: 1.3rem;
+	color: #3e2723;
+	margin-bottom: 1.2rem;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.recipe-section-title i {
+	color: #c59d85;
+}
+
+.ingredient-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 0.6rem 0;
+	border-bottom: 1px solid #f5f5f5;
+	font-family: 'Poppins', sans-serif;
+	font-size: 0.92rem;
+}
+
+.ingredient-item:last-child {
+	border-bottom: none;
+}
+
+.ingredient-qty {
+	font-weight: 700;
+	color: #c59d85;
+	min-width: 60px;
+}
+
+.step-item {
+	display: flex;
+	gap: 1rem;
+	padding: 1rem 0;
+	border-bottom: 1px solid #f5f5f5;
+}
+
+.step-item:last-child {
+	border-bottom: none;
+}
+
+.step-number {
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	background: linear-gradient(135deg, #d4a574 0%, #b8865f 100%);
+	color: white;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 700;
+	font-size: 0.9rem;
+	flex-shrink: 0;
+}
+
+.step-content {
+	font-family: 'Poppins', sans-serif;
+	font-size: 0.92rem;
+	color: #5a5a5a;
+	padding-top: 6px;
+	line-height: 1.6;
+}
+
+.step-duration {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	background: #fdf6f0;
+	color: #c59d85;
+	font-size: 0.78rem;
+	font-weight: 600;
+	padding: 2px 10px;
+	border-radius: 20px;
+	margin-top: 6px;
+}
+
+.tips-box {
+	background: linear-gradient(135deg, #fdf6f0 0%, #fdfbf7 100%);
+	border-left: 4px solid #d4a574;
+	border-radius: 0 12px 12px 0;
+	padding: 1.2rem 1.5rem;
+	font-family: 'Poppins', sans-serif;
+	font-size: 0.92rem;
+	color: #5a5a5a;
+	font-style: italic;
+}
+
+.meta-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: #fdf6f0;
+	color: #8d6e63;
+	padding: 6px 14px;
+	border-radius: 50px;
+	font-family: 'Poppins', sans-serif;
+	font-size: 0.85rem;
+	font-weight: 500;
+}
+
+.meta-pill i {
+	color: #c59d85;
+}
+
+.shared-footer {
+	text-align: center;
+	padding: 2rem;
+	color: #aaa;
+	font-family: 'Poppins', sans-serif;
+	font-size: 0.82rem;
+}
+
+
+/* ══════════════════════════════════════════
+   WIDGET NOTATION PREMIUM
+   Système de pastilles émotionnelles
+══════════════════════════════════════════ */
+
+.rating-widget {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 1.2rem 0;
+}
+
+.rating-label-top {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--choco-milk);
+}
+
+/* Les 5 pastilles */
+.rating-pills {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.rating-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.rating-pill:hover {
+    transform: translateY(-4px) scale(1.12);
+}
+
+.pill-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    border: 2px solid transparent;
+    background: var(--cream);
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 2px 8px rgba(62,39,35,0.08);
+}
+
+.pill-text {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.58rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--choco-milk);
+    text-transform: uppercase;
+    transition: color 0.2s ease;
+    white-space: nowrap;
+}
+
+/* États actifs par niveau */
+.rating-pill[data-value="1"].active .pill-circle,
+.rating-pill[data-value="1"]:hover .pill-circle {
+    background: #fde8e8;
+    border-color: #e57373;
+    box-shadow: 0 4px 15px rgba(229,115,115,0.35);
+}
+.rating-pill[data-value="1"].active .pill-text,
+.rating-pill[data-value="1"]:hover .pill-text { color: #c62828; }
+
+.rating-pill[data-value="2"].active .pill-circle,
+.rating-pill[data-value="2"]:hover .pill-circle {
+    background: #fff3e0;
+    border-color: #ffb74d;
+    box-shadow: 0 4px 15px rgba(255,183,77,0.35);
+}
+.rating-pill[data-value="2"].active .pill-text,
+.rating-pill[data-value="2"]:hover .pill-text { color: #e65100; }
+
+.rating-pill[data-value="3"].active .pill-circle,
+.rating-pill[data-value="3"]:hover .pill-circle {
+    background: #fff8e1;
+    border-color: var(--terracotta);
+    box-shadow: 0 4px 15px rgba(197,157,133,0.4);
+}
+.rating-pill[data-value="3"].active .pill-text,
+.rating-pill[data-value="3"]:hover .pill-text { color: var(--terracotta); }
+
+.rating-pill[data-value="4"].active .pill-circle,
+.rating-pill[data-value="4"]:hover .pill-circle {
+    background: #e8f5e9;
+    border-color: #66bb6a;
+    box-shadow: 0 4px 15px rgba(102,187,106,0.35);
+}
+.rating-pill[data-value="4"].active .pill-text,
+.rating-pill[data-value="4"]:hover .pill-text { color: #2e7d32; }
+
+.rating-pill[data-value="5"].active .pill-circle,
+.rating-pill[data-value="5"]:hover .pill-circle {
+    background: linear-gradient(135deg, #fff8e1, #fdf3e7);
+    border-color: #ffd54f;
+    box-shadow: 0 4px 20px rgba(255,213,79,0.5);
+    transform: scale(1.08);
+}
+.rating-pill[data-value="5"].active .pill-text,
+.rating-pill[data-value="5"]:hover .pill-text { color: #f57f17; }
+
+/* Animation burst quand on clique */
+@keyframes burst {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.35); }
+    70%  { transform: scale(0.92); }
+    100% { transform: scale(1.08); }
+}
+
+.rating-pill.just-rated .pill-circle {
+    animation: burst 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Message de feedback sous les pastilles */
+.rating-feedback {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.75rem;
+    font-style: italic;
+    color: var(--choco-milk);
+    min-height: 18px;
+    transition: opacity 0.3s ease;
+}
+
+/* ─── Mini version pour les cartes index ─── */
+.rating-mini {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.rating-mini-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--cream);
+    border: 1.5px solid var(--terracotta);
+    transition: all 0.2s ease;
+}
+
+.rating-mini-dot.filled { background: var(--terracotta); border-color: var(--terracotta); }
+.rating-mini-dot.filled-4 { background: #66bb6a; border-color: #66bb6a; }
+.rating-mini-dot.filled-5 { background: #ffd54f; border-color: #f9a825; }
+
+.rating-mini-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--choco-milk);
+    margin-left: 2px;
+}
+
+
+/* ══════════════════════════════════════════
+   CONTRÔLE PORTIONS — Widget centralisé
+══════════════════════════════════════════ */
+
+.servings-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    background: var(--terracotta-dark);        /* fond chocolat foncé */
+    border: none;
+    border-radius: 50px;
+    padding: 3px;
+    box-shadow: 0 4px 14px rgba(197,157,133,0.45);
+    transition: box-shadow 0.2s ease;
+}
+
+.servings-control:hover {
+    box-shadow: 0 6px 20px rgba(197,157,133,0.6);
+}
+
+.servings-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.18);   /* cercle légèrement visible */
+    color: #ffffff;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    flex-shrink: 0;
+}
+
+.servings-btn:hover {
+    background: rgba(255,255,255,0.35);
+    color: white;
+    transform: scale(1.12);
+}
+
+.servings-btn:active {
+    transform: scale(0.95);
+}
+
+.servings-display {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.75);        /* texte blanc doux */
+    min-width: 85px;
+    justify-content: center;
+}
+
+.servings-display i {
+    color: rgba(255,255,255,0.7) !important;  /* icône terracotta sur fond sombre */
+}
+
+#servingsDisplay {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #ffffff;                        /* chiffre blanc pur, lisible */
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: inline-block;
+}
+
+@keyframes popNumber {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.45); }
+    100% { transform: scale(1); }
+}
+
+#servingsDisplay.pop {
+    animation: popNumber 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.servings-unit {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.65);
+}
+
+/* Badge "recette adaptée" */
+.servings-modified-badge {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    background: var(--terracotta-dark);
+    border: none;
+    border-radius: 50px;
+    padding: 6px 16px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.8);
+    animation: fadeInDown 0.3s ease;
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.servings-reset-btn {
+    border: none;
+    background: none;
+    color: var(--terracotta);
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.servings-reset-btn:hover {
+    color: #ffffff;
+}
+
+
+/* ══════════════════════════════════════════════════
+   LISTE DE COURSES MULTI-RECETTES
+   Barre flottante + sélection cartes
+══════════════════════════════════════════════════ */
+
+/* ── Barre flottante ── */
+.shopping-bar {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050;
+    animation: slideUpBar 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideUpBar {
+    from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.shopping-bar-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--choco-dark, #3e2723);
+    border-radius: 50px;
+    padding: 10px 10px 10px 20px;
+    box-shadow: 0 8px 30px rgba(62,39,35,0.45);
+    white-space: nowrap;
+}
+
+.shopping-bar-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255,255,255,0.75);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.shopping-bar-info i { color: var(--terracotta, #c59d85); font-size: 1.1rem; }
+
+#shoppingBarCount {
+    color: white;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.shopping-bar-actions { display: flex; gap: 8px; align-items: center; }
+
+.shopping-bar-btn-cancel {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.65);
+    border-radius: 50px; padding: 7px 16px;
+    font-size: 0.8rem; font-weight: 600;
+    cursor: pointer; transition: all .2s;
+    display: inline-flex; align-items: center; gap: 5px;
+}
+.shopping-bar-btn-cancel:hover { background: rgba(255,255,255,0.18); color: white; }
+
+.shopping-bar-btn-go {
+    background: var(--terracotta, #c59d85);
+    border: none; color: white;
+    border-radius: 50px; padding: 8px 20px;
+    font-size: 0.82rem; font-weight: 700;
+    cursor: pointer; transition: all .2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: inline-flex; align-items: center; gap: 6px;
+    box-shadow: 0 4px 14px rgba(197,157,133,0.45);
+}
+.shopping-bar-btn-go:hover {
+    background: var(--terracotta-dark, #a67c65);
+    transform: scale(1.04);
+}
+
+/* ── Cercle de sélection sur les cartes ── */
+.card-select-check {
+    position: absolute;
+    top: 10px; left: 10px;
+    z-index: 10; cursor: pointer;
+}
+
+.card-check-circle {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.9);
+    border: 2px solid rgba(255,255,255,0.6);
+    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    color: transparent; font-size: 0.85rem;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.card-check-circle:hover { border-color: var(--terracotta, #c59d85); transform: scale(1.1); }
+.card-check-circle.active {
+    background: var(--terracotta, #c59d85);
+    border-color: var(--terracotta, #c59d85);
+    color: white; transform: scale(1.08);
+}
+
+.recipe-card.card-selected {
+    outline: 2.5px solid var(--terracotta, #c59d85);
+    outline-offset: 2px;
+}
+
+/* ── Checkbox tableau all_recipes ── */
+.table-check-all, .row-check {
+    width: 18px; height: 18px;
+    accent-color: var(--terracotta, #c59d85);
+    cursor: pointer;
+}
+
+
+/* ══════════════════════════════════════════════════
+   IMAGE PLACEHOLDER — CSS pur, zéro fichier externe
+   Dégradé terracotta/crème avec icône centrée
+══════════════════════════════════════════════════ */
+
+.img-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        145deg,
+        #f9f0ea 0%,
+        #f0e0d0 40%,
+        #e8cbb5 100%
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Motif de fond discret — petits losanges */
+.img-placeholder::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        repeating-linear-gradient(
+            45deg,
+            rgba(197,157,133,0.08) 0px,
+            rgba(197,157,133,0.08) 1px,
+            transparent 1px,
+            transparent 12px
+        ),
+        repeating-linear-gradient(
+            -45deg,
+            rgba(197,157,133,0.08) 0px,
+            rgba(197,157,133,0.08) 1px,
+            transparent 1px,
+            transparent 12px
+        );
+}
+
+.img-placeholder-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+}
+
+.img-placeholder-inner i {
+    font-size: 2.2rem;
+    color: var(--terracotta, #c59d85);
+    opacity: 0.7;
+    display: block;
+}
+
+.img-placeholder-inner span {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--terracotta-dark, #a67c65);
+    opacity: 0.8;
+}
+
+/* ── Variante hero (recipe_detail) ── */
+.img-placeholder-hero {
+    min-height: 320px;
+}
+
+.img-placeholder-hero .img-placeholder-inner i {
+    font-size: 3.5rem;
+    opacity: 0.5;
+}
+
+.img-placeholder-hero .img-placeholder-inner span {
+    font-size: 0.85rem;
+    letter-spacing: 0.25em;
+}
+
+/* ── Variante thumb (all_recipes tableau) ── */
+.img-placeholder-thumb {
+    width: 70px;
+    height: 70px;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.img-placeholder-thumb .img-placeholder-inner i {
+    font-size: 1.3rem;
+    opacity: 0.6;
+}
+
+.img-placeholder-thumb .img-placeholder-inner span {
+    display: none; /* trop petit pour le texte */
+}

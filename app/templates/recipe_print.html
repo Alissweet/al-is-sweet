@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ recipe.title }} — Al' is Sweet</title>
+    <style>
+        /* ═══════════════════════════════════
+           PALETTE INK-FRIENDLY
+           On garde l'ADN terracotta/crème
+           mais on abandonne le chocolat foncé
+        ═══════════════════════════════════
+
+           AVANT → APRÈS
+           #2c1810 (chocolat noir)  → #f2ede8 (crème chaude)  ou bordures #c8b4a8
+           #3e2723 (chocolat mid)   → #5c3d2e (brun doux, lisible)
+           #c59d85 (terracotta)     → #c59d85 (inchangé, c'est déjà pastel)
+           #a67c65 (terra-d)        → #a67c65 (inchangé)
+           #f9f0ea (terra-pale)     → #f9f0ea (inchangé)
+           #fdfaf6 (cream)          → #ffffff (blanc pur)
+           Texte principal          → #3d2b1f (brun foncé lisible, pas noir)
+        */
+
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #3d2b1f;
+            background: white;
+            width: 210mm;
+        }
+
+        /* ═══════════════════════════════════
+           BANDEAU TOP — terracotta doux
+        ═══════════════════════════════════ */
+        .bar-top {
+            background-color: #c59d85;
+            height: 5px;
+        }
+
+        /* ═══════════════════════════════════
+           HEADER
+        ═══════════════════════════════════ */
+        .page-header {
+            background-color: #ffffff;
+            border-bottom: 1.5px solid #e0cfc6;
+            padding: 13px 24px 11px;
+        }
+        .header-table { width: 100%; border-collapse: collapse; }
+        .header-brand-cell {
+            font-family: Georgia, serif;
+            font-size: 22px;
+            font-style: italic;
+            color: #c59d85;
+            letter-spacing: 1px;
+        }
+        .header-cat-cell {
+            text-align: right;
+            vertical-align: middle;
+        }
+        .cat-tag {
+            font-size: 7.5px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #a67c65;
+            background-color: #f9f0ea;
+            border: 1px solid #e0cfc6;
+            padding: 3px 9px;
+        }
+
+        /* ═══════════════════════════════════
+           PHOTO
+        ═══════════════════════════════════ */
+        .photo-wrap { width: 100%; height: 155px; overflow: hidden; }
+        .photo-wrap img {
+            width: 100%; height: 155px;
+            object-fit: cover; display: block;
+        }
+        .photo-placeholder {
+            width: 100%; height: 60px;
+            background-color: #f9f0ea;
+        }
+
+        /* ═══════════════════════════════════
+           TITRE — fond crème chaude (pas chocolat)
+        ═══════════════════════════════════ */
+        .title-band {
+            background-color: #f2ede8;
+            border-bottom: 1.5px solid #e0cfc6;
+            padding: 12px 24px 10px;
+        }
+        .recipe-cat-label {
+            font-size: 7.5px;
+            font-weight: bold;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: #c59d85;
+            margin-bottom: 4px;
+        }
+        .recipe-title {
+            font-family: Georgia, serif;
+            font-size: 23px;
+            font-weight: normal;
+            color: #3d2b1f;
+            line-height: 1.15;
+        }
+
+        /* ═══════════════════════════════════
+           MÉTAS — fond sable clair (pas chocolat)
+        ═══════════════════════════════════ */
+        .meta-row {
+            background-color: #f9f0ea;
+            border-bottom: 1.5px solid #e0cfc6;
+        }
+        .meta-row-table { width: 100%; border-collapse: collapse; }
+        .meta-cell {
+            text-align: center;
+            padding: 8px 6px;
+            border-right: 1px solid #e0cfc6;
+            vertical-align: middle;
+        }
+        .meta-cell:last-child { border-right: none; }
+        .meta-val {
+            font-family: Georgia, serif;
+            font-size: 14px;
+            font-weight: bold;
+            color: #3d2b1f;
+            display: block;
+            line-height: 1;
+        }
+        .meta-unit { font-size: 9px; color: #a67c65; }
+        .meta-lbl {
+            font-size: 7px;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #b89a8a;
+            display: block;
+            margin-top: 2px;
+        }
+
+        /* ═══════════════════════════════════
+           DESCRIPTION
+        ═══════════════════════════════════ */
+        .desc-block {
+            background-color: #ffffff;
+            border-bottom: 1px solid #ede4db;
+            padding: 8px 24px;
+        }
+        .desc-txt {
+            font-family: Georgia, serif;
+            font-size: 10px;
+            font-style: italic;
+            color: #8d7067;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        /* ═══════════════════════════════════
+           CORPS 2 COLONNES
+        ═══════════════════════════════════ */
+        .body-wrap { width: 100%; border-collapse: collapse; border-bottom: 1px solid #ede4db; }
+
+        .col-ing {
+            width: 175px;
+            background-color: #fdf8f4;
+            border-right: 1.5px solid #e0cfc6;
+            padding: 14px 14px;
+            vertical-align: top;
+        }
+        .col-steps {
+            padding: 14px 18px;
+            vertical-align: top;
+            background-color: #ffffff;
+        }
+
+        /* Titres de section */
+        .sec-title {
+            font-size: 7px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #a67c65;
+            padding-bottom: 7px;
+            border-bottom: 1.5px solid #c59d85;
+            margin-bottom: 10px;
+        }
+
+        /* ─── Ingrédients ─── */
+        .ing-row {
+            width: 100%;
+            border-collapse: collapse;
+            border-bottom: 1px solid #ede4db;
+        }
+        .ing-row:last-child { border-bottom: none; }
+        .ing-qty {
+            font-family: Georgia, serif;
+            font-size: 11px;
+            font-weight: bold;
+            color: #a67c65;
+            width: 50px;
+            padding: 4px 6px 4px 0;
+            vertical-align: top;
+            line-height: 1.3;
+        }
+        .ing-unit {
+            font-size: 8.5px;
+            font-weight: normal;
+            color: #8d7067;
+        }
+        .ing-name {
+            font-size: 9.5px;
+            color: #3d2b1f;
+            padding: 4px 0;
+            vertical-align: top;
+            line-height: 1.35;
+        }
+
+        /* ─── Étapes ─── */
+        .step-row { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+        .step-row:last-child { margin-bottom: 0; }
+        .step-num-td {
+            width: 24px;
+            vertical-align: top;
+            padding-right: 8px;
+            padding-top: 1px;
+        }
+        .step-circle {
+            width: 20px;
+            height: 20px;
+            /* Cercle en terracotta doux au lieu de chocolat noir */
+            background-color: #f9f0ea;
+            border: 1.5px solid #c59d85;
+            border-radius: 10px;
+            text-align: center;
+            font-family: Georgia, serif;
+            font-size: 9px;
+            font-weight: bold;
+            color: #a67c65;
+            line-height: 17px;
+            display: block;
+        }
+        .step-body-td { vertical-align: top; }
+        .step-txt {
+            font-size: 9.5px;
+            color: #4a3728;
+            line-height: 1.6;
+        }
+        .step-dur {
+            display: inline-block;
+            margin-top: 3px;
+            font-size: 8px;
+            font-weight: bold;
+            color: #a67c65;
+            background-color: #f9f0ea;
+            border: 1px solid #e0cfc6;
+            padding: 1px 7px;
+            border-radius: 8px;
+        }
+
+        /* ═══════════════════════════════════
+           CONSEIL DU CHEF
+        ═══════════════════════════════════ */
+        .tips-wrap {
+            background-color: #fdf8f4;
+            border-bottom: 1px solid #e0cfc6;
+            border-left: 3px solid #c59d85;
+            padding: 10px 20px 10px 18px;
+        }
+        .tips-table { width: 100%; border-collapse: collapse; }
+        .tips-icon-td { width: 26px; vertical-align: top; padding-top: 1px; }
+        .tips-dot {
+            width: 16px;
+            height: 16px;
+            background-color: #f9f0ea;
+            border: 1.5px solid #c59d85;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 8px;
+            color: #a67c65;
+            line-height: 13px;
+            display: block;
+        }
+        .tips-content-td { vertical-align: top; padding-left: 8px; }
+        .tips-label {
+            font-size: 7px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #c59d85;
+            display: block;
+            margin-bottom: 3px;
+        }
+        .tips-txt {
+            font-family: Georgia, serif;
+            font-size: 9.5px;
+            font-style: italic;
+            color: #7a6058;
+            line-height: 1.6;
+        }
+
+        /* ═══════════════════════════════════
+           FOOTER — ligne terracotta légère
+        ═══════════════════════════════════ */
+        .page-footer {
+            background-color: #f2ede8;
+            border-top: 1.5px solid #e0cfc6;
+            padding: 9px 24px;
+        }
+        .footer-table { width: 100%; border-collapse: collapse; }
+        .footer-brand-td {
+            font-family: Georgia, serif;
+            font-size: 15px;
+            font-style: italic;
+            color: #c59d85;
+            vertical-align: middle;
+        }
+        .footer-author-td {
+            text-align: right;
+            vertical-align: middle;
+            font-size: 7.5px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #b89a8a;
+        }
+        .footer-author-name { color: #a67c65; }
+
+        .bar-bottom {
+            background-color: #c59d85;
+            height: 4px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="bar-top"></div>
+
+<div class="page-header">
+    <table class="header-table">
+        <tr>
+            <td class="header-brand-cell">Al' is Sweet</td>
+            <td class="header-cat-cell">
+                <span class="cat-tag">{{ recipe.category or 'Recette' }}</span>
+            </td>
+        </tr>
+    </table>
+</div>
+
+{% if recipe.image_filename %}
+<div class="photo-wrap">
+    {% if recipe.image_filename.startswith('http') %}
+        <img src="{{ recipe.image_filename }}" alt="{{ recipe.title }}">
+    {% else %}
+        <img src="{{ url_for('static', filename='uploads/' + recipe.image_filename, _external=True) }}" alt="{{ recipe.title }}">
+    {% endif %}
+</div>
+{% else %}
+<div class="photo-placeholder"></div>
+{% endif %}
+
+<div class="title-band">
+    <div class="recipe-cat-label">{{ recipe.category or 'Recette' }}</div>
+    <div class="recipe-title">{{ recipe.title }}</div>
+</div>
+
+<div class="meta-row">
+    <table class="meta-row-table">
+        <tr>
+            <td class="meta-cell">
+                <span class="meta-val">{{ recipe.total_time }}<span class="meta-unit"> min</span></span>
+                <span class="meta-lbl">Durée totale</span>
+            </td>
+            {% if recipe.prep_time %}
+            <td class="meta-cell">
+                <span class="meta-val">{{ recipe.prep_time }}<span class="meta-unit"> min</span></span>
+                <span class="meta-lbl">Préparation</span>
+            </td>
+            {% endif %}
+            {% if recipe.cook_time %}
+            <td class="meta-cell">
+                <span class="meta-val">{{ recipe.cook_time }}<span class="meta-unit"> min</span></span>
+                <span class="meta-lbl">Cuisson</span>
+            </td>
+            {% endif %}
+            <td class="meta-cell">
+                <span class="meta-val">{{ recipe.servings }}<span class="meta-unit"> pers.</span></span>
+                <span class="meta-lbl">Personnes</span>
+            </td>
+            {% if recipe.difficulty %}
+            <td class="meta-cell">
+                <span class="meta-val" style="font-size:11px;">{{ recipe.difficulty }}</span>
+                <span class="meta-lbl">Difficulté</span>
+            </td>
+            {% endif %}
+            {% if recipe.total_carbs %}
+            <td class="meta-cell" style="background-color: #c0392b;">
+                <span class="meta-val" style="color: #ffffff; font-weight: 900;">{{ "%.0f"|format(recipe.total_carbs) }}<span class="meta-unit" style="color: rgba(255,255,255,0.85); font-weight: bold;"> g</span></span>
+                <span class="meta-lbl" style="color: rgba(255,255,255,0.75); font-weight: bold; letter-spacing: 2px;">Glucides</span>
+            </td>
+            {% endif %}
+        </tr>
+    </table>
+</div>
+
+{% if recipe.description %}
+<div class="desc-block">
+    <p class="desc-txt">« {{ recipe.description }} »</p>
+</div>
+{% endif %}
+
+<table class="body-wrap">
+    <tr>
+        <td class="col-ing">
+            <div class="sec-title">Ingrédients</div>
+            {% for ing in recipe.ingredients %}
+            <table class="ing-row">
+                <tr>
+                    <td class="ing-qty">
+                        {% if ing.quantity %}{{ ing.quantity }}{% endif %}
+                        {% if ing.unit %}<span class="ing-unit"> {{ ing.unit }}</span>{% endif %}
+                    </td>
+                    <td class="ing-name">{{ ing.name }}</td>
+                </tr>
+            </table>
+            {% endfor %}
+        </td>
+        <td class="col-steps">
+            <div class="sec-title">Préparation</div>
+            {% for step in recipe.steps.order_by('order') %}
+            <table class="step-row">
+                <tr>
+                    <td class="step-num-td">
+                        <span class="step-circle">{{ step.order }}</span>
+                    </td>
+                    <td class="step-body-td">
+                        <div class="step-txt">{{ step.instruction }}</div>
+                        {% if step.duration %}
+                        <span class="step-dur">{{ step.duration }} min</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+            {% endfor %}
+        </td>
+    </tr>
+</table>
+
+{% if recipe.tips %}
+<div class="tips-wrap">
+    <table class="tips-table">
+        <tr>
+            <td class="tips-icon-td">
+                <span class="tips-dot">*</span>
+            </td>
+            <td class="tips-content-td">
+                <span class="tips-label">Conseil du Chef</span>
+                <p class="tips-txt">{{ recipe.tips }}</p>
+            </td>
+        </tr>
+    </table>
+</div>
+{% endif %}
+
+<div class="page-footer">
+    <table class="footer-table">
+        <tr>
+            <td class="footer-brand-td">Al' is Sweet</td>
+            <td class="footer-author-td">
+                Recette de <span class="footer-author-name">{{ recipe.author.username }}</span>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="bar-bottom"></div>
+
+</body>
+</html>

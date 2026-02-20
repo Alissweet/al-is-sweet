@@ -52,12 +52,33 @@
         </div>
     </div>
 
+    <!-- BARRE FLOTTANTE LISTE DE COURSES -->
+    <div id="shoppingBar" class="shopping-bar d-none">
+        <div class="shopping-bar-inner">
+            <div class="shopping-bar-info">
+                <i class="bi bi-basket3-fill"></i>
+                <span id="shoppingBarCount">0</span> recette(s) sélectionnée(s)
+            </div>
+            <div class="shopping-bar-actions">
+                <button class="shopping-bar-btn-cancel" onclick="clearSelection()">
+                    <i class="bi bi-x"></i> Annuler
+                </button>
+                <button class="shopping-bar-btn-go" onclick="goToShoppingList()">
+                    <i class="bi bi-list-check"></i> Générer la liste de courses
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Tableau des recettes -->
     <div class="card border-0 shadow-sm">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0" id="recipesTable">
                 <thead class="bg-terracotta text-white">
                     <tr>
+                        <th style="width: 44px;">
+                            <input type="checkbox" class="table-check-all" onchange="toggleAllRows(this)" title="Tout sélectionner">
+                        </th>
                         <th class="sortable" data-column="image" style="width: 100px;">Photo</th>
                         <th class="sortable" data-column="title" style="cursor: pointer;">
                             Recette <i class="bi bi-chevron-expand ms-1"></i>
@@ -74,12 +95,20 @@
                         <th class="sortable text-center" data-column="carbs" style="cursor: pointer; width: 120px;">
                             Glucides <i class="bi bi-chevron-expand ms-1"></i>
                         </th>
-                        <th class="text-center" style="width: 100px;">Actions</th>
+						<th class="text-center sortable" data-column="rating" style="cursor: pointer; width: 130px;">
+							Avis <i class="bi bi-chevron-expand ms-1"></i>
+						</th>
+                        <th class="text-center" style="width: 130px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for recipe in recipe_data %}
-                    <tr data-category="{{ recipe.category }}" data-difficulty="{{ recipe.difficulty }}">
+                    <tr data-category="{{ recipe.category }}" data-difficulty="{{ recipe.difficulty }}" data-recipe-id="{{ recipe.id }}">
+                        <td>
+                            <input type="checkbox" class="row-check" 
+                                   onchange="toggleRecipeSelect({{ recipe.id }}, this)"
+                                   onclick="event.stopPropagation()">
+                        </td>
                         <!-- Photo -->
                         <td>
                             {% if recipe.image %}
@@ -91,9 +120,10 @@
                                          class="rounded shadow-sm" style="width: 70px; height: 70px; object-fit: cover;">
                                 {% endif %}
                             {% else %}
-                                <div class="bg-light rounded d-flex align-items-center justify-content-center" 
-                                     style="width: 70px; height: 70px;">
-                                    <i class="bi bi-image text-muted"></i>
+                                <div class="img-placeholder img-placeholder-thumb">
+                                    <div class="img-placeholder-inner">
+                                        <i class="bi bi-egg-fried"></i>
+                                    </div>
                                 </div>
                             {% endif %}
                         </td>
@@ -155,18 +185,44 @@
                                 <i class="bi bi-lightning-fill"></i> {{ recipe.total_carbs }}g
                             </span>
                         </td>
+						
+						<!-- Notation -->
+						<td class="text-center">
+							{% if recipe.rating %}
+								{% set emojis = {1: '😕', 2: '😐', 3: '🙂', 4: '😊', 5: '🤩'} %}
+								{% set labels = {1: 'À revoir', 2: 'Bof…', 3: 'Bien', 4: 'Très bien', 5: 'Incontournable'} %}
+								{% set colors = {1: '#e57373', 2: '#ffb74d', 3: '#c59d85', 4: '#66bb6a', 5: '#ffd54f'} %}
+								<span style="
+									display: inline-flex; align-items: center; gap: 5px;
+									background: {{ colors[recipe.rating] }}22;
+									border: 1.5px solid {{ colors[recipe.rating] }};
+									border-radius: 50px; padding: 3px 10px;
+									font-size: 0.78rem; font-weight: 600;
+									color: #3e2723;">
+									{{ emojis[recipe.rating] }} {{ labels[recipe.rating] }}
+								</span>
+							{% else %}
+								<span class="text-muted small fst-italic">—</span>
+							{% endif %}
+						</td>
                         
                         <!-- Actions -->
-						<td class="text-center">
+						<td class="text-center" style="white-space: nowrap;">
 							<a href="{{ url_for('main.recipe_detail', id=recipe.id) }}" 
 							   class="btn btn-sm btn-outline-primary me-1" 
 							   title="Voir">
 								<i class="bi bi-eye"></i>
 							</a>
 							<a href="{{ url_for('main.recipe_edit', id=recipe.id) }}" 
-							   class="btn btn-sm btn-outline-secondary" 
+							   class="btn btn-sm btn-outline-secondary me-1" 
 							   title="Modifier">
 								<i class="bi bi-pencil"></i>
+							</a>
+							<a href="{{ url_for('main.recipe_pdf', id=recipe.id) }}" 
+							   class="btn btn-sm btn-outline-danger" 
+							   title="Télécharger PDF"
+							   target="_blank">
+								<i class="bi bi-file-earmark-pdf"></i>
 							</a>
 						</td>
                     </tr>

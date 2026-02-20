@@ -1,6 +1,8 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app, Response
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
+from weasyprint import HTML, CSS
+from weasyprint.text.fonts import FontConfiguration
 from app import db
 from app.models import Recipe, Ingredient, Step, Category
 from app.forms import RecipeForm
@@ -582,7 +584,8 @@ def all_recipes():
             'total_time': total_time,
             'total_carbs': recipe.total_carbs or 0,
             'servings': recipe.servings or 4,
-            'difficulty': recipe.difficulty or 'Moyen'
+            'difficulty': recipe.difficulty or 'Moyen',
+            'rating': recipe.rating
         })
 
     return render_template('all_recipes.html',
@@ -598,6 +601,158 @@ def all_recipes():
 def ping():
     """Route légère pour UptimeRobot — maintient Render actif"""
     return jsonify({'status': 'ok'}), 200
+
+
+# ============================================================
+#  PARTAGER RECETTE
+# ============================================================
+@main.route('/recipe/<int:id>/share', methods=['POST'])
+@login_required
+def recipe_share(id):
+    recipe = Recipe.query.get_or_404(id)
+    if recipe.user_id != current_user.id:
+        return jsonify({'success': False, 'message': 'Action non autorisée.'}), 403
+
+    action = request.form.get('action', 'generate')
+    if action == 'revoke':
+        recipe.revoke_share_token()
+        db.session.commit()
+        return jsonify({'success': True, 'action': 'revoked'})
+    else:
+        if not recipe.share_token:
+            recipe.generate_share_token()
+            db.session.commit()
+        share_url = url_for('main.recipe_public', token=recipe.share_token, _external=True)
+        return jsonify({'success': True, 'action': 'generated', 'share_url': share_url})
+
+@main.route('/recette/<token>')
+def recipe_public(token):
+    recipe = Recipe.query.filter_by(share_token=token).first_or_404()
+    return render_template('recipe_shared.html', recipe=recipe)
+
+
+# ===============================================================
+# IMPRIMER RECETTE INDIVIDUELLE
+# ===============================================================
+@main.route('/recipe/<int:id>/pdf')
+@login_required
+def recipe_pdf(id):
+    recipe = Recipe.query.get_or_404(id)
+
+    # Sécurité : seul le propriétaire peut télécharger
+    if recipe.user_id != current_user.id:
+        flash("Accès non autorisé.", 'danger')
+        return redirect(url_for('main.index'))
+
+    # Rendre le template HTML
+    html_string = render_template('recipe_print.html', recipe=recipe)
+
+    # Générer le PDF avec WeasyPrint
+    font_config = FontConfiguration()
+    pdf_bytes = HTML(
+        string=html_string,
+        base_url=request.host_url          # nécessaire pour charger les images locales
+    ).write_pdf(
+        font_config=font_config
+    )
+
+    # Nom de fichier propre (sans espaces ni caractères spéciaux)
+    import re
+    safe_title = re.sub(r'[^\w\-]', '_', recipe.title)
+
+    # Retourner le PDF en téléchargement direct
+    return Response(
+        pdf_bytes,
+        mimetype='application/pdf',
+        headers={
+            'Content-Disposition': f'inline; filename="{safe_title}.pdf"'
+            # 'inline' = s'ouvre dans le navigateur
+            # Remplacer par 'attachment' pour forcer le téléchargement
+        }
+    )
+
+
+# ============================================================
+#  NOTATION DES RECETTES
+# ============================================================
+@main.route('/recipe/<int:id>/rate', methods=['POST'])
+@login_required
+def recipe_rate(id):
+    recipe = Recipe.query.get_or_404(id)
+    if recipe.user_id != current_user.id:
+        return jsonify({'success': False, 'message': 'Action non autorisée.'}), 403
+
+    rating = request.form.get('rating', type=int)
+    if not rating or rating < 1 or rating > 5:
+        return jsonify({'success': False, 'message': 'Note invalide.'})
+
+    # Si on reclique sur la même note → on efface (toggle)
+    if recipe.rating == rating:
+        recipe.rating = None
+        db.session.commit()
+        return jsonify({'success': True, 'rating': None})
+
+    recipe.rating = rating
+    db.session.commit()
+    return jsonify({'success': True, 'rating': rating})
+
+# ============================================================
+#  LISTE DE COURSES CONSOLIDÉE
+# ============================================================
+@main.route('/shopping-list', methods=['POST'])
+@login_required
+def shopping_list():
+    # Récupérer les IDs des recettes sélectionnées
+    recipe_ids_raw = request.form.get('recipe_ids', '')
+    if not recipe_ids_raw:
+        flash("Sélectionne au moins une recette.", 'warning')
+        return redirect(url_for('main.index'))
+
+    try:
+        recipe_ids = [int(i) for i in recipe_ids_raw.split(',') if i.strip()]
+    except ValueError:
+        flash("Sélection invalide.", 'danger')
+        return redirect(url_for('main.index'))
+
+    # Charger les recettes en vérifiant l'appartenance
+    recipes = Recipe.query.filter(
+        Recipe.id.in_(recipe_ids),
+        Recipe.user_id == current_user.id
+    ).all()
+
+    if not recipes:
+        flash("Aucune recette valide sélectionnée.", 'warning')
+        return redirect(url_for('main.index'))
+
+    # Consolider les ingrédients
+    # Clé : (nom_normalisé, unité) → cumul des quantités
+    consolidated = {}
+    for recipe in recipes:
+        for ing in recipe.ingredients:
+            name_key = ing.name.strip().lower()
+            unit_key = (ing.unit or '').strip().lower()
+            key = (name_key, unit_key)
+
+            if key not in consolidated:
+                consolidated[key] = {
+                    'name': ing.name.strip(),
+                    'unit': ing.unit or '',
+                    'quantity': 0,
+                    'has_qty': False,
+                    'recipes': []
+                }
+            if ing.quantity:
+                consolidated[key]['quantity'] += ing.quantity
+                consolidated[key]['has_qty'] = True
+            if recipe.title not in consolidated[key]['recipes']:
+                consolidated[key]['recipes'].append(recipe.title)
+
+    # Trier par nom
+    shopping_items = sorted(consolidated.values(), key=lambda x: x['name'].lower())
+
+    return render_template('shopping_list.html',
+                           recipes=recipes,
+                           shopping_items=shopping_items)
 
 
 # ============================================================

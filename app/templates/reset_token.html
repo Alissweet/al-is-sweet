@@ -1,27 +1,196 @@
-{% extends "base.html" %}
+{% extends "base_auth.html" %}
 {% block title %}Nouveau mot de passe - Al' is Sweet{% endblock %}
 
 {% block content %}
-<div class="container auth-container">
-    <div class="col-md-5">
-        <div class="card card-auth p-5">
-            <div class="auth-header">
-                <h2 class="font-playfair mb-2">Nouveau mot de passe</h2>
+<div class="auth-page">
+    <div class="auth-wrapper">
+
+        <div class="auth-deco">
+            <div class="auth-deco-content">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="deco-logo">
+                <h1 class="deco-title">Al' is Sweet</h1>
+                <p class="deco-subtitle">Choisissez un nouveau mot<br>de passe sécurisé.</p>
+                <div class="deco-dots">
+                    <span></span><span></span><span></span>
+                </div>
             </div>
-            
-            <form method="POST">
-			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <div class="mb-3">
-                    <label class="form-label fw-bold small text-muted">NOUVEAU MOT DE PASSE</label>
-                    <input type="password" name="password" class="form-control form-control-lg" required>
-                </div>
-                <div class="mb-4">
-                    <label class="form-label fw-bold small text-muted">CONFIRMER</label>
-                    <input type="password" name="confirm_password" class="form-control form-control-lg" required>
-                </div>
-                <button type="submit" class="btn btn-terracotta w-100">Valider</button>
-            </form>
         </div>
+
+        <div class="auth-form-panel">
+            <div class="auth-form-inner">
+
+                <div class="auth-form-header">
+                    <div class="auth-icon-circle mb-3">
+                        <i class="bi bi-shield-lock-fill"></i>
+                    </div>
+                    <h2>Nouveau mot de passe</h2>
+                    <p class="text-muted">Choisissez un mot de passe fort et mémorisable</p>
+                </div>
+
+                <form method="POST" novalidate id="resetTokenForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                    <!-- Nouveau mot de passe -->
+                    <div class="auth-field mb-3">
+                        <label class="auth-label">
+                            <i class="bi bi-lock me-1"></i> Nouveau mot de passe
+                        </label>
+                        <div class="auth-input-group">
+                            <input type="password"
+                                   name="password"
+                                   id="newPassword"
+                                   class="auth-input"
+                                   placeholder="••••••••"
+                                   autocomplete="new-password"
+                                   minlength="8"
+                                   required>
+                            <button type="button" class="auth-eye-btn" onclick="togglePassword('newPassword', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        <!-- Barre de force -->
+                        <div class="password-strength-container mt-2" id="strengthContainer" style="display:none;">
+                            <div class="password-strength">
+                                <div class="password-strength-bar" id="strengthBar"></div>
+                            </div>
+                            <small class="strength-label" id="strengthLabel"></small>
+                        </div>
+                        <!-- Checklist critères -->
+                        <div class="password-checklist mt-2" id="passwordChecklist" style="display:none;">
+                            <div class="check-item" id="check-length">
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                                <span>Au moins 8 caractères</span>
+                            </div>
+                            <div class="check-item" id="check-upper">
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                                <span>Une lettre majuscule</span>
+                            </div>
+                            <div class="check-item" id="check-lower">
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                                <span>Une lettre minuscule</span>
+                            </div>
+                            <div class="check-item" id="check-digit">
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                                <span>Un chiffre</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Confirmation -->
+                    <div class="auth-field mb-4">
+                        <label class="auth-label">
+                            <i class="bi bi-lock-fill me-1"></i> Confirmer le mot de passe
+                        </label>
+                        <div class="auth-input-group">
+                            <input type="password"
+                                   name="confirm_password"
+                                   id="confirmPassword"
+                                   class="auth-input"
+                                   placeholder="••••••••"
+                                   autocomplete="new-password"
+                                   required>
+                            <button type="button" class="auth-eye-btn" onclick="togglePassword('confirmPassword', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        <div class="auth-field-feedback" id="confirmFeedback"></div>
+                    </div>
+
+                    <button type="submit" class="auth-btn-primary w-100 mb-3" id="resetTokenSubmit">
+                        <i class="bi bi-check-circle me-2"></i>
+                        Valider le nouveau mot de passe
+                    </button>
+
+                    <p class="auth-switch-text">
+                        <a href="{{ url_for('auth.login') }}" class="auth-link">
+                            <i class="bi bi-arrow-left me-1"></i>Retour à la connexion
+                        </a>
+                    </p>
+
+                </form>
+            </div>
+        </div>
+
     </div>
 </div>
+
+<script>
+function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('bi-eye', 'bi-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.replace('bi-eye-slash', 'bi-eye');
+    }
+}
+
+const passwordInput = document.getElementById('newPassword');
+const confirmInput  = document.getElementById('confirmPassword');
+const confirmFeedback = document.getElementById('confirmFeedback');
+const strengthBar   = document.getElementById('strengthBar');
+const strengthLabel = document.getElementById('strengthLabel');
+const strengthContainer = document.getElementById('strengthContainer');
+const passwordChecklist = document.getElementById('passwordChecklist');
+
+passwordInput.addEventListener('input', function() {
+    const val = this.value;
+    if (!val) { strengthContainer.style.display = 'none'; passwordChecklist.style.display = 'none'; return; }
+
+    strengthContainer.style.display = 'block';
+    passwordChecklist.style.display = 'block';
+
+    const checks = { length: val.length >= 8, upper: /[A-Z]/.test(val), lower: /[a-z]/.test(val), digit: /[0-9]/.test(val) };
+
+    Object.keys(checks).forEach(key => {
+        const el = document.getElementById(`check-${key}`);
+        el.querySelector('i').className = checks[key]
+            ? 'bi bi-check-circle-fill text-success'
+            : 'bi bi-x-circle-fill text-danger';
+    });
+
+    const score = Object.values(checks).filter(Boolean).length;
+    strengthBar.style.width = (score / 4 * 100) + '%';
+    if (score <= 1) { strengthBar.className = 'password-strength-bar bg-weak'; strengthLabel.textContent = 'Faible'; strengthLabel.className = 'strength-label text-danger'; }
+    else if (score <= 3) { strengthBar.className = 'password-strength-bar bg-medium'; strengthLabel.textContent = 'Moyen'; strengthLabel.className = 'strength-label text-warning'; }
+    else { strengthBar.className = 'password-strength-bar bg-strong'; strengthLabel.textContent = 'Fort ✓'; strengthLabel.className = 'strength-label text-success'; }
+
+    checkMatch();
+});
+
+confirmInput.addEventListener('input', checkMatch);
+
+function checkMatch() {
+    if (!confirmInput.value) { clearField(); return; }
+    if (passwordInput.value === confirmInput.value) {
+        confirmInput.classList.replace('is-invalid', 'is-valid') || confirmInput.classList.add('is-valid');
+        confirmFeedback.textContent = '✓ Les mots de passe correspondent';
+        confirmFeedback.className = 'auth-field-feedback text-success';
+    } else {
+        confirmInput.classList.replace('is-valid', 'is-invalid') || confirmInput.classList.add('is-invalid');
+        confirmFeedback.textContent = 'Les mots de passe ne correspondent pas';
+        confirmFeedback.className = 'auth-field-feedback text-danger';
+    }
+}
+
+function clearField() {
+    confirmInput.classList.remove('is-valid', 'is-invalid');
+    confirmFeedback.textContent = '';
+}
+
+document.getElementById('resetTokenForm').addEventListener('submit', function(e) {
+    if (passwordInput.value !== confirmInput.value) {
+        e.preventDefault();
+        confirmInput.classList.add('is-invalid');
+        confirmFeedback.textContent = 'Les mots de passe ne correspondent pas';
+        confirmFeedback.className = 'auth-field-feedback text-danger';
+        return;
+    }
+    const btn = document.getElementById('resetTokenSubmit');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Validation...';
+    btn.disabled = true;
+});
+</script>
 {% endblock %}

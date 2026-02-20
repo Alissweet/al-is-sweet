@@ -15,6 +15,13 @@ class Config:
     SQLALCHEMY_DATABASE_URI = _db_url
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    
+    # ✅ Neon : SSL + gestion du cold start (instance gratuite)
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "connect_args": {"sslmode": "require"},
+        "pool_pre_ping": True,
+        "pool_recycle": 300,
+}
 
     # --- IMAGES (Hybride Cloud/Local) ---
     CLOUDINARY_URL = os.environ.get('CLOUDINARY_URL')

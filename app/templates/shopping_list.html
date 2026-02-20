@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+
+{% block title %}Liste de courses — Al' is Sweet{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+
+            <!-- En-tête -->
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <a href="{{ url_for('main.index') }}" class="text-muted small text-decoration-none mb-2 d-block">
+                        <i class="bi bi-arrow-left"></i> Retour aux recettes
+                    </a>
+                    <h1 class="h3 mb-0" style="font-family:'Playfair Display',serif;">
+                        <i class="bi bi-basket3 text-terracotta me-2"></i>Liste de courses
+                    </h1>
+                </div>
+                <button class="btn-shopping-print" onclick="window.print()">
+                    <i class="bi bi-printer"></i> Imprimer
+                </button>
+            </div>
+
+            <!-- Recettes incluses -->
+            <div class="shopping-recipes-tag-wrap mb-4">
+                <span class="shopping-recipes-label">Recettes incluses :</span>
+                {% for recipe in recipes %}
+                <span class="shopping-recipe-tag">
+                    <i class="bi bi-journal-text"></i> {{ recipe.title }}
+                    <span class="text-muted small ms-1">({{ recipe.servings }} pers.)</span>
+                </span>
+                {% endfor %}
+            </div>
+
+            <!-- Total glucides -->
+            {% set total_carbs = recipes | sum(attribute='total_carbs') %}
+            {% if total_carbs > 0 %}
+            <div class="shopping-carbs-banner mb-4">
+                <i class="bi bi-lightning-fill"></i>
+                Total glucides des recettes sélectionnées :
+                <strong>{{ "%.0f"|format(total_carbs) }}g</strong>
+            </div>
+            {% endif %}
+
+            <!-- Liste de courses -->
+            <div class="shopping-list-card">
+                <div class="shopping-list-header">
+                    <span>{{ shopping_items | length }} ingrédient(s) au total</span>
+                    <button class="shopping-check-all-btn" onclick="toggleCheckAll(this)">
+                        <i class="bi bi-check2-square"></i> Tout cocher
+                    </button>
+                </div>
+
+                <div class="shopping-items-wrap" id="shoppingItems">
+                    {% set current_letter = '' %}
+                    {% for item in shopping_items %}
+                        {% set first_letter = item.name[0] | upper %}
+                        {% if first_letter != current_letter %}
+                            {% set current_letter = first_letter %}
+                            <div class="shopping-alpha-divider">{{ first_letter }}</div>
+                        {% endif %}
+
+                        <label class="shopping-item" id="item-{{ loop.index }}">
+                            <input type="checkbox" class="shopping-item-check"
+                                   onchange="toggleItemCheck(this)">
+                            <div class="shopping-item-check-circle">
+                                <i class="bi bi-check-lg"></i>
+                            </div>
+                            <div class="shopping-item-body">
+                                <span class="shopping-item-name">{{ item.name }}</span>
+                                {% if item.has_qty %}
+                                <span class="shopping-item-qty">
+                                    {{ item.quantity | round(2) | string | replace('.0', '') }}
+                                    {% if item.unit %}{{ item.unit }}{% endif %}
+                                </span>
+                                {% endif %}
+                            </div>
+                            {% if item.recipes | length > 1 %}
+                            <span class="shopping-item-source" title="{{ item.recipes | join(', ') }}">
+                                <i class="bi bi-layers"></i> {{ item.recipes | length }}
+                            </span>
+                            {% endif %}
+                        </label>
+                    {% endfor %}
+                </div>
+
+                <div class="shopping-list-footer">
+                    <span id="checkedCount">0</span> / {{ shopping_items | length }} coché(s)
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+/* ── Styles propres à cette page ── */
+
+.btn-shopping-print {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: transparent;
+    border: 1.5px solid var(--terracotta, #c59d85);
+    color: var(--terracotta, #c59d85);
+    padding: 8px 18px; border-radius: 50px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.82rem; font-weight: 600;
+    cursor: pointer; transition: all .2s;
+}
+.btn-shopping-print:hover {
+    background: var(--terracotta, #c59d85); color: white;
+}
+
+.shopping-recipes-tag-wrap {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+}
+.shopping-recipes-label {
+    font-size: 0.78rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .1em;
+    color: var(--choco-milk, #8d6e63);
+}
+.shopping-recipe-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--cream, #efebe9);
+    border: 1px solid var(--terracotta, #c59d85);
+    color: var(--choco-dark, #3e2723);
+    border-radius: 50px; padding: 4px 12px;
+    font-size: 0.8rem; font-weight: 500;
+}
+
+.shopping-carbs-banner {
+    background: linear-gradient(135deg, #fff3e0, #fdf6f0);
+    border: 1.5px solid #ffb74d;
+    border-radius: 12px; padding: 10px 18px;
+    font-size: 0.88rem; color: #e65100;
+    display: flex; align-items: center; gap: 8px;
+}
+.shopping-carbs-banner i { color: #ff9800; }
+
+/* ── Carte principale ── */
+.shopping-list-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(62,39,35,0.1);
+    overflow: hidden;
+}
+
+.shopping-list-header {
+    background: var(--choco-dark, #3e2723);
+    color: rgba(255,255,255,0.7);
+    padding: 14px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 0.82rem;
+}
+
+.shopping-check-all-btn {
+    background: transparent; border: 1px solid rgba(255,255,255,0.3);
+    color: rgba(255,255,255,0.8); border-radius: 50px;
+    padding: 4px 14px; font-size: 0.78rem; font-weight: 600;
+    cursor: pointer; transition: all .2s;
+    display: inline-flex; align-items: center; gap: 5px;
+}
+.shopping-check-all-btn:hover {
+    background: rgba(255,255,255,0.12); color: white;
+}
+
+/* ── Séparateur alphabétique ── */
+.shopping-alpha-divider {
+    background: var(--cream, #efebe9);
+    padding: 4px 20px;
+    font-size: 0.7rem; font-weight: 800;
+    letter-spacing: .18em; text-transform: uppercase;
+    color: var(--terracotta, #c59d85);
+    border-bottom: 1px solid #f0e9e0;
+}
+
+/* ── Item ── */
+.shopping-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 20px;
+    border-bottom: 1px solid #f5f0eb;
+    cursor: pointer;
+    transition: background .15s;
+    margin: 0;
+}
+.shopping-item:last-child { border-bottom: none; }
+.shopping-item:hover { background: #fdfaf6; }
+
+/* Masquer la vraie checkbox */
+.shopping-item-check { display: none; }
+
+/* Cercle custom */
+.shopping-item-check-circle {
+    width: 24px; height: 24px; border-radius: 50%;
+    border: 2px solid #ddd;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all .2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    color: transparent; font-size: 0.8rem;
+}
+
+.shopping-item.checked .shopping-item-check-circle {
+    background: var(--terracotta, #c59d85);
+    border-color: var(--terracotta, #c59d85);
+    color: white;
+}
+
+.shopping-item-body { flex: 1; display: flex; align-items: baseline; gap: 8px; }
+
+.shopping-item-name {
+    font-size: 0.92rem; color: var(--choco-dark, #3e2723);
+    font-weight: 500; transition: all .2s;
+}
+.shopping-item.checked .shopping-item-name {
+    text-decoration: line-through; color: #bbb;
+}
+
+.shopping-item-qty {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.88rem; font-weight: 700;
+    color: var(--terracotta, #c59d85);
+    transition: all .2s;
+}
+.shopping-item.checked .shopping-item-qty { color: #ccc; }
+
+.shopping-item-source {
+    font-size: 0.72rem; color: #bbb;
+    display: inline-flex; align-items: center; gap: 3px;
+}
+
+/* ── Footer ── */
+.shopping-list-footer {
+    background: #fdfaf6; padding: 12px 20px;
+    text-align: center; font-size: 0.8rem;
+    color: var(--choco-milk, #8d6e63); font-weight: 600;
+    border-top: 1px solid #f0e9e0;
+}
+
+/* ── Print ── */
+@media print {
+    .btn-shopping-print,
+    .shopping-check-all-btn,
+    .shopping-item-check-circle,
+    nav, .navbar-premium { display: none !important; }
+
+    .shopping-item.checked .shopping-item-name { text-decoration: none; color: inherit; }
+    .shopping-list-card { box-shadow: none; }
+}
+</style>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+let checkedCount = 0;
+const totalItems = {{ shopping_items | length }};
+
+function toggleItemCheck(checkbox) {
+    const label = checkbox.closest('.shopping-item');
+    if (checkbox.checked) {
+        label.classList.add('checked');
+        checkedCount++;
+    } else {
+        label.classList.remove('checked');
+        checkedCount--;
+    }
+    document.getElementById('checkedCount').textContent = checkedCount;
+}
+
+function toggleCheckAll(btn) {
+    const allChecked = checkedCount === totalItems;
+    checkedCount = 0;
+
+    document.querySelectorAll('.shopping-item-check').forEach(cb => {
+        cb.checked = !allChecked;
+        const label = cb.closest('.shopping-item');
+        if (!allChecked) {
+            label.classList.add('checked');
+            checkedCount++;
+        } else {
+            label.classList.remove('checked');
+        }
+    });
+
+    document.getElementById('checkedCount').textContent = checkedCount;
+    btn.innerHTML = allChecked
+        ? '<i class="bi bi-check2-square"></i> Tout cocher'
+        : '<i class="bi bi-square"></i> Tout décocher';
+}
+</script>
+{% endblock %}

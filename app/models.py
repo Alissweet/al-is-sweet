@@ -4,8 +4,9 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import current_app
 from itsdangerous import URLSafeTimedSerializer as Serializer
+import uuid
 
-# 🆕 NOUVELLE CLASSE UTILISATEUR
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     
@@ -54,6 +55,8 @@ class Recipe(db.Model):
     difficulty = db.Column(db.String(50))
     category = db.Column(db.String(100))
     total_carbs = db.Column(db.Float, default=0)
+    rating = db.Column(db.Integer, nullable=True)
+    share_token = db.Column(db.String(64), unique=True, nullable=True, index=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -69,6 +72,13 @@ class Recipe(db.Model):
         if self.servings and self.servings > 0:
             return self.total_carbs / self.servings
         return 0
+     
+    def generate_share_token(self):
+        self.share_token = uuid.uuid4().hex
+        return self.share_token
+
+    def revoke_share_token(self):
+        self.share_token = None
     
     @property
     def total_time(self):

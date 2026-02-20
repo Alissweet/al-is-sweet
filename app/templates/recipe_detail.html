@@ -18,8 +18,11 @@
 						<img src="{{ url_for('static', filename='uploads/' + recipe.image_filename) }}" alt="{{ recipe.title }}" class="recipe-hero-image">
 					{% endif %}
 				{% else %}
-					<div class="d-flex align-items-center justify-content-center h-100 bg-light text-muted">
-						<i class="bi bi-camera display-1 opacity-25"></i>
+					<div class="img-placeholder img-placeholder-hero">
+						<div class="img-placeholder-inner">
+							<i class="bi bi-egg-fried"></i>
+							<span>{{ recipe.category or 'Recette' }}</span>
+						</div>
 					</div>
 				{% endif %}
                 
@@ -36,11 +39,33 @@
                 <h1 class="recipe-main-title">{{ recipe.title }}</h1>
                 
                 <!-- Méta Données -->
-                <div class="d-flex justify-content-center gap-4 text-muted fw-medium">
-                    <span><i class="bi bi-clock text-terracotta"></i> {{ recipe.total_time }} min</span>
-                    <span><i class="bi bi-people text-terracotta"></i> <span id="servingsDisplay">{{ recipe.servings }}</span> pers.</span>
-                    <span><i class="bi bi-bar-chart text-terracotta"></i> {{ recipe.difficulty }}</span>
-                </div>
+				<div class="d-flex justify-content-center align-items-center gap-4 text-muted fw-medium flex-wrap">
+					<span><i class="bi bi-clock text-terracotta"></i> {{ recipe.total_time }} min</span>
+					
+					<!-- Contrôle portions centralisé -->
+					<div class="servings-control">
+						<button class="servings-btn" onclick="adjustServings(-1)" aria-label="Moins">
+							<i class="bi bi-dash"></i>
+						</button>
+						<div class="servings-display">
+							<i class="bi bi-people text-terracotta"></i>
+							<span id="servingsDisplay">{{ recipe.servings }}</span>
+							<span class="servings-unit">pers.</span>
+						</div>
+						<button class="servings-btn" onclick="adjustServings(1)" aria-label="Plus">
+							<i class="bi bi-plus"></i>
+						</button>
+					</div>
+
+					<span><i class="bi bi-bar-chart text-terracotta"></i> {{ recipe.difficulty }}</span>
+				</div>
+
+				<!-- Badge "portions modifiées" -->
+				<div id="servingsBadge" class="servings-modified-badge d-none mt-2">
+					<i class="bi bi-arrow-repeat"></i>
+					Recette adaptée — <span id="servingsRatio"></span>
+					<button class="servings-reset-btn" onclick="resetServings()">Réinitialiser</button>
+				</div>
                 
                 {% if recipe.description %}
                 <p class="mt-3 text-muted fst-italic">"{{ recipe.description }}"</p>
@@ -63,14 +88,46 @@
             </div>
 
             <!-- Actions Admin (Discrètes en bas) -->
-            <div class="text-center mt-5 pt-4 border-top">
-                <a href="{{ url_for('main.recipe_edit', id=recipe.id) }}" class="text-muted small me-3 text-decoration-none">
-                    <i class="bi bi-pencil"></i> Modifier
-                </a>
-                <a href="#" class="text-danger small text-decoration-none" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                    <i class="bi bi-trash"></i> Supprimer
-                </a>
-            </div>
+			<div class="text-center mt-5 pt-4 border-top">
+				<a href="#" class="text-muted small me-3 text-decoration-none"
+				   data-bs-toggle="modal" data-bs-target="#shareModal">
+					<i class="bi bi-share"></i> Partager
+				</a>
+				<a href="{{ url_for('main.recipe_pdf', id=recipe.id) }}"
+				   target="_blank" class="text-muted small me-3 text-decoration-none">
+					<i class="bi bi-file-earmark-pdf"></i> PDF
+				</a>
+				<a href="{{ url_for('main.recipe_edit', id=recipe.id) }}" class="text-muted small me-3 text-decoration-none">
+					<i class="bi bi-pencil"></i> Modifier
+				</a>
+				<a href="#" class="text-danger small text-decoration-none" data-bs-toggle="modal" data-bs-target="#deleteModal">
+					<i class="bi bi-trash"></i> Supprimer
+				</a>
+			</div>
+
+			<!-- WIDGET NOTATION -->
+			<div class="rating-widget mt-4">
+				<span class="rating-label-top">Mon avis sur cette recette</span>
+				<div class="rating-pills">
+					{% set labels = ['À revoir', 'Bof…', 'Bien', 'Très bien', 'Incontournable !'] %}
+					{% set emojis = ['😕', '😐', '🙂', '😊', '🤩'] %}
+					{% for i in range(1, 6) %}
+					<button class="rating-pill {{ 'active' if recipe.rating == i else '' }}"
+							data-value="{{ i }}"
+							data-recipe-id="{{ recipe.id }}"
+							onclick="rateRecipe(this)">
+						<div class="pill-circle">{{ emojis[i-1] }}</div>
+						<span class="pill-text">{{ labels[i-1] }}</span>
+					</button>
+					{% endfor %}
+				</div>
+				<div class="rating-feedback" id="ratingFeedback">
+					{% if recipe.rating %}
+						{% set feedbacks = ['', 'Recette à améliorer', 'Recette correcte', 'Bonne recette !', 'Très bonne recette !', '✨ Recette incontournable !'] %}
+						{{ feedbacks[recipe.rating] }}
+					{% endif %}
+				</div>
+			</div>
 
         </div>
     </div>
@@ -85,15 +142,19 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
-                <!-- Calculateur -->
-                <div class="d-flex justify-content-between align-items-center mb-4 bg-light p-2 rounded-pill">
-                    <span class="ms-3 text-muted small">Portions :</span>
-                    <div class="btn-group">
-                        <button class="btn btn-sm btn-white rounded-circle shadow-sm" onclick="adjustServings(-1)"><i class="bi bi-dash"></i></button>
-                        <span class="px-3 fw-bold d-flex align-items-center" id="modalServings">{{ recipe.servings }}</span>
-                        <button class="btn btn-sm btn-white rounded-circle shadow-sm" onclick="adjustServings(1)"><i class="bi bi-plus"></i></button>
-                    </div>
-                </div>
+                <!-- Calculateur — miroir du contrôle principal -->
+				<div class="d-flex justify-content-between align-items-center mb-4 bg-light p-2 rounded-pill">
+					<span class="ms-3 text-muted small">Portions :</span>
+					<div class="d-flex align-items-center gap-2">
+						<button class="btn btn-sm btn-white rounded-circle shadow-sm" onclick="adjustServings(-1)">
+							<i class="bi bi-dash"></i>
+						</button>
+						<span class="px-3 fw-bold d-flex align-items-center" id="modalServings">{{ recipe.servings }}</span>
+						<button class="btn btn-sm btn-white rounded-circle shadow-sm" onclick="adjustServings(1)">
+							<i class="bi bi-plus"></i>
+						</button>
+					</div>
+				</div>
 
                 <!-- Liste à cocher -->
                 <div class="list-group list-group-flush">
@@ -206,6 +267,45 @@
 
     </div>
 </div>
+
+<!-- Modal Partage -->
+<div class="modal fade" id="shareModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-terracotta text-white">
+                <h5 class="modal-title"><i class="bi bi-share me-2"></i>Partager la recette</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+
+                <!-- État : pas encore de lien -->
+                <div id="shareInit">
+                    <p class="text-muted mb-3">Génère un lien public pour partager cette recette, même avec des personnes sans compte.</p>
+                    <button class="btn btn-terracotta rounded-pill px-4" onclick="generateShareLink()">
+                        <i class="bi bi-link-45deg me-2"></i>Générer le lien
+                    </button>
+                </div>
+
+                <!-- État : lien généré -->
+                <div id="shareResult" class="d-none">
+                    <p class="text-muted mb-2">Lien de partage actif :</p>
+                    <div class="input-group mb-3">
+                        <input type="text" id="shareLinkInput" class="form-control form-control-sm" readonly>
+                        <button class="btn btn-outline-secondary" onclick="copyShareLink()">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
+                    </div>
+                    <p id="copyConfirm" class="text-success small d-none">✓ Lien copié !</p>
+                    <button class="btn btn-sm btn-outline-danger rounded-pill mt-2" onclick="revokeShareLink()">
+                        <i class="bi bi-x-circle me-1"></i>Désactiver le lien
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <!-- Modal Suppression (Classique) -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
@@ -325,5 +425,48 @@
     function changeStep(delta) {
         showStep(currentStep + delta);
     }
+
+// --- GESTION DU PARTAGE ---
+const recipeId = {{ recipe.id }};
+
+function generateShareLink() {
+    fetch(`/recipe/${recipeId}/share`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `action=generate&csrf_token={{ csrf_token() }}`
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('shareLinkInput').value = data.share_url;
+            document.getElementById('shareInit').classList.add('d-none');
+            document.getElementById('shareResult').classList.remove('d-none');
+        }
+    });
+}
+
+function copyShareLink() {
+    const input = document.getElementById('shareLinkInput');
+    navigator.clipboard.writeText(input.value).then(() => {
+        const confirm = document.getElementById('copyConfirm');
+        confirm.classList.remove('d-none');
+        setTimeout(() => confirm.classList.add('d-none'), 2000);
+    });
+}
+
+function revokeShareLink() {
+    fetch(`/recipe/${recipeId}/share`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `action=revoke&csrf_token={{ csrf_token() }}`
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('shareInit').classList.remove('d-none');
+            document.getElementById('shareResult').classList.add('d-none');
+        }
+    });
+}
 </script>
 {% endblock %}

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ recipe.title }} - Al' is Sweet</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+<body style="background: #fdfbf7;">
+
+    <!-- Header minimal -->
+    <header class="shared-header">
+        <a href="{{ url_for('main.index') }}" class="shared-brand">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo">
+            <span>Al' is Sweet</span>
+        </a>
+        <a href="{{ url_for('auth.register') }}" class="btn-join">
+            <i class="bi bi-person-plus"></i>
+            Créer mon carnet de recettes
+        </a>
+    </header>
+
+    <div class="container py-4" style="max-width: 780px;">
+
+        <!-- Bannière invitation -->
+        <div class="shared-banner">
+            <div class="shared-banner-text">
+                <i class="bi bi-share-fill me-2" style="color: #c59d85;"></i>
+                Recette partagée par <strong>{{ recipe.author.username }}</strong> via Al' is Sweet
+            </div>
+            <a href="{{ url_for('auth.register') }}" class="btn-join">
+                <i class="bi bi-collection"></i>
+                Créer mon carnet gratuit
+            </a>
+        </div>
+
+        <!-- Image Hero -->
+        {% if recipe.image_filename %}
+        <div class="mb-4" style="border-radius: 16px; overflow: hidden; max-height: 400px;">
+            {% if recipe.image_filename.startswith('http') %}
+            <img src="{{ recipe.image_filename }}" alt="{{ recipe.title }}"
+                 style="width: 100%; height: 400px; object-fit: cover;">
+            {% else %}
+            <img src="{{ url_for('static', filename='uploads/' + recipe.image_filename) }}"
+                 alt="{{ recipe.title }}"
+                 style="width: 100%; height: 400px; object-fit: cover;">
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Titre & Méta -->
+        <div class="recipe-section">
+            <span class="text-uppercase text-muted small fw-bold" style="letter-spacing: 0.1em;">
+                {{ recipe.category or 'Recette' }}
+            </span>
+            <h1 style="font-family: 'Playfair Display', serif; font-size: 2rem; color: #3e2723; margin: 0.5rem 0 1rem;">
+                {{ recipe.title }}
+            </h1>
+
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <span class="meta-pill">
+                    <i class="bi bi-clock"></i>
+                    {{ recipe.total_time }} min
+                    {% if recipe.prep_time and recipe.cook_time %}
+                    <small class="text-muted">({{ recipe.prep_time }}+{{ recipe.cook_time }})</small>
+                    {% endif %}
+                </span>
+                <span class="meta-pill">
+                    <i class="bi bi-people"></i>
+                    {{ recipe.servings }} personnes
+                </span>
+                <span class="meta-pill">
+                    <i class="bi bi-bar-chart"></i>
+                    {{ recipe.difficulty or 'Non précisé' }}
+                </span>
+                {% if recipe.total_carbs %}
+                <span class="meta-pill">
+                    <i class="bi bi-lightning-fill text-warning"></i>
+                    {{ "%.0f"|format(recipe.total_carbs) }}g glucides
+                </span>
+                {% endif %}
+            </div>
+
+            {% if recipe.description %}
+            <p style="color: #8d6e63; font-style: italic; font-family: 'Poppins', sans-serif;">
+                "{{ recipe.description }}"
+            </p>
+            {% endif %}
+        </div>
+
+        <!-- Ingrédients -->
+        {% if recipe.ingredients.count() > 0 %}
+        <div class="recipe-section">
+            <h2 class="recipe-section-title">
+                <i class="bi bi-basket2"></i> Ingrédients
+            </h2>
+            {% for ing in recipe.ingredients %}
+            <div class="ingredient-item">
+                <span class="ingredient-qty">
+                    {% if ing.quantity %}{{ ing.quantity }}{% endif %}
+                    {% if ing.unit %}{{ ing.unit }}{% endif %}
+                </span>
+                <span>{{ ing.name }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Étapes -->
+        {% if recipe.steps.count() > 0 %}
+        <div class="recipe-section">
+            <h2 class="recipe-section-title">
+                <i class="bi bi-list-ol"></i> Préparation
+            </h2>
+            {% for step in recipe.steps.order_by('order') %}
+            <div class="step-item">
+                <div class="step-number">{{ step.order }}</div>
+                <div>
+                    <div class="step-content">{{ step.instruction }}</div>
+                    {% if step.duration %}
+                    <div class="step-duration">
+                        <i class="bi bi-stopwatch"></i> {{ step.duration }} min
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Conseils du chef -->
+        {% if recipe.tips %}
+        <div class="recipe-section">
+            <h2 class="recipe-section-title">
+                <i class="bi bi-lightbulb"></i> Conseil du Chef
+            </h2>
+            <div class="tips-box">{{ recipe.tips }}</div>
+        </div>
+        {% endif %}
+
+        <!-- CTA final -->
+        <div class="recipe-section text-center">
+            <p style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #3e2723; margin-bottom: 1rem;">
+                Vous aussi, créez votre carnet de recettes personnel 🍰
+            </p>
+            <a href="{{ url_for('auth.register') }}" class="btn-join" style="font-size: 0.95rem; padding: 12px 28px;">
+                <i class="bi bi-person-plus me-1"></i>
+                C'est gratuit, je me lance !
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Footer minimal -->
+    <div class="shared-footer">
+        © 2026 Al' is Sweet — Des recettes gourmandes, pour des moments sucrés.
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

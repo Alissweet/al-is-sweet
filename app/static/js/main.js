@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initAnimations();
     initTooltips();
     initCategoryManagement();
+	autoCloseAlerts();
 });
 
 /**
@@ -42,6 +43,22 @@ function initAnimations() {
 function initTooltips() {
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+}
+
+/**
+ * Fermeture automatique des alertes flash après 3 secondes
+ */
+function autoCloseAlerts() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            // Fade out élégant
+            alert.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            alert.style.opacity = '0';
+            alert.style.transform = 'translateY(-10px)';
+            setTimeout(() => alert.remove(), 500);
+        }, 2000); // 3 secondes
+    });
 }
 
 /**
@@ -174,39 +191,61 @@ function handleEditCategory(e) {
 }
 
 /**
- * Supprimer une catégorie
+ * Supprimer une catégorie — avec modale Bootstrap
  */
 function handleDeleteCategory(button) {
     const categoryId = button.dataset.categoryId;
     const categoryName = button.dataset.categoryName;
-    
-    console.log('🗑️ Tentative de suppression:', categoryId, categoryName);
-    
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer la famille "${categoryName}" ?`)) {
-        console.log('❌ Suppression annulée par l\'utilisateur');
-        return;
-    }
-    
-    fetch(`/settings/category/delete/${categoryId}`, {
-        method: 'POST'
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('✅ Réponse serveur:', data);
-        if (data.success) {
-            showMessage(data.message, 'success');
-            // Recharger la page pour afficher les modifications
-            setTimeout(() => {
-                window.location.href = window.location.href.split('#')[0] + '#modalCategories';
-                window.location.reload();
-            }, 800);
-        } else {
-            showMessage(data.message, 'danger');
-        }
-    })
-    .catch(error => {
-        console.error('❌ Erreur:', error);
-        showMessage('Erreur lors de la suppression de la catégorie', 'danger');
+
+    // Remplir la modale avec le nom de la catégorie
+    document.getElementById('deleteCategoryName').textContent = `"${categoryName}"`;
+
+    // Afficher la modale Bootstrap
+    const modalEl = document.getElementById('deleteCategoryModal');
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+
+    // Quand on clique sur "Oui, supprimer"
+    const confirmBtn = document.getElementById('confirmDeleteCategory');
+
+    // Nettoyer l'ancien listener pour éviter les doublons
+    const newConfirmBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+    newConfirmBtn.addEventListener('click', function() {
+        // Feedback visuel sur le bouton
+        newConfirmBtn.disabled = true;
+        newConfirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Suppression...';
+
+        const formData = new FormData();
+        formData.append('csrf_token', document.querySelector('meta[name="csrf-token"]')?.content 
+            || document.querySelector('input[name="csrf_token"]')?.value || '');
+
+        fetch(`/settings/category/delete/${categoryId}`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            modal.hide();
+            if (data.success) {
+                // Supprimer la ligne visuellement
+                const row = document.getElementById(`cat-row-${categoryId}`);
+                if (row) {
+                    row.style.transition = 'opacity 0.3s ease';
+                    row.style.opacity = '0';
+                    setTimeout(() => row.remove(), 300);
+                }
+                showMessage(data.message, 'success');
+            } else {
+                showMessage(data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            modal.hide();
+            console.error('Erreur:', error);
+            showMessage('Erreur lors de la suppression.', 'danger');
+        });
     });
 }
 
@@ -229,6 +268,123 @@ function showMessage(message, type = 'info') {
     setTimeout(() => {
         alertDiv.remove();
     }, 3000);
+}
+
+/**
+ * ═══════════════════════════════════════════════
+ * LISTE DE COURSES MULTI-RECETTES
+ * ═══════════════════════════════════════════════
+ */
+
+let selectedRecipeIds = new Set(
+    JSON.parse(sessionStorage.getItem('selectedRecipes') || '[]')
+);
+
+document.addEventListener('DOMContentLoaded', function() {
+    _syncSelectionUI();
+});
+
+function handleCardClick(event, recipeId, recipeUrl) {
+    if (selectedRecipeIds.size > 0) {
+        const checkEl = document.getElementById('check-' + recipeId);
+        toggleRecipeSelect(recipeId, checkEl);
+    } else {
+        window.location = recipeUrl;
+    }
+}
+
+function toggleRecipeSelect(recipeId, el) {
+    if (selectedRecipeIds.has(recipeId)) {
+        selectedRecipeIds.delete(recipeId);
+    } else {
+        selectedRecipeIds.add(recipeId);
+    }
+    _saveSelection();
+    _syncSelectionUI();
+}
+
+function toggleAllRows(masterCheckbox) {
+    document.querySelectorAll('.row-check').forEach(cb => {
+        const row = cb.closest('tr');
+        const recipeId = parseInt(row.dataset.recipeId);
+        if (masterCheckbox.checked) {
+            selectedRecipeIds.add(recipeId);
+            cb.checked = true;
+        } else {
+            selectedRecipeIds.delete(recipeId);
+            cb.checked = false;
+        }
+    });
+    _saveSelection();
+    _syncSelectionUI();
+}
+
+function clearSelection() {
+    selectedRecipeIds.clear();
+    _saveSelection();
+    _syncSelectionUI();
+}
+
+function goToShoppingList() {
+    if (selectedRecipeIds.size === 0) return;
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/shopping-list';
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'recipe_ids';
+    input.value = Array.from(selectedRecipeIds).join(',');
+    form.appendChild(input);
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content
+              || document.querySelector('input[name="csrf_token"]')?.value || '';
+    if (csrf) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrf_token';
+        csrfInput.value = csrf;
+        form.appendChild(csrfInput);
+    }
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function _saveSelection() {
+    sessionStorage.setItem('selectedRecipes', JSON.stringify(Array.from(selectedRecipeIds)));
+}
+
+function _syncSelectionUI() {
+    const count = selectedRecipeIds.size;
+    const bar = document.getElementById('shoppingBar');
+    const countEl = document.getElementById('shoppingBarCount');
+    if (bar) {
+        if (count > 0) {
+            bar.classList.remove('d-none');
+            bar.classList.add('d-flex');
+        } else {
+            bar.classList.add('d-none');
+            bar.classList.remove('d-flex');
+        }
+    }
+    if (countEl) countEl.textContent = count;
+
+    document.querySelectorAll('[id^="check-"]').forEach(circle => {
+        const id = parseInt(circle.id.replace('check-', ''));
+        const card = document.getElementById('card-' + id);
+        if (selectedRecipeIds.has(id)) {
+            circle.classList.add('active');
+            card?.classList.add('card-selected');
+        } else {
+            circle.classList.remove('active');
+            card?.classList.remove('card-selected');
+        }
+    });
+
+    document.querySelectorAll('.row-check').forEach(cb => {
+        const row = cb.closest('tr');
+        if (!row) return;
+        const recipeId = parseInt(row.dataset.recipeId);
+        cb.checked = selectedRecipeIds.has(recipeId);
+    });
 }
 
 /**

@@ -1,45 +1,135 @@
-{% extends "base.html" %}
+{% extends "base_auth.html" %}
 {% block title %}Connexion - Al' is Sweet{% endblock %}
 
 {% block content %}
-<div class="container auth-container">
-    <div class="col-md-5">
-        <div class="card card-auth p-5">
-            <div class="auth-header">
-                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="auth-logo">
-                <h2 class="font-playfair mb-2">Connexion</h2>
-                <p class="text-muted">Accédez à vos recettes sucrées</p>
+<div class="auth-page">
+    <div class="auth-wrapper">
+
+        <!-- Panneau gauche décoratif -->
+        <div class="auth-deco">
+            <div class="auth-deco-content">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="deco-logo">
+                <h1 class="deco-title">Al' is Sweet</h1>
+                <p class="deco-subtitle">Vos recettes gourmandes,<br>toujours à portée de main.</p>
+                <div class="deco-dots">
+                    <span></span><span></span><span></span>
+                </div>
             </div>
-            
-            <form method="POST">
-			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <div class="mb-3">
-                    <label class="form-label fw-bold small text-muted">EMAIL</label>
-                    <input type="email" name="email" class="form-control form-control-lg" required>
-                </div>
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between">
-                        <label class="form-label fw-bold small text-muted">MOT DE PASSE</label>
-                        <a href="{{ url_for('auth.reset_request') }}" class="small text-terracotta text-decoration-none">Oublié ?</a>
-                    </div>
-                    <input type="password" name="password" class="form-control form-control-lg" required>
-                </div>
-                
-                <div class="mb-4 form-check">
-                    <input type="checkbox" class="form-check-input" id="remember" name="remember">
-                    <label class="form-check-label text-muted small" for="remember">Se souvenir de moi</label>
-                </div>
-                
-                <button type="submit" class="btn btn-terracotta w-100 mb-3">Se connecter</button>
-                
-                <div class="text-center">
-                    <p class="text-muted small mb-0">
-                        Pas encore de compte ? 
-                        <a href="{{ url_for('auth.register') }}" class="text-terracotta fw-bold">Créer un compte</a>
-                    </p>
-                </div>
-            </form>
         </div>
+
+        <!-- Panneau droit formulaire -->
+        <div class="auth-form-panel">
+            <div class="auth-form-inner">
+
+                <div class="auth-form-header">
+                    <h2>Bon retour !</h2>
+                    <p class="text-muted">Connectez-vous pour accéder à vos recettes</p>
+                </div>
+
+                <form method="POST" novalidate id="loginForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                    <!-- Email -->
+                    <div class="auth-field mb-3">
+                        <label class="auth-label">
+                            <i class="bi bi-envelope me-1"></i> Email
+                        </label>
+                        <input type="email"
+                               name="email"
+                               id="loginEmail"
+                               class="auth-input"
+                               placeholder="votre@email.com"
+                               autocomplete="email"
+                               required>
+                        <div class="auth-field-feedback" id="emailFeedback"></div>
+                    </div>
+
+                    <!-- Mot de passe -->
+                    <div class="auth-field mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label class="auth-label">
+                                <i class="bi bi-lock me-1"></i> Mot de passe
+                            </label>
+                            <a href="{{ url_for('auth.reset_request') }}" class="auth-link-small">
+                                Mot de passe oublié ?
+                            </a>
+                        </div>
+                        <div class="auth-input-group">
+                            <input type="password"
+                                   name="password"
+                                   id="loginPassword"
+                                   class="auth-input"
+                                   placeholder="••••••••"
+                                   autocomplete="current-password"
+                                   required>
+                            <button type="button" class="auth-eye-btn" onclick="togglePassword('loginPassword', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Se souvenir de moi -->
+                    <div class="mb-4 d-flex align-items-center gap-2">
+                        <input type="checkbox" class="auth-checkbox" id="remember" name="remember">
+                        <label class="auth-checkbox-label" for="remember">Se souvenir de moi</label>
+                    </div>
+
+                    <!-- Bouton connexion -->
+                    <button type="submit" class="auth-btn-primary w-100 mb-3" id="loginSubmit">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                        Se connecter
+                    </button>
+
+                    <!-- Lien inscription -->
+                    <p class="auth-switch-text">
+                        Pas encore de compte ?
+                        <a href="{{ url_for('auth.register') }}" class="auth-link">Créer un compte</a>
+                    </p>
+
+                </form>
+            </div>
+        </div>
+
     </div>
 </div>
+
+<script>
+// Afficher/masquer le mot de passe
+function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('bi-eye', 'bi-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.replace('bi-eye-slash', 'bi-eye');
+    }
+}
+
+// Validation email en temps réel
+const emailInput = document.getElementById('loginEmail');
+const emailFeedback = document.getElementById('emailFeedback');
+const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+
+emailInput.addEventListener('blur', function() {
+    if (this.value && !emailRegex.test(this.value)) {
+        this.classList.add('is-invalid');
+        this.classList.remove('is-valid');
+        emailFeedback.textContent = 'Adresse email invalide.';
+        emailFeedback.className = 'auth-field-feedback text-danger';
+    } else if (this.value) {
+        this.classList.remove('is-invalid');
+        this.classList.add('is-valid');
+        emailFeedback.textContent = '';
+    }
+});
+
+// Feedback visuel au submit
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    const btn = document.getElementById('loginSubmit');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Connexion...';
+    btn.disabled = true;
+});
+</script>
 {% endblock %}

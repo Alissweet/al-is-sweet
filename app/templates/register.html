@@ -1,183 +1,323 @@
-{% extends "base.html" %}
-
+{% extends "base_auth.html" %}
 {% block title %}Inscription - Al' is Sweet{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row justify-content-center min-vh-100 align-items-center py-5">
-        <div class="col-md-6">
-            <div class="card border-0 shadow-lg">
-                <div class="card-body p-5">
-                    <!-- Logo et titre -->
-                    <div class="text-center mb-4">
-                        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" style="width: 80px;" class="mb-3">
-                        <h2 class="font-playfair text-choco-dark mb-2">Créer un compte</h2>
-                        <p class="text-muted">Rejoignez la communauté des gourmands</p>
+<div class="auth-page">
+    <div class="auth-wrapper">
+
+        <!-- Panneau gauche décoratif -->
+        <div class="auth-deco">
+            <div class="auth-deco-content">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="deco-logo">
+                <h1 class="deco-title">Al' is Sweet</h1>
+                <p class="deco-subtitle">Rejoignez la communauté<br>des gourmands passionnés.</p>
+                <div class="deco-dots">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panneau droit formulaire -->
+        <div class="auth-form-panel">
+            <div class="auth-form-inner">
+
+                <div class="auth-form-header">
+                    <h2>Créer un compte</h2>
+                    <p class="text-muted">Commencez à collecter vos recettes</p>
+                </div>
+
+                <form method="POST" action="{{ url_for('auth.register') }}" novalidate id="registerForm" autocomplete="on">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                    <!-- Nom d'utilisateur -->
+                    <div class="auth-field mb-3">
+                        <label class="auth-label">
+                            <i class="bi bi-person me-1"></i> Nom d'utilisateur
+                        </label>
+                        <input type="text"
+                               name="username"
+                               id="regUsername"
+                               class="auth-input"
+                               placeholder="JohnDoe"
+                               autocomplete="username"
+                               minlength="3"
+                               maxlength="50"
+                               required>
+                        <div class="auth-field-feedback" id="usernameFeedback"></div>
+                        <small class="auth-hint">3 à 50 caractères — lettres, chiffres, - et _ uniquement</small>
                     </div>
-                    
-                    <!-- Formulaire d'inscription -->
-                    <form method="POST" action="{{ url_for('auth.register') }}" autocomplete="on" id="registerForm">
-					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        
-                        <!-- Nom d'utilisateur -->
-                        <div class="mb-3">
-                            <label for="username" class="form-label fw-medium">
-                                <i class="bi bi-person me-1"></i> Nom d'utilisateur
-                            </label>
-                            <input type="text" 
-                                   class="form-control" 
-                                   id="username" 
-                                   name="username" 
-                                   placeholder="JohnDoe"
-                                   autocomplete="username"
-                                   minlength="3"
-                                   maxlength="50"
-                                   pattern="[a-zA-Z0-9_-]+"
-                                   required>
-                            <small class="text-muted">3-50 caractères, lettres, chiffres, - et _ uniquement</small>
-                        </div>
-                        
-                        <!-- Email -->
-                        <div class="mb-3">
-                            <label for="email" class="form-label fw-medium">
-                                <i class="bi bi-envelope me-1"></i> Email
-                            </label>
-                            <input type="email" 
-                                   class="form-control" 
-                                   id="email" 
-                                   name="email" 
-                                   placeholder="votre@email.com"
-                                   autocomplete="email"
-                                   required>
-                        </div>
-                        
-                        <!-- Mot de passe -->
-                        <div class="mb-3">
-                            <label for="password" class="form-label fw-medium">
-                                <i class="bi bi-lock me-1"></i> Mot de passe
-                            </label>
-                            <input type="password" 
-                                   class="form-control" 
-                                   id="password" 
-                                   name="password" 
+
+                    <!-- Email -->
+                    <div class="auth-field mb-3">
+                        <label class="auth-label">
+                            <i class="bi bi-envelope me-1"></i> Email
+                        </label>
+                        <input type="email"
+                               name="email"
+                               id="regEmail"
+                               class="auth-input"
+                               placeholder="votre@email.com"
+                               autocomplete="email"
+                               required>
+                        <div class="auth-field-feedback" id="emailFeedback"></div>
+                    </div>
+
+                    <!-- Mot de passe -->
+                    <div class="auth-field mb-3">
+                        <label class="auth-label">
+                            <i class="bi bi-lock me-1"></i> Mot de passe
+                        </label>
+                        <div class="auth-input-group">
+                            <input type="password"
+                                   name="password"
+                                   id="regPassword"
+                                   class="auth-input"
                                    placeholder="••••••••"
                                    autocomplete="new-password"
                                    minlength="8"
                                    required>
-                            <small class="text-muted">
-                                Min. 8 caractères avec majuscule, minuscule et chiffre
-                            </small>
-                            <!-- Indicateur de force -->
-                            <div class="password-strength mt-2" style="display: none;">
-                                <div class="progress" style="height: 5px;">
-                                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
-                                </div>
-                                <small class="strength-text text-muted"></small>
+                            <button type="button" class="auth-eye-btn" onclick="togglePassword('regPassword', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        <!-- Barre de force -->
+                        <div class="password-strength-container mt-2" id="strengthContainer" style="display:none;">
+                            <div class="password-strength">
+                                <div class="password-strength-bar" id="strengthBar"></div>
+                            </div>
+                            <small class="strength-label" id="strengthLabel"></small>
+                        </div>
+                        <!-- Checklist critères -->
+                        <div class="password-checklist mt-2" id="passwordChecklist" style="display:none;">
+                            <div class="check-item" id="check-length">
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                                <span>Au moins 8 caractères</span>
+                            </div>
+                            <div class="check-item" id="check-upper">
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                                <span>Une lettre majuscule</span>
+                            </div>
+                            <div class="check-item" id="check-lower">
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                                <span>Une lettre minuscule</span>
+                            </div>
+                            <div class="check-item" id="check-digit">
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                                <span>Un chiffre</span>
                             </div>
                         </div>
-                        
-                        <!-- Confirmation mot de passe -->
-                        <div class="mb-4">
-                            <label for="password_confirm" class="form-label fw-medium">
-                                <i class="bi bi-lock-fill me-1"></i> Confirmer le mot de passe
-                            </label>
-                            <input type="password" 
-                                   class="form-control" 
-                                   id="password_confirm" 
-                                   name="password_confirm" 
+                    </div>
+
+                    <!-- Confirmation mot de passe -->
+                    <div class="auth-field mb-4">
+                        <label class="auth-label">
+                            <i class="bi bi-lock-fill me-1"></i> Confirmer le mot de passe
+                        </label>
+                        <div class="auth-input-group">
+                            <input type="password"
+                                   name="password_confirm"
+                                   id="regPasswordConfirm"
+                                   class="auth-input"
                                    placeholder="••••••••"
                                    autocomplete="new-password"
                                    required>
-                            <small class="match-indicator text-danger" style="display: none;">
-                                Les mots de passe ne correspondent pas
-                            </small>
+                            <button type="button" class="auth-eye-btn" onclick="togglePassword('regPasswordConfirm', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
                         </div>
-                        
-                        <!-- Bouton d'inscription -->
-                        <button type="submit" class="btn btn-terracotta btn-lg w-100 mb-3" id="submitBtn">
-                            <i class="bi bi-person-plus me-2"></i>Créer mon compte
-                        </button>
-                        
-                        <!-- Lien connexion -->
-                        <div class="text-center">
-                            <p class="text-muted mb-0">
-                                Déjà inscrit ? 
-                                <a href="{{ url_for('auth.login') }}" class="text-terracotta text-decoration-none fw-medium">
-                                    Se connecter
-                                </a>
-                            </p>
-                        </div>
-                    </form>
-                </div>
+                        <div class="auth-field-feedback" id="confirmFeedback"></div>
+                    </div>
+
+                    <!-- Bouton inscription -->
+                    <button type="submit" class="auth-btn-primary w-100 mb-3" id="registerSubmit">
+                        <i class="bi bi-person-plus me-2"></i>
+                        Créer mon compte
+                    </button>
+
+                    <!-- Lien connexion -->
+                    <p class="auth-switch-text">
+                        Déjà inscrit ?
+                        <a href="{{ url_for('auth.login') }}" class="auth-link">Se connecter</a>
+                    </p>
+
+                </form>
             </div>
         </div>
+
     </div>
 </div>
 
 <script>
-// Validation en temps réel du mot de passe
-const passwordInput = document.getElementById('password');
-const passwordConfirm = document.getElementById('password_confirm');
-const strengthIndicator = document.querySelector('.password-strength');
-const strengthBar = strengthIndicator.querySelector('.progress-bar');
-const strengthText = strengthIndicator.querySelector('.strength-text');
-const matchIndicator = document.querySelector('.match-indicator');
-const submitBtn = document.getElementById('submitBtn');
-
-passwordInput.addEventListener('input', function() {
-    const password = this.value;
-    strengthIndicator.style.display = password.length > 0 ? 'block' : 'none';
-    
-    let strength = 0;
-    if (password.length >= 8) strength++;
-    if (/[a-z]/.test(password)) strength++;
-    if (/[A-Z]/.test(password)) strength++;
-    if (/[0-9]/.test(password)) strength++;
-    if (/[^a-zA-Z0-9]/.test(password)) strength++;
-    
-    const percentage = (strength / 5) * 100;
-    strengthBar.style.width = percentage + '%';
-    
-    if (strength <= 2) {
-        strengthBar.className = 'progress-bar bg-danger';
-        strengthText.textContent = 'Faible';
-    } else if (strength === 3) {
-        strengthBar.className = 'progress-bar bg-warning';
-        strengthText.textContent = 'Moyen';
+// ── Afficher/masquer le mot de passe ──────────────────────
+function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('bi-eye', 'bi-eye-slash');
     } else {
-        strengthBar.className = 'progress-bar bg-success';
-        strengthText.textContent = 'Fort';
-    }
-    
-    checkPasswordMatch();
-});
-
-passwordConfirm.addEventListener('input', checkPasswordMatch);
-
-function checkPasswordMatch() {
-    if (passwordConfirm.value.length > 0) {
-        if (passwordInput.value === passwordConfirm.value) {
-            matchIndicator.style.display = 'none';
-            passwordConfirm.classList.remove('is-invalid');
-            passwordConfirm.classList.add('is-valid');
-        } else {
-            matchIndicator.style.display = 'block';
-            passwordConfirm.classList.remove('is-valid');
-            passwordConfirm.classList.add('is-invalid');
-        }
-    } else {
-        matchIndicator.style.display = 'none';
-        passwordConfirm.classList.remove('is-valid', 'is-invalid');
+        input.type = 'password';
+        icon.classList.replace('bi-eye-slash', 'bi-eye');
     }
 }
 
-// Validation avant soumission
-document.getElementById('registerForm').addEventListener('submit', function(e) {
-    if (passwordInput.value !== passwordConfirm.value) {
-        e.preventDefault();
-        alert('Les mots de passe ne correspondent pas');
-        return false;
+// ── Regex ─────────────────────────────────────────────────
+const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+const usernameRegex = /^[a-zA-Z0-9_\-]{3,50}$/;
+
+// ── Validation username ───────────────────────────────────
+const usernameInput = document.getElementById('regUsername');
+const usernameFeedback = document.getElementById('usernameFeedback');
+
+usernameInput.addEventListener('input', function() {
+    const val = this.value;
+    if (val.length === 0) {
+        clearField(this, usernameFeedback);
+    } else if (!usernameRegex.test(val)) {
+        setInvalid(this, usernameFeedback, 'Caractères autorisés : lettres, chiffres, - et _');
+    } else if (val.length < 3) {
+        setInvalid(this, usernameFeedback, 'Minimum 3 caractères');
+    } else {
+        setValid(this, usernameFeedback, '');
     }
+});
+
+// ── Validation email ──────────────────────────────────────
+const emailInput = document.getElementById('regEmail');
+const emailFeedback = document.getElementById('emailFeedback');
+
+emailInput.addEventListener('blur', function() {
+    if (!this.value) return;
+    if (!emailRegex.test(this.value)) {
+        setInvalid(this, emailFeedback, 'Adresse email invalide');
+    } else {
+        setValid(this, emailFeedback, '');
+    }
+});
+
+// ── Force du mot de passe ─────────────────────────────────
+const passwordInput = document.getElementById('regPassword');
+const strengthBar = document.getElementById('strengthBar');
+const strengthLabel = document.getElementById('strengthLabel');
+const strengthContainer = document.getElementById('strengthContainer');
+const passwordChecklist = document.getElementById('passwordChecklist');
+
+passwordInput.addEventListener('input', function() {
+    const val = this.value;
+
+    if (val.length === 0) {
+        strengthContainer.style.display = 'none';
+        passwordChecklist.style.display = 'none';
+        return;
+    }
+
+    strengthContainer.style.display = 'block';
+    passwordChecklist.style.display = 'block';
+
+    // Critères
+    const checks = {
+        length: val.length >= 8,
+        upper:  /[A-Z]/.test(val),
+        lower:  /[a-z]/.test(val),
+        digit:  /[0-9]/.test(val),
+    };
+
+    // Mise à jour checklist
+    Object.keys(checks).forEach(key => {
+        const el = document.getElementById(`check-${key}`);
+        const icon = el.querySelector('i');
+        if (checks[key]) {
+            icon.className = 'bi bi-check-circle-fill text-success';
+        } else {
+            icon.className = 'bi bi-x-circle-fill text-danger';
+        }
+    });
+
+    // Score
+    const score = Object.values(checks).filter(Boolean).length;
+    const pct = (score / 4) * 100;
+    strengthBar.style.width = pct + '%';
+
+    if (score <= 1) {
+        strengthBar.className = 'password-strength-bar bg-weak';
+        strengthLabel.textContent = 'Faible';
+        strengthLabel.className = 'strength-label text-danger';
+    } else if (score === 2 || score === 3) {
+        strengthBar.className = 'password-strength-bar bg-medium';
+        strengthLabel.textContent = 'Moyen';
+        strengthLabel.className = 'strength-label text-warning';
+    } else {
+        strengthBar.className = 'password-strength-bar bg-strong';
+        strengthLabel.textContent = 'Fort ✓';
+        strengthLabel.className = 'strength-label text-success';
+    }
+
+    checkMatch();
+});
+
+// ── Confirmation mot de passe ─────────────────────────────
+const confirmInput = document.getElementById('regPasswordConfirm');
+const confirmFeedback = document.getElementById('confirmFeedback');
+
+confirmInput.addEventListener('input', checkMatch);
+
+function checkMatch() {
+    if (!confirmInput.value) {
+        clearField(confirmInput, confirmFeedback);
+        return;
+    }
+    if (passwordInput.value === confirmInput.value) {
+        setValid(confirmInput, confirmFeedback, '✓ Les mots de passe correspondent');
+    } else {
+        setInvalid(confirmInput, confirmFeedback, 'Les mots de passe ne correspondent pas');
+    }
+}
+
+// ── Helpers ───────────────────────────────────────────────
+function setInvalid(input, feedback, msg) {
+    input.classList.add('is-invalid');
+    input.classList.remove('is-valid');
+    feedback.textContent = msg;
+    feedback.className = 'auth-field-feedback text-danger';
+}
+
+function setValid(input, feedback, msg) {
+    input.classList.remove('is-invalid');
+    input.classList.add('is-valid');
+    feedback.textContent = msg;
+    feedback.className = 'auth-field-feedback text-success';
+}
+
+function clearField(input, feedback) {
+    input.classList.remove('is-invalid', 'is-valid');
+    feedback.textContent = '';
+}
+
+// ── Validation avant soumission ───────────────────────────
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    let valid = true;
+
+    if (!usernameRegex.test(usernameInput.value)) {
+        setInvalid(usernameInput, usernameFeedback, 'Nom d\'utilisateur invalide');
+        valid = false;
+    }
+    if (!emailRegex.test(emailInput.value)) {
+        setInvalid(emailInput, emailFeedback, 'Adresse email invalide');
+        valid = false;
+    }
+    if (passwordInput.value !== confirmInput.value) {
+        setInvalid(confirmInput, confirmFeedback, 'Les mots de passe ne correspondent pas');
+        valid = false;
+    }
+
+    if (!valid) {
+        e.preventDefault();
+        return;
+    }
+
+    const btn = document.getElementById('registerSubmit');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Création...';
+    btn.disabled = true;
 });
 </script>
 {% endblock %}

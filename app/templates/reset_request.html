@@ -1,24 +1,96 @@
-{% extends "base.html" %}
+{% extends "base_auth.html" %}
 {% block title %}Mot de passe oublié - Al' is Sweet{% endblock %}
 
 {% block content %}
-<div class="container auth-container">
-    <div class="col-md-5">
-        <div class="card card-auth p-5">
-            <div class="auth-header">
-                <h2 class="font-playfair mb-2">Récupération</h2>
-                <p class="text-muted">Entrez votre email pour réinitialiser votre mot de passe</p>
-            </div>
-            
-            <form method="POST">
-			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <div class="mb-4">
-                    <label class="form-label fw-bold small text-muted">EMAIL</label>
-                    <input type="email" name="email" class="form-control form-control-lg" required>
+<div class="auth-page">
+    <div class="auth-wrapper">
+
+        <div class="auth-deco">
+            <div class="auth-deco-content">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="deco-logo">
+                <h1 class="deco-title">Al' is Sweet</h1>
+                <p class="deco-subtitle">Pas de panique,<br>on vous aide à retrouver l'accès.</p>
+                <div class="deco-dots">
+                    <span></span><span></span><span></span>
                 </div>
-                <button type="submit" class="btn btn-terracotta w-100">Envoyer le lien</button>
-            </form>
+            </div>
         </div>
+
+        <div class="auth-form-panel">
+            <div class="auth-form-inner">
+
+                <div class="auth-form-header">
+                    <div class="auth-icon-circle mb-3">
+                        <i class="bi bi-key-fill"></i>
+                    </div>
+                    <h2>Récupération</h2>
+                    <p class="text-muted">Entrez votre email pour recevoir un lien de réinitialisation</p>
+                </div>
+
+                <form method="POST" novalidate id="resetForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                    <div class="auth-field mb-4">
+                        <label class="auth-label">
+                            <i class="bi bi-envelope me-1"></i> Email
+                        </label>
+                        <input type="email"
+                               name="email"
+                               id="resetEmail"
+                               class="auth-input"
+                               placeholder="votre@email.com"
+                               autocomplete="email"
+                               required>
+                        <div class="auth-field-feedback" id="emailFeedback"></div>
+                    </div>
+
+                    <button type="submit" class="auth-btn-primary w-100 mb-3" id="resetSubmit">
+                        <i class="bi bi-send me-2"></i>
+                        Envoyer le lien
+                    </button>
+
+                    <p class="auth-switch-text">
+                        <a href="{{ url_for('auth.login') }}" class="auth-link">
+                            <i class="bi bi-arrow-left me-1"></i>Retour à la connexion
+                        </a>
+                    </p>
+
+                </form>
+            </div>
+        </div>
+
     </div>
 </div>
+
+<script>
+const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+const emailInput = document.getElementById('resetEmail');
+const emailFeedback = document.getElementById('emailFeedback');
+
+emailInput.addEventListener('blur', function() {
+    if (!this.value) return;
+    if (!emailRegex.test(this.value)) {
+        this.classList.add('is-invalid');
+        emailFeedback.textContent = 'Adresse email invalide.';
+        emailFeedback.className = 'auth-field-feedback text-danger';
+    } else {
+        this.classList.remove('is-invalid');
+        this.classList.add('is-valid');
+        emailFeedback.textContent = '';
+    }
+});
+
+document.getElementById('resetForm').addEventListener('submit', function(e) {
+    if (!emailRegex.test(emailInput.value)) {
+        e.preventDefault();
+        emailInput.classList.add('is-invalid');
+        emailFeedback.textContent = 'Adresse email invalide.';
+        emailFeedback.className = 'auth-field-feedback text-danger';
+        return;
+    }
+    const btn = document.getElementById('resetSubmit');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Envoi en cours...';
+    btn.disabled = true;
+});
+</script>
 {% endblock %}

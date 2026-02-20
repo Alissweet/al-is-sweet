@@ -29,15 +29,41 @@
         </div>
     </section>
 
+    <!-- BARRE FLOTTANTE LISTE DE COURSES -->
+    <div id="shoppingBar" class="shopping-bar d-none">
+        <div class="shopping-bar-inner">
+            <div class="shopping-bar-info">
+                <i class="bi bi-basket3-fill"></i>
+                <span id="shoppingBarCount">0</span> recette(s) sélectionnée(s)
+            </div>
+            <div class="shopping-bar-actions">
+                <button class="shopping-bar-btn-cancel" onclick="clearSelection()">
+                    <i class="bi bi-x"></i> Annuler
+                </button>
+                <button class="shopping-bar-btn-go" onclick="goToShoppingList()">
+                    <i class="bi bi-list-check"></i> Générer la liste de courses
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- GRILLE DES RECETTES (Premium Edition) -->
     <section class="recipes-grid">
         {% if recipes.items %}
         <div class="row g-4">
             {% for recipe in recipes.items %}
             <div class="col-md-6 col-lg-4">
-                <!-- La carte entière est cliquable -->
-                <div class="recipe-card" onclick="window.location='{{ url_for('main.recipe_detail', id=recipe.id) }}';">
-                    
+                <div class="recipe-card"
+                     id="card-{{ recipe.id }}"
+                     onclick="handleCardClick(event, {{ recipe.id }}, '{{ url_for('main.recipe_detail', id=recipe.id) }}')">
+
+                    <!-- Checkbox sélection courses -->
+                    <div class="card-select-check" onclick="event.stopPropagation(); toggleRecipeSelect({{ recipe.id }}, this)">
+                        <div class="card-check-circle" id="check-{{ recipe.id }}">
+                            <i class="bi bi-check-lg"></i>
+                        </div>
+                    </div>
+
                     <!-- 1. IMAGE + BADGES -->
                     <div class="recipe-card-image">
                         {% if recipe.image_filename %}
@@ -47,9 +73,11 @@
 								<img src="{{ url_for('static', filename='uploads/' + recipe.image_filename) }}" alt="{{ recipe.title }}" loading="lazy">
 							{% endif %}
 						{% else %}
-							<!-- Placeholder -->
-							<div class="d-flex align-items-center justify-content-center h-100 bg-light text-muted">
-								<i class="bi bi-camera fs-1"></i>
+							<div class="img-placeholder">
+								<div class="img-placeholder-inner">
+									<i class="bi bi-egg-fried"></i>
+									<span>{{ recipe.category or 'Recette' }}</span>
+								</div>
 							</div>
 						{% endif %}
                         
