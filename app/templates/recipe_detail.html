@@ -77,6 +77,19 @@
                 {% if recipe.description %}
                 <p class="mt-3 text-muted fst-italic">"{{ recipe.description }}"</p>
                 {% endif %}
+
+                {% if recipe.source %}
+                <div class="recipe-source mt-2">
+                    <i class="bi bi-link-45deg"></i>
+                    {% if recipe.source.startswith('http') %}
+                    <a href="{{ recipe.source }}" target="_blank" rel="noopener noreferrer" class="recipe-source-link">
+                        {{ recipe.source | replace('https://', '') | replace('http://', '') | truncate(50) }}
+                    </a>
+                    {% else %}
+                    <span class="recipe-source-text">{{ recipe.source }}</span>
+                    {% endif %}
+                </div>
+                {% endif %}
 				{% if recipe.tags %}
                 <div class="tags-container mt-3 d-flex justify-content-center gap-2 flex-wrap">
                     {% for tag in recipe.tags %}

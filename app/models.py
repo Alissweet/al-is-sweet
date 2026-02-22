@@ -60,6 +60,7 @@ class Recipe(db.Model):
     category = db.Column(db.String(100))
     total_carbs = db.Column(db.Float, default=0)
     rating = db.Column(db.Integer, nullable=True)
+    source = db.Column(db.String(500), nullable=True)
     is_favorite = db.Column(db.Boolean, default=False, index=True)
     share_token = db.Column(db.String(64), unique=True, nullable=True, index=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -104,6 +105,7 @@ class Recipe(db.Model):
             'category': self.category,
             'total_carbs': self.total_carbs,
             'rating': self.rating,
+            'source': self.source,
             'is_favorite': self.is_favorite,
             'carbs_per_serving': self.carbs_per_serving,
             'ingredients': [ing.to_dict() for ing in self.ingredients],

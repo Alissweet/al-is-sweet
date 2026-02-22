@@ -146,12 +146,10 @@ def index():
 @login_required
 def recipe_detail(id):
     recipe = Recipe.query.get_or_404(id)
-    # ✅ SÉCURITÉ : vérification du propriétaire
     if recipe.user_id != current_user.id:
         flash("Vous n'avez pas accès à cette recette.", 'danger')
         return redirect(url_for('main.index'))
 
-    # Recettes similaires : même tags, exclure la recette courante
     similar_recipes = []
     if recipe.tags:
         tag_ids = [t.id for t in recipe.tags]
@@ -188,6 +186,7 @@ def recipe_new():
                 title=request.form.get('title'),
                 description=request.form.get('description'),
                 tips=request.form.get('tips'),
+                source=request.form.get('source', '').strip() or None,
                 prep_time=request.form.get('prep_time', type=int),
                 cook_time=request.form.get('cook_time', type=int),
                 servings=servings,
@@ -298,6 +297,7 @@ def recipe_edit(id):
             recipe.title = request.form.get('title')
             recipe.description = request.form.get('description')
             recipe.tips = request.form.get('tips')
+            recipe.source = request.form.get('source', '').strip() or None
             recipe.prep_time = max(0, request.form.get('prep_time', type=int) or 0)
             recipe.cook_time = max(0, request.form.get('cook_time', type=int) or 0)
             recipe.servings = max(1, request.form.get('servings', 4, type=int))
@@ -450,7 +450,6 @@ def random_recipe():
 @main.route('/tag/<tag_name>')
 @login_required
 def recipes_by_tag(tag_name):
-    """Page listant toutes les recettes d'un tag donné"""
     tag = Tag.query.filter_by(name=tag_name, user_id=current_user.id).first_or_404()
     recipes = Recipe.query.filter(
         Recipe.user_id == current_user.id,
