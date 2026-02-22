@@ -534,10 +534,12 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
 .recipe-card-title {
     font-family: 'Playfair Display', serif;
     font-size: 1.4rem;
-    margin-bottom: 0.5rem;
     color: var(--choco-dark);
     line-height: 1.2;
     transition: color 0.3s;
+    /* Le titre prend la place dispo et pousse le cœur à droite */
+    flex: 1; 
+    margin-bottom: 0 !important; /* On gère la marge via le conteneur parent */
 }
 
 .recipe-meta-row {
@@ -3423,4 +3425,341 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
 
 .img-placeholder-thumb .img-placeholder-inner span {
     display: none; /* trop petit pour le texte */
+}
+
+
+/* ============================================
+   SYSTÈME DE FAVORIS
+   ============================================ */
+
+/* Bouton Toggle sur la page détail */
+.btn-favorite-toggle {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    color: #ccc; /* Gris par défaut */
+}
+
+.btn-favorite-toggle i {
+    font-size: 1.4rem;
+    transition: transform 0.2s;
+}
+
+.btn-favorite-toggle:hover {
+    transform: scale(1.1);
+    background: white;
+    color: #e53935; /* Rouge au survol */
+}
+
+/* État Actif (Cœur rouge) */
+.btn-favorite-toggle.active {
+    color: #e53935;
+    background: white;
+    box-shadow: 0 4px 15px rgba(229, 57, 53, 0.3);
+}
+
+.btn-favorite-toggle.active i {
+    animation: heartPop 0.4s ease;
+}
+
+/* Petit badge sur les cartes index */
+.badge-favorite-icon {
+    position: absolute;
+    top: 15px;
+    left: 15px; /* Même position que catégorie, on va décaler la catégorie */
+    width: 32px;
+    height: 32px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #e53935;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 3;
+    font-size: 0.9rem;
+}
+
+/* Ajustement : Si le favori est là, on décale le badge catégorie */
+.badge-favorite-icon ~ .badge-category {
+    left: 55px; /* 15px + 32px + 8px gap */
+    transition: left 0.3s;
+}
+
+@keyframes heartPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.4); }
+    100% { transform: scale(1); }
+}
+
+
+/* ============================================
+   FILTRES COMBINÉS (Index) - VERSION PREMIUM
+   ============================================ */
+
+.filters-container {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+/* --- 1. La Barre de Recherche (Style Capsule) --- */
+.search-wrapper {
+    flex: 2; /* Prend plus de place que les filtres */
+    min-width: 280px;
+}
+
+.search-group-premium {
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 1px solid var(--terracotta);
+    border-radius: 50px; /* Forme pilule parfaite */
+    padding: 4px; /* Espace interne */
+    height: 50px; /* Hauteur fixe pour alignement */
+    box-shadow: 0 4px 15px rgba(197, 157, 133, 0.1); /* Ombre douce */
+    transition: all 0.3s ease;
+}
+
+.search-group-premium:focus-within {
+    box-shadow: 0 4px 20px rgba(197, 157, 133, 0.25);
+    border-color: var(--terracotta-dark);
+    transform: translateY(-1px);
+}
+
+.search-input-premium {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    height: 100%;
+    padding-left: 20px;
+    font-size: 1rem;
+    color: var(--choco-dark);
+    font-weight: 500;
+    flex-grow: 1; /* Prend toute la place dispo */
+}
+
+.search-input-premium::placeholder {
+    color: #bcaaa4;
+    font-weight: 400;
+}
+
+.search-btn-premium {
+    background: var(--terracotta);
+    color: white;
+    border: none;
+    border-radius: 50%; /* Bouton rond */
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 2px;
+    transition: all 0.3s ease;
+}
+
+.search-btn-premium:hover {
+    background: var(--choco-dark);
+    transform: rotate(10deg);
+}
+
+/* --- 2. Les Menus Déroulants (Selects) --- */
+.filter-wrapper {
+    flex: 1;
+    min-width: 130px;
+    max-width: 200px;
+}
+
+.form-select-filter {
+    width: 100%;
+    height: 50px; /* Même hauteur que la recherche */
+    padding: 0 40px 0 20px; /* Padding droite pour la flèche */
+    border: 1px solid var(--terracotta);
+    border-radius: 50px;
+    background-color: white;
+    color: var(--choco-dark);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none; /* Supprime le style par défaut du navigateur */
+    
+    /* La flèche personnalisée (SVG) */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23c59d85' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat; /* CORRECTION DU BUG DE RÉPÉTITION */
+    background-position: right 1.2rem center;
+    background-size: 14px 10px;
+    box-shadow: 0 4px 15px rgba(197, 157, 133, 0.1);
+}
+
+.form-select-filter:focus {
+    outline: none;
+    border-color: var(--terracotta-dark);
+    box-shadow: 0 4px 20px rgba(197, 157, 133, 0.25);
+}
+
+.form-select-filter:hover {
+    background-color: #fffbf7; /* Très léger fond crème au survol */
+}
+
+/* --- 3. Bouton Reset (Croix) --- */
+.btn-reset-filters {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid #e53935;
+    color: #e53935;
+    transition: all 0.3s;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(229, 57, 53, 0.15);
+}
+
+.btn-reset-filters:hover {
+    background: #e53935;
+    color: white;
+    transform: rotate(90deg);
+    box-shadow: 0 4px 12px rgba(229, 57, 53, 0.3);
+}
+
+.filter-wrapper:last-child {
+    flex: 0 0 auto; /* Ne grandit pas */
+    min-width: auto;
+}
+
+/* --- 4. Adaptation Mobile --- */
+@media (max-width: 768px) {
+    .filters-container {
+        flex-direction: column;
+        align-items: stretch; /* Tout prend la largeur max */
+        gap: 12px;
+    }
+    
+    .search-wrapper, .filter-wrapper {
+        width: 100%;
+        max-width: none; /* On enlève la limite de largeur sur mobile */
+    }
+    
+    .btn-reset-filters {
+        margin: 0 auto; /* Centrer le bouton reset sur mobile */
+    }
+}
+
+
+/* --- BOUTON MAGIQUE (Random) --- */
+.btn-magic {
+    background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%); /* Violet mystique */
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 12px 24px;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(106, 27, 154, 0.3);
+    transition: all 0.3s;
+}
+.btn-magic:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(106, 27, 154, 0.5);
+    color: white;
+}
+.btn-magic i { animation: twinkle 2s infinite; }
+
+@keyframes twinkle {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* --- TAGS --- */
+.recipe-tag {
+    background: var(--cream);
+    color: var(--terracotta);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    font-style: italic;
+}
+
+/* --- TIMELINE HISTORIQUE --- */
+.timeline-container {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px 0;
+}
+.timeline-container::before {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0; left: 80px; /* Ligne verticale */
+    width: 2px;
+    background: var(--cream);
+}
+.timeline-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    position: relative;
+}
+.timeline-date {
+    width: 60px;
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    color: var(--terracotta);
+    line-height: 1;
+}
+.timeline-date .day { font-size: 1.5rem; font-weight: 700; display: block; }
+.timeline-date .month { font-size: 0.9rem; text-transform: uppercase; }
+.timeline-date .year { font-size: 0.7rem; color: var(--choco-milk); }
+
+.timeline-marker {
+    width: 16px;
+    height: 16px;
+    background: white;
+    border: 4px solid var(--terracotta);
+    border-radius: 50%;
+    margin: 0 20px;
+    z-index: 2;
+}
+.timeline-content {
+    flex: 1;
+    transition: transform 0.3s;
+}
+.timeline-content:hover { transform: translateX(5px); }
+
+.timeline-img {
+    width: 60px; height: 60px;
+    border-radius: 12px;
+    object-fit: cover;
+}
+.timeline-img-placeholder {
+    width: 60px; height: 60px;
+    border-radius: 12px;
+    background: var(--cream);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--terracotta);
+    font-size: 1.5rem;
+}
+
+@media (max-width: 576px) {
+    .timeline-container::before { left: 20px; }
+    .timeline-date { display: none; } /* On cache la date latérale sur mobile */
+    .timeline-marker { margin: 0 12px 0 12px; }
 }

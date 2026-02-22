@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container py-5">
     
-    <!-- COMMAND CENTER : Épuré et Fonctionnel -->
+    <!-- COMMAND CENTER : Filtres Combinés -->
     <section class="command-center text-center">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="h3 mb-0">Mes Recettes</h1>
@@ -13,108 +13,176 @@
                 <i class="bi bi-plus-circle-fill"></i> Créer une recette
             </a>
         </div>
-
-        <!-- Navigation Pillules -->
-        <div class="category-nav">
-            <a href="{{ url_for('main.index') }}" 
-               class="cat-pill {{ 'active' if not current_category else '' }}">
-                Toutes
+		<div class="d-flex gap-2 justify-content-center justify-content-md-end mt-3 mt-md-0">
+            <a href="{{ url_for('main.random_recipe') }}" class="btn btn-magic" title="Qu'est-ce qu'on mange ?">
+                <i class="bi bi-stars"></i> Inspiration
             </a>
-            {% for cat in categories %}
-            <a href="{{ url_for('main.index', category=cat) }}" 
-               class="cat-pill {{ 'active' if current_category == cat else '' }}">
-                {{ cat }}
+            <a href="{{ url_for('main.recipe_new') }}" class="btn-add-recipe">
+                <i class="bi bi-plus-circle-fill"></i> Créer
             </a>
-            {% endfor %}
         </div>
+
+        <!-- Formulaire Global de Filtrage -->
+        <form id="filterForm" action="{{ url_for('main.index') }}" method="GET">
+            
+            <!-- Champ caché pour la catégorie (géré par les pillules) -->
+            <input type="hidden" name="category" id="categoryInput" value="{{ current_category }}">
+
+            <!-- Ligne 1 : Recherche + Filtres Rapides -->
+            <div class="filters-container mb-4">
+                <!-- Barre de recherche -->
+                <div class="search-wrapper">
+                    <!-- Note la classe search-group-premium ici -->
+                    <div class="search-group-premium">
+                        <input type="search" name="search" class="form-control search-input-premium" 
+                               placeholder="Rechercher..." value="{{ search }}" autocomplete="off">
+                        <button class="search-btn-premium" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filtre Difficulté -->
+                <div class="filter-wrapper">
+                    <select name="difficulty" class="form-select-filter" onchange="document.getElementById('filterForm').submit()">
+                        <option value="">Difficulté</option>
+                        <option value="Facile" {{ 'selected' if current_difficulty == 'Facile' else '' }}>Facile</option>
+                        <option value="Moyen" {{ 'selected' if current_difficulty == 'Moyen' else '' }}>Moyen</option>
+                        <option value="Difficile" {{ 'selected' if current_difficulty == 'Difficile' else '' }}>Difficile</option>
+                    </select>
+                </div>
+
+                <!-- Filtre Temps -->
+                <div class="filter-wrapper">
+                    <select name="max_time" class="form-select-filter" onchange="document.getElementById('filterForm').submit()">
+                        <option value="">Temps max</option>
+                        <option value="15" {{ 'selected' if current_max_time == 15 else '' }}>- 15 min</option>
+                        <option value="30" {{ 'selected' if current_max_time == 30 else '' }}>- 30 min</option>
+                        <option value="45" {{ 'selected' if current_max_time == 45 else '' }}>- 45 min</option>
+                        <option value="60" {{ 'selected' if current_max_time == 60 else '' }}>- 1 h</option>
+                    </select>
+                </div>
+				
+				<!-- Filtre Tri -->
+				<div class="filter-wrapper">
+                    <select name="sort" class="form-select-filter" onchange="document.getElementById('filterForm').submit()">
+                        <option value="date_desc" {{ 'selected' if current_sort == 'date_desc' else '' }}>📅 Récents</option>
+                        <option value="date_asc" {{ 'selected' if current_sort == 'date_asc' else '' }}>📅 Anciens</option>
+                        <option value="alpha_asc" {{ 'selected' if current_sort == 'alpha_asc' else '' }}>🔤 A - Z</option>
+                        <option value="time_asc" {{ 'selected' if current_sort == 'time_asc' else '' }}>⏱️ Rapide</option>
+                        <option value="difficulty_asc" {{ 'selected' if current_sort == 'difficulty_asc' else '' }}>💪 Facilité</option>
+                    </select>
+                </div>
+                
+                <!-- Bouton Reset (Mise à jour de la condition pour inclure le tri) -->
+                {% if search or current_category or current_difficulty or current_max_time or current_sort != 'date_desc' %}
+                <div class="filter-wrapper" style="flex: 0; min-width: auto;">
+                    <a href="{{ url_for('main.index') }}" class="btn-reset-filters" title="Réinitialiser">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Ligne 2 : Navigation Pillules (Catégories) -->
+            <div class="category-nav">
+                <!-- Bouton "Toutes" -->
+                <button type="button" 
+                        class="cat-pill {{ 'active' if not current_category else '' }}"
+                        onclick="selectCategory('')">
+                    Toutes
+                </button>
+                
+                <!-- Bouton "Favoris" -->
+                <button type="button" 
+                        class="cat-pill {{ 'active' if current_category == 'favorites' else '' }}"
+                        onclick="selectCategory('favorites')">
+                    <i class="bi bi-heart-fill text-danger"></i> Favoris
+                </button>
+
+                <!-- Catégories Dynamiques -->
+                {% for cat in categories %}
+                <button type="button" 
+                        class="cat-pill {{ 'active' if current_category == cat else '' }}"
+                        onclick="selectCategory('{{ cat }}')">
+                    {{ cat }}
+                </button>
+                {% endfor %}
+            </div>
+        </form>
     </section>
 
-    <!-- BARRE FLOTTANTE LISTE DE COURSES -->
-    <div id="shoppingBar" class="shopping-bar d-none">
-        <div class="shopping-bar-inner">
-            <div class="shopping-bar-info">
-                <i class="bi bi-basket3-fill"></i>
-                <span id="shoppingBarCount">0</span> recette(s) sélectionnée(s)
-            </div>
-            <div class="shopping-bar-actions">
-                <button class="shopping-bar-btn-cancel" onclick="clearSelection()">
-                    <i class="bi bi-x"></i> Annuler
-                </button>
-                <button class="shopping-bar-btn-go" onclick="goToShoppingList()">
-                    <i class="bi bi-list-check"></i> Générer la liste de courses
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- GRILLE DES RECETTES (Premium Edition) -->
+    <!-- GRILLE DES RECETTES -->
     <section class="recipes-grid">
         {% if recipes.items %}
         <div class="row g-4">
             {% for recipe in recipes.items %}
             <div class="col-md-6 col-lg-4">
-                <div class="recipe-card"
-                     id="card-{{ recipe.id }}"
-                     onclick="handleCardClick(event, {{ recipe.id }}, '{{ url_for('main.recipe_detail', id=recipe.id) }}')">
+                <!-- Clic direct vers le détail (plus de sélection) -->
+                <div class="recipe-card" onclick="window.location='{{ url_for('main.recipe_detail', id=recipe.id) }}';">
 
-                    <!-- Checkbox sélection courses -->
-                    <div class="card-select-check" onclick="event.stopPropagation(); toggleRecipeSelect({{ recipe.id }}, this)">
-                        <div class="card-check-circle" id="check-{{ recipe.id }}">
-                            <i class="bi bi-check-lg"></i>
-                        </div>
-                    </div>
-
-                    <!-- 1. IMAGE + BADGES -->
+                    <!-- IMAGE + BADGES -->
                     <div class="recipe-card-image">
                         {% if recipe.image_filename %}
-							{% if recipe.image_filename.startswith('http') %}
-								<img src="{{ recipe.image_filename }}" alt="{{ recipe.title }}" loading="lazy">
-							{% else %}
-								<img src="{{ url_for('static', filename='uploads/' + recipe.image_filename) }}" alt="{{ recipe.title }}" loading="lazy">
-							{% endif %}
-						{% else %}
-							<div class="img-placeholder">
-								<div class="img-placeholder-inner">
-									<i class="bi bi-egg-fried"></i>
-									<span>{{ recipe.category or 'Recette' }}</span>
-								</div>
-							</div>
-						{% endif %}
+                            {% if recipe.image_filename.startswith('http') %}
+                                <img src="{{ recipe.image_filename }}" alt="{{ recipe.title }}" loading="lazy">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='uploads/' + recipe.image_filename) }}" alt="{{ recipe.title }}" loading="lazy">
+                            {% endif %}
+                        {% else %}
+                            <div class="img-placeholder">
+                                <div class="img-placeholder-inner">
+                                    <i class="bi bi-egg-fried"></i>
+                                    <span>{{ recipe.category or 'Recette' }}</span>
+                                </div>
+                            </div>
+                        {% endif %}
                         
-                        <!-- Badge Catégorie (Haut Gauche) -->
+                        <!-- Badge Catégorie -->
                         <div class="badge-category">
                             {{ recipe.category or 'Recette' }}
                         </div>
+
+                        <!-- Bouton Favori -->
+                        <button class="btn-card-favorite {{ 'active' if recipe.is_favorite else '' }}"
+                                onclick="event.stopPropagation(); toggleFavorite({{ recipe.id }}, this)"
+                                title="Ajouter aux favoris">
+                            <i class="bi {{ 'bi-heart-fill' if recipe.is_favorite else 'bi-heart' }}"></i>
+                        </button>
                         
-                        <!-- Badge Glucides (Haut Droite) -->
+                        <!-- Badge Glucides -->
                         <div class="badge-carbs">
                             <i class="bi bi-lightning-fill"></i>
                             {{ "%.0f"|format(recipe.total_carbs) }}g
                         </div>
                     </div>
 
-                    <!-- 2. CORPS DE LA CARTE -->
+                    <!-- CORPS DE LA CARTE -->
                     <div class="recipe-card-body">
-                        <h3 class="recipe-card-title">{{ recipe.title }}</h3>
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h3 class="recipe-card-title mb-0">{{ recipe.title }}</h3>
+                            
+                            {% if recipe.is_favorite %}
+                                <i class="bi bi-heart-fill text-danger ms-2" 
+                                style="font-size: 1rem; margin-top: 4px;" 
+                                title="Favori"></i>
+                            {% endif %}
+                        </div>
                         
-                        <!-- NOUVEAU : Ligne de séparation élégante -->
                         <div class="recipe-card-divider"></div>
                         
-                        <!-- Ligne Méta : Temps | Parts | Difficulté -->
                         <div class="recipe-meta-row">
                             <span><i class="bi bi-clock"></i> {{ recipe.total_time }} min</span>
                             <span><i class="bi bi-people"></i> {{ recipe.servings }}</span>
                             <span><i class="bi bi-bar-chart"></i> {{ recipe.difficulty }}</span>
                         </div>
 
-                        <!-- Description avec style citation -->
                         {% if recipe.description %}
                         <p class="recipe-card-description">
                             "{{ recipe.description }}"
                         </p>
                         {% endif %}
 
-                        <!-- NOUVEAU : Footer Action avec flèche ronde -->
                         <div class="card-footer-action">
                             <span>Découvrir</span>
                             <div class="action-arrow">

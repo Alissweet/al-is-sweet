@@ -158,6 +158,16 @@
                                     </div>
                                 </div>
                             </div>
+							
+							<!-- Tags Libres -->
+                            <div class="form-group-premium">
+                                <label class="form-label-premium">
+                                    <span class="label-text">Tags (séparés par des virgules)</span>
+                                </label>
+                                <input type="text" name="tags" class="form-control-premium" 
+                                       value="{{ recipe.tags|map(attribute='name')|join(', ') if recipe else '' }}" 
+                                       placeholder="Ex: rapide, enfants, sans gluten, été...">
+                            </div>
                             
                             <!-- Temps et portions -->
                             <div class="time-servings-grid">

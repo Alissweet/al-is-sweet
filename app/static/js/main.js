@@ -387,6 +387,184 @@ function _syncSelectionUI() {
     });
 }
 
+
+/**
+ * ═══════════════════════════════════════════════
+ * GESTION DES FAVORIS
+ * ═══════════════════════════════════════════════
+ */
+function toggleFavorite(recipeId, btnElement) {
+    // Récupération du token CSRF (depuis une meta ou un input caché global)
+    const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || 
+                      document.querySelector('meta[name="csrf-token"]')?.content;
+
+    // Animation immédiate pour l'UX (Optimistic UI)
+    const icon = btnElement.querySelector('i');
+    const isActive = btnElement.classList.contains('active');
+    
+    // Toggle visuel temporaire
+    btnElement.classList.toggle('active');
+    icon.className = isActive ? 'bi bi-heart' : 'bi bi-heart-fill';
+
+    fetch(`/recipe/${recipeId}/favorite`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Erreur réseau');
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Confirmation visuelle finale
+            if (data.is_favorite) {
+                btnElement.classList.add('active');
+                icon.className = 'bi bi-heart-fill';
+                // Petit effet de pop
+                icon.style.transform = 'scale(1.3)';
+                setTimeout(() => icon.style.transform = 'scale(1)', 200);
+            } else {
+                btnElement.classList.remove('active');
+                icon.className = 'bi bi-heart';
+            }
+        } else {
+            // Revert en cas d'erreur logique
+            console.error(data.message);
+            btnElement.classList.toggle('active'); // On annule
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        // Revert en cas d'erreur technique
+        btnElement.classList.toggle('active');
+        icon.className = isActive ? 'bi bi-heart-fill' : 'bi bi-heart';
+        alert("Impossible de modifier les favoris pour l'instant.");
+    });
+}
+
+/**
+ * ═══════════════════════════════════════════════
+ * SYSTÈME DE NOTATION (RATING)
+ * ═══════════════════════════════════════════════
+ */
+function rateRecipe(button) {
+    const value = button.dataset.value;
+    const recipeId = button.dataset.recipeId;
+    
+    // Récupération du token CSRF
+    const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || 
+                      document.querySelector('meta[name="csrf-token"]')?.content;
+
+    if (!csrfToken) {
+        console.error("Token CSRF introuvable");
+        return;
+    }
+
+    // Appel AJAX
+    fetch(`/recipe/${recipeId}/rate`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken
+        },
+        body: `rating=${value}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            updateRatingUI(button, data.rating);
+        } else {
+            console.error(data.message);
+        }
+    })
+    .catch(error => console.error('Erreur:', error));
+}
+
+function updateRatingUI(clickedBtn, activeValue) {
+    const container = clickedBtn.closest('.rating-pills');
+    const feedback = document.getElementById('ratingFeedback');
+    
+    // Textes de feedback (doivent correspondre à ceux du template)
+    const labels = [
+        '', 
+        'Recette à améliorer', 
+        'Recette correcte', 
+        'Bonne recette !', 
+        'Très bonne recette !', 
+        '✨ Recette incontournable !'
+    ];
+
+    // 1. Reset visuel de tous les boutons
+    container.querySelectorAll('.rating-pill').forEach(btn => {
+        btn.classList.remove('active', 'just-rated');
+    });
+
+    // 2. Activation du bouton sélectionné (si une note existe)
+    if (activeValue) {
+        // On retrouve le bouton qui correspond à la valeur retournée par le serveur
+        const targetBtn = container.querySelector(`.rating-pill[data-value="${activeValue}"]`);
+        if (targetBtn) {
+            targetBtn.classList.add('active', 'just-rated');
+        }
+        
+        // Mise à jour du texte
+        if (feedback) {
+            feedback.textContent = labels[activeValue];
+            feedback.style.opacity = '1';
+        }
+    } else {
+        // Si la note a été retirée (toggle off)
+        if (feedback) {
+            feedback.style.opacity = '0';
+            setTimeout(() => { feedback.textContent = ''; }, 300);
+        }
+    }
+}
+
+
+/**
+ * ═══════════════════════════════════════════════
+ * GESTION DES FILTRES COMBINÉS
+ * ═══════════════════════════════════════════════
+ */
+function selectCategory(categoryName) {
+    // 1. Mettre à jour le champ caché
+    const input = document.getElementById('categoryInput');
+    if (input) {
+        input.value = categoryName;
+        
+        // 2. Soumettre le formulaire global
+        const form = document.getElementById('filterForm');
+        if (form) {
+            form.submit();
+        }
+    }
+}
+
+function markAsCooked(recipeId) {
+    const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || 
+                      document.querySelector('meta[name="csrf-token"]')?.content;
+
+    fetch(`/recipe/${recipeId}/cooked`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            showMessage(data.message, 'success');
+        } else {
+            showMessage(data.message, 'danger');
+        }
+    });
+}
+
 /**
  * Réouvrir la modale après rechargement
  */

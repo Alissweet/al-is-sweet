@@ -262,7 +262,7 @@
         const difficultyValue = difficultyFilter.value;
 
         tableRows.forEach(row => {
-            const title = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+            const title = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
             const category = row.dataset.category;
             const difficulty = row.dataset.difficulty;
 
@@ -297,8 +297,8 @@
 
                 switch(column) {
                     case 'title':
-                        aVal = a.querySelector('td:nth-child(2)').textContent.trim();
-                        bVal = b.querySelector('td:nth-child(2)').textContent.trim();
+                        aVal = a.querySelector('td:nth-child(3)').textContent.trim();
+                        bVal = b.querySelector('td:nth-child(3)').textContent.trim();
                         break;
                     case 'category':
                         aVal = a.dataset.category;

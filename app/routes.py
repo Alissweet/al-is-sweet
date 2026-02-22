@@ -4,15 +4,17 @@ from werkzeug.utils import secure_filename
 from weasyprint import HTML, CSS
 from weasyprint.text.fonts import FontConfiguration
 from app import db
-from app.models import Recipe, Ingredient, Step, Category
+from app.models import Recipe, Ingredient, Step, Category, Tag, CookingHistory
 from app.forms import RecipeForm
 from datetime import datetime
+from sqlalchemy import func, case
 import json
 import os
 import uuid
 import logging
 import cloudinary
 import cloudinary.uploader
+import random
 
 main = Blueprint('main', __name__)
 logger = logging.getLogger(__name__)
@@ -58,19 +60,61 @@ def save_image(file):
 @main.route('/')
 @login_required
 def index():
+    """Page d'accueil avec filtres combinés et tri"""
     page = request.args.get('page', 1, type=int)
+    
+    # Récupération des filtres
     category = request.args.get('category', '')
     search = request.args.get('search', '')
+    difficulty = request.args.get('difficulty', '')
+    max_time = request.args.get('max_time', type=int)
+    sort = request.args.get('sort', 'date_desc')
 
+    # Base de la requête
     query = Recipe.query.filter_by(user_id=current_user.id)
-    if category:
+    
+    # --- FILTRES ---
+    if category == 'favorites':
+        query = query.filter(Recipe.is_favorite == True)
+    elif category:
         query = query.filter(Recipe.category == category)
+    
     if search:
         query = query.filter(Recipe.title.ilike(f'%{search}%'))
+        
+    if difficulty:
+        query = query.filter(Recipe.difficulty == difficulty)
+        
+    if max_time:
+        query = query.filter(
+            (func.coalesce(Recipe.prep_time, 0) + func.coalesce(Recipe.cook_time, 0)) <= max_time
+        )
 
-    recipes = query.order_by(Recipe.created_at.desc()).paginate(
-        page=page, per_page=9, error_out=False
-    )
+    # --- TRI ---
+    if sort == 'alpha_asc':
+        query = query.order_by(Recipe.title.asc())
+    elif sort == 'time_asc':
+        query = query.order_by((func.coalesce(Recipe.prep_time, 0) + func.coalesce(Recipe.cook_time, 0)).asc())
+    elif sort == 'difficulty_asc':
+        # ✅ CORRECTION : Syntaxe dictionnaire pour SQLAlchemy 2.x
+        difficulty_order = case(
+            {
+                'Facile': 1,
+                'Moyen': 2,
+                'Difficile': 3
+            },
+            value=Recipe.difficulty,
+            else_=4
+        )
+        query = query.order_by(difficulty_order.asc())
+    elif sort == 'date_asc':
+        query = query.order_by(Recipe.created_at.asc())
+    else: # date_desc
+        query = query.order_by(Recipe.created_at.desc())
+
+    # Pagination
+    recipes = query.paginate(page=page, per_page=9, error_out=False)
+    
     categories = [c.name for c in Category.query.filter_by(
         user_id=current_user.id).order_by(Category.name).all()]
 
@@ -78,7 +122,10 @@ def index():
                            recipes=recipes,
                            categories=categories,
                            current_category=category,
-                           search=search)
+                           search=search,
+                           current_difficulty=difficulty,
+                           current_max_time=max_time,
+                           current_sort=sort)
 
 
 @main.route('/recipe/<int:id>')
@@ -171,6 +218,23 @@ def recipe_new():
                         instruction=instruction.strip(),
                         duration=duration
                     ))
+            # GESTION DES TAGS
+            tags_input = request.form.get('tags', '')
+            recipe.tags = []
+            if tags_input:
+                # Séparation par virgule et nettoyage
+                tag_names = list(set([t.strip() for t in tags_input.split(',') if t.strip()]))
+                
+                for tag_name in tag_names:
+                    # Chercher si le tag existe déjà POUR CET UTILISATEUR
+                    tag = Tag.query.filter_by(name=tag_name, user_id=current_user.id).first()
+                    
+                    if not tag:
+                        # Création du tag lié à l'utilisateur
+                        tag = Tag(name=tag_name, user_id=current_user.id)
+                        db.session.add(tag)
+                    
+                    recipe.tags.append(tag)
 
             db.session.commit()
             flash('Recette créée avec succès! 🎉', 'success')
@@ -279,7 +343,24 @@ def recipe_edit(id):
                         instruction=instruction.strip(),
                         duration=dur
                     ))
-
+            # GESTION DES TAGS
+            tags_input = request.form.get('tags', '')
+            recipe.tags = []
+            if tags_input:
+                # Séparation par virgule et nettoyage
+                tag_names = list(set([t.strip() for t in tags_input.split(',') if t.strip()]))
+                
+                for tag_name in tag_names:
+                    # Chercher si le tag existe déjà POUR CET UTILISATEUR
+                    tag = Tag.query.filter_by(name=tag_name, user_id=current_user.id).first()
+                    
+                    if not tag:
+                        # Création du tag lié à l'utilisateur
+                        tag = Tag(name=tag_name, user_id=current_user.id)
+                        db.session.add(tag)
+                    
+                    recipe.tags.append(tag)
+                    
             db.session.commit()
             flash('Recette modifiée avec succès! ✨', 'success')
             return redirect(url_for('main.recipe_detail', id=recipe.id))
@@ -319,6 +400,56 @@ def recipe_delete(id):
     db.session.commit()
     flash('Recette supprimée avec succès!', 'success')
     return redirect(url_for('main.index'))
+
+
+
+# ============================================================
+#  FONCTIONNALITÉS PREMIUM (Random, Tags, History)
+# ============================================================
+
+@main.route('/recipe/random')
+@login_required
+def random_recipe():
+    """Redirige vers une recette aléatoire de l'utilisateur (Optimisé)"""
+    # ✅ OPTIMISATION : On ne charge que les IDs, pas les objets entiers
+    recipe_ids = [r[0] for r in Recipe.query.filter_by(user_id=current_user.id).with_entities(Recipe.id).all()]
+    
+    if not recipe_ids:
+        flash("Créez d'abord quelques recettes !", 'warning')
+        return redirect(url_for('main.index'))
+    
+    random_id = random.choice(recipe_ids)
+    return redirect(url_for('main.recipe_detail', id=random_id))
+
+
+@main.route('/recipe/<int:id>/cooked', methods=['POST'])
+@login_required
+def mark_cooked(id):
+    """Marque une recette comme cuisinée aujourd'hui"""
+    recipe = Recipe.query.get_or_404(id)
+    if recipe.user_id != current_user.id:
+        return jsonify({'success': False, 'message': 'Non autorisé'}), 403
+        
+    try:
+        entry = CookingHistory(user_id=current_user.id, recipe_id=recipe.id)
+        db.session.add(entry)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Ajouté à l\'historique ! 📅'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': 'Erreur technique'}), 500
+
+
+@main.route('/history')
+@login_required
+def history():
+    """Page d'historique culinaire"""
+    # Récupère l'historique trié par date décroissante
+    history_entries = CookingHistory.query.filter_by(user_id=current_user.id)\
+        .order_by(CookingHistory.cooked_at.desc()).all()
+        
+    # On groupe par mois pour l'affichage (facultatif mais joli)
+    return render_template('history.html', history=history_entries)
 
 
 # ============================================================
@@ -753,6 +884,34 @@ def shopping_list():
     return render_template('shopping_list.html',
                            recipes=recipes,
                            shopping_items=shopping_items)
+
+
+# ============================================================
+#  GESTION DES FAVORIS
+# ============================================================
+@main.route('/recipe/<int:id>/favorite', methods=['POST'])
+@login_required
+def toggle_favorite(id):
+    recipe = Recipe.query.get_or_404(id)
+    
+    # Sécurité : Vérifier que la recette appartient à l'utilisateur
+    if recipe.user_id != current_user.id:
+        return jsonify({'success': False, 'message': 'Action non autorisée'}), 403
+        
+    # Bascule l'état
+    recipe.is_favorite = not recipe.is_favorite
+    
+    try:
+        db.session.commit()
+        return jsonify({
+            'success': True, 
+            'is_favorite': recipe.is_favorite,
+            'message': 'Ajouté aux favoris ❤️' if recipe.is_favorite else 'Retiré des favoris'
+        })
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Erreur favori: {e}")
+        return jsonify({'success': False, 'message': 'Erreur technique'}), 500
 
 
 # ============================================================
