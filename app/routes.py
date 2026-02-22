@@ -70,8 +70,6 @@ def index():
     max_time = request.args.get('max_time', type=int)
     sort = request.args.get('sort', 'date_desc')
 
-    tag = request.args.get('tag', '')
-
     # Base de la requête
     query = Recipe.query.filter_by(user_id=current_user.id)
     
@@ -82,7 +80,12 @@ def index():
         query = query.filter(Recipe.category == category)
     
     if search:
-        query = query.filter(Recipe.title.ilike(f'%{search}%'))
+        query = query.filter(
+            db.or_(
+                Recipe.title.ilike(f'%{search}%'),
+                Recipe.tags.any(Tag.name.ilike(f'%{search}%'))
+            )
+        )
         
     if difficulty:
         query = query.filter(Recipe.difficulty == difficulty)
@@ -91,9 +94,6 @@ def index():
         query = query.filter(
             (func.coalesce(Recipe.prep_time, 0) + func.coalesce(Recipe.cook_time, 0)) <= max_time
         )
-
-    if tag:
-        query = query.filter(Recipe.tags.any(Tag.name == tag))
 
     # --- TRI ---
     if sort == 'alpha_asc':
@@ -123,11 +123,6 @@ def index():
     categories = [c.name for c in Category.query.filter_by(
         user_id=current_user.id).order_by(Category.name).all()]
 
-    # Tags disponibles pour l'utilisateur (ayant au moins 1 recette)
-    available_tags = Tag.query.filter_by(user_id=current_user.id)\
-        .join(Tag.recipes).filter(Recipe.user_id == current_user.id)\
-        .distinct().order_by(Tag.name).all()
-
     return render_template('index.html',
                            recipes=recipes,
                            categories=categories,
@@ -135,9 +130,7 @@ def index():
                            search=search,
                            current_difficulty=difficulty,
                            current_max_time=max_time,
-                           current_sort=sort,
-                           current_tag=tag,
-                           available_tags=available_tags)
+                           current_sort=sort)
 
 
 @main.route('/recipe/<int:id>')
@@ -432,21 +425,6 @@ def random_recipe():
     
     random_id = random.choice(recipe_ids)
     return redirect(url_for('main.recipe_detail', id=random_id))
-
-
-@main.route('/tag/<tag_name>')
-@login_required
-def recipes_by_tag(tag_name):
-    """Page listant toutes les recettes d'un tag donné"""
-    tag = Tag.query.filter_by(name=tag_name, user_id=current_user.id).first_or_404()
-    
-    recipes = Recipe.query.filter(
-        Recipe.user_id == current_user.id,
-        Recipe.tags.any(Tag.id == tag.id)
-    ).order_by(Recipe.created_at.desc()).all()
-
-    return render_template('recipes_by_tag.html', tag=tag, recipes=recipes)
-
 
 
 @main.route('/recipe/<int:id>/cooked', methods=['POST'])
