@@ -441,10 +441,11 @@ img { max-width: 100%; }
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: var(--choco-dark);
+    background: linear-gradient(135deg, var(--terracotta-dark) 0%, var(--choco-dark) 100%);
     color: white;
     border: none;
     border-radius: var(--radius-sm);
+	border-bottom: 2px solid var(--gold);
     padding: 0 1.4rem;
     height: 42px;
     font-family: 'Poppins', sans-serif;
@@ -458,6 +459,7 @@ img { max-width: 100%; }
     transition: background var(--transition-base);
     white-space: nowrap;
     cursor: pointer;
+	box-shadow: 0 3px 14px rgba(166, 124, 101, 0.45);
 }
 .btn-add-recipe::before {
     content: '';
@@ -465,6 +467,7 @@ img { max-width: 100%; }
     width: 3px;
     background: var(--gold);
 }
+
 .btn-add-recipe:hover { background: var(--choco-ink); color: white; }
 .btn-add-recipe i { font-size: 1.1rem; }
 
@@ -569,7 +572,7 @@ img { max-width: 100%; }
 .filters-container {
     display: flex;
     align-items: stretch;
-    gap: 0;
+    gap: 4px;
     background: white;
     border: 1px solid var(--cream-deep);
     border-radius: var(--radius-sm);
@@ -577,6 +580,7 @@ img { max-width: 100%; }
     margin-bottom: 2rem;
     box-shadow: var(--shadow-sm);
     flex-wrap: nowrap;
+    padding: 5px;
 }
 
 /* Bloc recherche */
@@ -586,8 +590,15 @@ img { max-width: 100%; }
     flex: 2;
     padding: 0 1.2rem;
     gap: 10px;
-    border-right: 1px solid var(--cream-deep);
+    border-right: none;
     min-width: 180px;
+    background: var(--bg-body);
+    border-radius: calc(var(--radius-sm) - 3px);
+    transition: background var(--transition-base), box-shadow var(--transition-base);
+}
+.search-wrapper:hover {
+    background: var(--cream-deep);
+    box-shadow: inset 0 0 0 1px var(--terracotta);
 }
 
 .search-group-premium {
@@ -641,11 +652,16 @@ img { max-width: 100%; }
 .filter-wrapper {
     display: flex;
     align-items: center;
-    border-right: 1px solid var(--cream-deep);
+    border-right: none;
     position: relative;
     flex: 1;
     min-width: 110px;
+    background: var(--bg-body);
+    border-radius: calc(var(--radius-sm) - 3px);
+    transition: background var(--transition-base), box-shadow var(--transition-base);
 }
+
+
 .filter-wrapper:last-child { border-right: none; flex: 0 0 auto; min-width: auto; }
 
 .form-select-filter {
@@ -662,13 +678,13 @@ img { max-width: 100%; }
     font-weight: 600;
     letter-spacing: 0.03em;
     cursor: pointer;
-    transition: background var(--transition-base);
+    transition: background var(--transition-base), box-shadow var(--transition-base);
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23a67c65' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 1rem center;
     background-size: 11px 8px;
 }
-.form-select-filter:hover  { background-color: var(--bg-body); }
+.form-select-filter:hover  { background-color: var(--cream-deep); box-shadow: inset 0 0 0 1px var(--terracotta); }
 .form-select-filter:focus  { outline: none; background-color: var(--bg-body); }
 
 /* Reset filtres */
@@ -2072,9 +2088,9 @@ img { max-width: 100%; }
     #cookingMode           { padding: 1rem; }
 
     /* Filtres en colonne */
-    .filters-container { flex-direction: column; }
-    .search-wrapper    { min-width: 0; border-right: none; border-bottom: 1px solid var(--cream-deep); }
-    .filter-wrapper    { border-right: none; border-bottom: 1px solid var(--cream-deep); flex: 1; max-width: none; min-width: 0; }
+    .filters-container { flex-direction: column; padding: 5px; gap: 4px; }
+    .search-wrapper    { min-width: 0; border-right: none; border-bottom: none; }
+    .filter-wrapper    { border-right: none; border-bottom: none; flex: 1; max-width: none; min-width: 0; }
     .filter-wrapper:last-child { border-bottom: none; }
     .form-select-filter { height: 46px; font-size: 0.85rem; }
     .btn-reset-filters  { width: 100%; height: 44px; border-left: none; }
