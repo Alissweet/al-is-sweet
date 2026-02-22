@@ -111,7 +111,30 @@
         }
 
         /* ═══════════════════════════════════
-           MÉTAS — fond sable clair (pas chocolat)
+           SOURCE — D'après
+        ═══════════════════════════════════ */
+        .print-source {
+            font-family: Georgia, serif;
+            font-size: 9px;
+            font-style: italic;
+            color: #a67c65;
+            margin-top: 5px;
+        }
+        .print-source-icon {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: #f9f0ea;
+            border: 1px solid #c59d85;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 6px;
+            color: #a67c65;
+            line-height: 9px;
+            margin-right: 4px;
+            vertical-align: middle;
+            font-style: normal;
+        }
         ═══════════════════════════════════ */
         .meta-row {
             background-color: #f9f0ea;
@@ -368,6 +391,11 @@
 <div class="title-band">
     <div class="recipe-cat-label">{{ recipe.category or 'Recette' }}</div>
     <div class="recipe-title">{{ recipe.title }}</div>
+    {% if recipe.source %}
+    <div class="print-source">
+        <span class="print-source-icon">✦</span>D'après&nbsp;{{ recipe.source }}
+    </div>
+    {% endif %}
 </div>
 
 <div class="meta-row">

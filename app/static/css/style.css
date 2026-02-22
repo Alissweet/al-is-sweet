@@ -1764,6 +1764,71 @@ img { max-width: 100%; }
 
 
 
+/* ════════════════════════════════════════════════════════════════
+   CHAMP SOURCE — Formulaire & Fiche recette
+   ════════════════════════════════════════════════════════════════ */
+
+/* Label hint (sous-texte du label) */
+.label-hint {
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: var(--choco-milk);
+    opacity: 0.8;
+    margin-left: 6px;
+    font-style: italic;
+}
+
+/* Wrapper avec icône intégrée */
+.source-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.source-icon {
+    position: absolute;
+    left: 12px;
+    color: var(--terracotta);
+    font-size: 1.1rem;
+    pointer-events: none;
+    z-index: 1;
+}
+.source-input {
+    padding-left: 2.4rem !important;
+}
+
+/* Affichage source sur la fiche recette */
+.recipe-source {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-family: 'Poppins', sans-serif;
+    color: var(--choco-milk);
+    font-style: italic;
+}
+.recipe-source i {
+    color: var(--terracotta);
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    font-style: normal;
+}
+.recipe-source-link {
+    color: var(--terracotta-dark);
+    text-decoration: none;
+    font-weight: 500;
+    font-style: normal;
+    border-bottom: 1px dashed var(--terracotta);
+    transition: all var(--transition-base);
+}
+.recipe-source-link:hover {
+    color: var(--choco-dark);
+    border-bottom-style: solid;
+}
+.recipe-source-text {
+    color: var(--choco-milk);
+}
+
+
 
 /* ════════════════════════════════════════════════════════════════
    TAG CLOUD — Index
@@ -1909,6 +1974,8 @@ img { max-width: 100%; }
     padding: 2px 7px;
     border-radius: var(--radius-sm);
 }
+
+
 
 /* ════════════════════════════════════════════════════════════════
    15. MEDIA QUERIES — Toutes regroupées ici

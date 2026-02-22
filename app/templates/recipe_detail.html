@@ -45,6 +45,20 @@
                 <span class="text-uppercase text-muted small ls-2 fw-bold">{{ recipe.category or 'Recette' }}</span>
                 <h1 class="recipe-main-title">{{ recipe.title }}</h1>
                 
+				{% if recipe.source %}
+				<div class="mb-3">
+					<span class="recipe-source">
+						<i class="bi bi-book"></i>
+						D'après
+						{% if recipe.source.startswith('http') %}
+							<a href="{{ recipe.source }}" target="_blank" rel="noopener" class="recipe-source-link">{{ recipe.source }}</a>
+						{% else %}
+							<span class="recipe-source-text">{{ recipe.source }}</span>
+						{% endif %}
+					</span>
+				</div>
+				{% endif %}
+			
                 <!-- Méta Données -->
 				<div class="d-flex justify-content-center align-items-center gap-4 text-muted fw-medium flex-wrap">
 					<span><i class="bi bi-clock text-terracotta"></i> {{ recipe.total_time }} min</span>
@@ -78,18 +92,7 @@
                 <p class="mt-3 text-muted fst-italic">"{{ recipe.description }}"</p>
                 {% endif %}
 
-                {% if recipe.source %}
-                <div class="recipe-source mt-2">
-                    <i class="bi bi-link-45deg"></i>
-                    {% if recipe.source.startswith('http') %}
-                    <a href="{{ recipe.source }}" target="_blank" rel="noopener noreferrer" class="recipe-source-link">
-                        {{ recipe.source | replace('https://', '') | replace('http://', '') | truncate(50) }}
-                    </a>
-                    {% else %}
-                    <span class="recipe-source-text">{{ recipe.source }}</span>
-                    {% endif %}
-                </div>
-                {% endif %}
+
 				{% if recipe.tags %}
                 <div class="tags-container mt-3 d-flex justify-content-center gap-2 flex-wrap">
                     {% for tag in recipe.tags %}

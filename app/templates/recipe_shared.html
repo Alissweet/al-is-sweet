@@ -66,6 +66,20 @@
                 {{ recipe.title }}
             </h1>
 
+            {% if recipe.source %}
+            <div class="mb-3">
+                <span class="recipe-source">
+                    <i class="bi bi-book"></i>
+                    D'après
+                    {% if recipe.source.startswith('http') %}
+                        <a href="{{ recipe.source }}" target="_blank" rel="noopener" class="recipe-source-link">{{ recipe.source }}</a>
+                    {% else %}
+                        <span class="recipe-source-text">{{ recipe.source }}</span>
+                    {% endif %}
+                </span>
+            </div>
+            {% endif %}
+
             <div class="d-flex flex-wrap gap-2 mb-3">
                 <span class="meta-pill">
                     <i class="bi bi-clock"></i>
