@@ -80,7 +80,7 @@
 				{% if recipe.tags %}
                 <div class="tags-container mt-3 d-flex justify-content-center gap-2 flex-wrap">
                     {% for tag in recipe.tags %}
-                    <span class="recipe-tag">#{{ tag.name }}</span>
+                    <a href="{{ url_for('main.index', tag=tag.name) }}" class="recipe-tag recipe-tag-link">#{{ tag.name }}</a>
                     {% endfor %}
                 </div>
                 {% endif %}

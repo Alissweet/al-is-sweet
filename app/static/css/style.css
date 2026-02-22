@@ -17,9 +17,9 @@
     --choco-ink:        #1a1208;
     --choco-mid:        #6d4c41;
     --choco-milk:       #8d6e63;
-    --terracotta:       #b8836a;
-    --terracotta-dark:  #9a6248;
-    --cream:            #ede3db;
+    --terracotta:       #c59d85;
+    --terracotta-dark:  #a67c65;
+    --cream:            #efebe9;
     --cream-deep:       #e0d5cc;
     --gold:             #c8a96e;
     --gold-light:       #d4b87a;
@@ -30,8 +30,8 @@
     --radius-sm:   2px;
 
     /* Ombres — plus chirurgicales */
-    --shadow-sm:    0 2px 12px rgba(62, 39, 35, 0.10), 0 0 0 1px rgba(197,157,133,0.08);
-    --shadow-hover: 0 14px 44px rgba(62, 39, 35, 0.18), 0 0 0 1px rgba(197,157,133,0.12);
+    --shadow-sm:         0 2px 12px rgba(62, 39, 35, 0.07);
+    --shadow-hover:      0 12px 40px rgba(62, 39, 35, 0.16);
     --shadow-btn:        0 2px 8px rgba(62, 39, 35, 0.18);
     --shadow-btn-hover:  0 6px 20px rgba(62, 39, 35, 0.28);
 
@@ -441,11 +441,10 @@ img { max-width: 100%; }
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: linear-gradient(135deg, var(--terracotta-dark) 0%, var(--choco-dark) 100%);
+    background: var(--choco-dark);
     color: white;
     border: none;
     border-radius: var(--radius-sm);
-	border-bottom: 2px solid var(--gold);
     padding: 0 1.4rem;
     height: 42px;
     font-family: 'Poppins', sans-serif;
@@ -459,7 +458,6 @@ img { max-width: 100%; }
     transition: background var(--transition-base);
     white-space: nowrap;
     cursor: pointer;
-	box-shadow: 0 3px 14px rgba(166, 124, 101, 0.45);
 }
 .btn-add-recipe::before {
     content: '';
@@ -467,9 +465,7 @@ img { max-width: 100%; }
     width: 3px;
     background: var(--gold);
 }
-.btn-add-recipe:hover {
-    background: linear-gradient(135deg, var(--terracotta) 0%, var(--choco-mid) 100%); box-shadow: 0 6px 22px rgba(166, 124, 101, 0.6); transform: translateY(-1px); color: white;
-}
+.btn-add-recipe:hover { background: var(--choco-ink); color: white; }
 .btn-add-recipe i { font-size: 1.1rem; }
 
 /* Bouton Inspiration — discret, contour fin */
@@ -536,6 +532,22 @@ img { max-width: 100%; }
     text-transform: uppercase;
 }
 
+/* Tag cliquable — lien navigable */
+a.recipe-tag-link {
+    display: inline-block;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: all var(--transition-base);
+    cursor: pointer;
+}
+a.recipe-tag-link:hover {
+    background: var(--terracotta-dark);
+    color: white;
+    border-color: var(--terracotta-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(166, 124, 101, 0.3);
+}
+
 /* Modal Paramètres */
 .nav-pills .nav-link {
     color: var(--choco-dark);
@@ -573,15 +585,14 @@ img { max-width: 100%; }
 .filters-container {
     display: flex;
     align-items: stretch;
-    gap: 1px;
-    background: var(--cream-deep);
+    gap: 0;
+    background: white;
     border: 1px solid var(--cream-deep);
-    border-radius: var(--radius-card);
+    border-radius: var(--radius-sm);
     overflow: hidden;
     margin-bottom: 2rem;
     box-shadow: var(--shadow-sm);
     flex-wrap: nowrap;
-	padding: 0;
 }
 
 /* Bloc recherche */
@@ -651,12 +662,6 @@ img { max-width: 100%; }
     flex: 1;
     min-width: 110px;
 }
-
-.search-wrapper,
-.filter-wrapper {
-    background: white;
-}
-
 .filter-wrapper:last-child { border-right: none; flex: 0 0 auto; min-width: auto; }
 
 .form-select-filter {
@@ -1874,7 +1879,7 @@ img { max-width: 100%; }
     .filter-wrapper    { border-right: none; border-bottom: 1px solid var(--cream-deep); flex: 1; max-width: none; min-width: 0; }
     .filter-wrapper:last-child { border-bottom: none; }
     .form-select-filter { height: 46px; font-size: 0.85rem; }
-    .btn-reset-filters  { width: 100%; height: 44px; border-left: none; background: white; }
+    .btn-reset-filters  { width: 100%; height: 44px; border-left: none; }
 
     /* Catégories */
     .cat-pill { padding: 0.6rem 1rem; font-size: 0.74rem; }

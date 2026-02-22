@@ -70,9 +70,21 @@
                         <option value="difficulty_asc" {{ 'selected' if current_sort == 'difficulty_asc' else '' }}>💪 Facilité</option>
                     </select>
                 </div>
+
+                <!-- Filtre Tag -->
+                {% if available_tags %}
+                <div class="filter-wrapper">
+                    <select name="tag" class="form-select-filter" onchange="document.getElementById('filterForm').submit()">
+                        <option value="">🏷️ Tag</option>
+                        {% for t in available_tags %}
+                        <option value="{{ t.name }}" {{ 'selected' if current_tag == t.name else '' }}>#{{ t.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
                 
-                <!-- Bouton Reset (Mise à jour de la condition pour inclure le tri) -->
-                {% if search or current_category or current_difficulty or current_max_time or current_sort != 'date_desc' %}
+                <!-- Bouton Reset (Mise à jour de la condition pour inclure le tri et le tag) -->
+                {% if search or current_category or current_difficulty or current_max_time or current_sort != 'date_desc' or current_tag %}
                 <div class="filter-wrapper" style="flex: 0; min-width: auto;">
                     <a href="{{ url_for('main.index') }}" class="btn-reset-filters" title="Réinitialiser">
                         <i class="bi bi-x-lg"></i>
