@@ -118,6 +118,20 @@
                 </button>
                 {% endfor %}
             </div>
+
+            <!-- TAG CLOUD -->
+            {% if available_tags %}
+            <div class="tag-cloud mt-3">
+                {% for t in available_tags %}
+                <button type="button"
+                        class="tag-cloud-pill {{ 'active' if current_tag == t.name else '' }}"
+                        onclick="selectTag('{{ t.name }}')">
+                    #{{ t.name }}
+                </button>
+                {% endfor %}
+            </div>
+            <input type="hidden" name="tag" id="tagInput" value="{{ current_tag }}">
+            {% endif %}
         </form>
     </section>
 
@@ -237,4 +251,14 @@
         {% endif %}
     </section>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function selectTag(tagName) {
+    const currentVal = document.getElementById('tagInput') ? document.getElementById('tagInput').value : '';
+    document.getElementById('tagInput').value = (currentVal === tagName) ? '' : tagName;
+    document.getElementById('filterForm').submit();
+}
+</script>
 {% endblock %}
