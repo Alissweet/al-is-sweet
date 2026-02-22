@@ -56,12 +56,12 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
 
 .navbar-premium {
     background: linear-gradient(135deg, #ffffff 0%, #fdfbf7 100%);
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 20px rgba(101, 67, 33, 0.18);
+    border-bottom: 3px solid rgba(139, 90, 43, 0.35);
     padding: 1rem 0;
     position: sticky;
     top: 0;
     z-index: 1000;
-    border-bottom: 1px solid rgba(212, 165, 116, 0.1);
 }
 
 /*-- Logo & Brand --*/
@@ -70,11 +70,12 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
     align-items: center;
     gap: 2px;
     text-decoration: none;
-    transition: transform 0.3s ease;
+    transition: filter 0.4s ease, opacity 0.4s ease;
 }
 
 .navbar-brand:hover {
-    transform: translateY(-2px);
+    filter: drop-shadow(0 0 8px rgba(197, 157, 133, 0.6));
+    opacity: 0.9;
 }
 
 .brand-logo {
@@ -95,34 +96,47 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
     white-space: nowrap; 
 }
 
-/*-- Navigation Links --*/
-.navbar-nav .nav-link {
-    display: flex;
+.nav-link-premium {
+    position: relative;
+    display: inline-flex;
     align-items: center;
     gap: 6px;
-    color: #5a5a5a;
-    font-family: 'Poppins', sans-serif;
-    font-size: 0.95rem;
-    font-weight: 500;
-    padding: 8px 16px;
-    border-radius: 25px;
-    transition: all 0.3s ease;
+    color: var(--choco-dark);
     text-decoration: none;
+    font-weight: 500;
+    font-size: 0.92rem;
+    padding: 6px 4px 8px 4px;
+    margin: 0 8px;
+    transition: color 0.3s ease;
 }
 
-.navbar-nav .nav-link i {
-    font-size: 1.1rem;
+/* Soulignement animé depuis le centre */
+.nav-link-premium::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--terracotta);
+    border-radius: 2px;
+    transition: all 0.35s ease;
+    transform: translateX(-50%);
 }
 
-.navbar-nav .nav-link:hover {
-    background: rgba(212, 165, 116, 0.1);
-    color: #d4a574;
-    transform: translateY(-1px);
+.nav-link-premium:hover {
+    color: var(--terracotta);
 }
 
-.navbar-nav .nav-link.active {
-    background: linear-gradient(135deg, #d4a574 0%, #b8865f 100%);
-    color: white;
+.nav-link-premium:hover::after,
+.nav-link-premium.active::after {
+    width: 100%;
+}
+
+/* Lien actif toujours souligné */
+.nav-link-premium.active {
+    color: var(--terracotta);
+    font-weight: 600;
 }
 
 /*-- Navbar Actions Container --*/
@@ -369,25 +383,24 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
 .btn-add-recipe {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
+    gap: 8px;
     background: var(--terracotta);
-    color: white !important;
-    font-weight: 600;
-    padding: 12px 28px;
-    border-radius: var(--radius-pill);
+    color: white;
     border: none;
-    box-shadow: var(--shadow-btn);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    text-transform: uppercase;
-    font-size: 0.9rem;
-    letter-spacing: 0.5px;
+    border-radius: 50px;
+    padding: 12px 24px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    box-shadow: 0 4px 15px rgba(197, 157, 133, 0.35);
+    transition: all 0.3s ease;
 }
 
 .btn-add-recipe:hover {
-    background: var(--choco-dark);
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: var(--shadow-btn-hover);
+    background: var(--terracotta-dark);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(197, 157, 133, 0.5);
 }
 
 .btn-add-recipe i {
@@ -3666,20 +3679,26 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
 
 /* --- BOUTON MAGIQUE (Random) --- */
 .btn-magic {
-    background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%); /* Violet mystique */
+    background: linear-gradient(135deg, #b8860b 0%, #d4a017 100%);
     color: white;
     border: none;
     border-radius: 50px;
     padding: 12px 24px;
     font-weight: 600;
-    box-shadow: 0 4px 15px rgba(106, 27, 154, 0.3);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(184, 134, 11, 0.3);
     transition: all 0.3s;
 }
+
 .btn-magic:hover {
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 8px 25px rgba(106, 27, 154, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(184, 134, 11, 0.5);
     color: white;
 }
+
 .btn-magic i { animation: twinkle 2s infinite; }
 
 @keyframes twinkle {
@@ -3762,4 +3781,113 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
     .timeline-container::before { left: 20px; }
     .timeline-date { display: none; } /* On cache la date latérale sur mobile */
     .timeline-marker { margin: 0 12px 0 12px; }
+}
+
+
+/*===========================================
+  Aperçu photo au survol
+===========================================*/
+.img-preview-wrapper {
+    position: relative;
+    display: inline-block;
+}
+.img-thumb {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    cursor: zoom-in;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.img-preview-wrapper:hover .img-thumb {
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+.img-preview-zoom {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(101, 67, 33, 0.45);
+    border: 3px solid rgba(197, 157, 133, 0.6);
+    pointer-events: none;
+}
+.img-preview-zoom img {
+    width: 380px;
+    height: 380px;
+    object-fit: cover;
+    display: block;
+}
+.img-preview-wrapper:hover .img-preview-zoom {
+    display: block;
+    animation: fadeInZoom 0.25s ease forwards;
+}
+@keyframes fadeInZoom {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.88); }
+    to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+
+
+/*=================================================================
+  BOUTON RESET HISTORIQUE
+  ===============================================================*/
+/* ── Bouton Reset Historique ── */
+.btn-reset-history {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #8B0000 0%, #c0392b 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 14px 32px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(139, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Effet de brillance au survol */
+.btn-reset-history::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-reset-history:hover::before {
+    left: 100%;
+}
+
+.btn-reset-history:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(139, 0, 0, 0.45);
+    background: linear-gradient(135deg, #a00000 0%, #e74c3c 100%);
+    color: white;
+}
+
+.btn-reset-history:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(139, 0, 0, 0.3);
+}
+
+.btn-reset-history i {
+    font-size: 1.1rem;
+    transition: transform 0.4s ease;
+}
+
+.btn-reset-history:hover i {
+    transform: rotate(180deg);
 }

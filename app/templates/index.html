@@ -7,20 +7,17 @@
     
     <!-- COMMAND CENTER : Filtres Combinés -->
     <section class="command-center text-center">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h3 mb-0">Mes Recettes</h1>
-            <a href="{{ url_for('main.recipe_new') }}" class="btn-add-recipe">
-                <i class="bi bi-plus-circle-fill"></i> Créer une recette
-            </a>
-        </div>
-		<div class="d-flex gap-2 justify-content-center justify-content-md-end mt-3 mt-md-0">
-            <a href="{{ url_for('main.random_recipe') }}" class="btn btn-magic" title="Qu'est-ce qu'on mange ?">
-                <i class="bi bi-stars"></i> Inspiration
-            </a>
-            <a href="{{ url_for('main.recipe_new') }}" class="btn-add-recipe">
-                <i class="bi bi-plus-circle-fill"></i> Créer
-            </a>
-        </div>
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+			<h1 class="h3 mb-0">Mes Recettes</h1>
+			<div class="d-flex gap-2 align-items-center">
+				<a href="{{ url_for('main.random_recipe') }}" class="btn-magic">
+					<i class="bi bi-stars"></i> Inspiration
+				</a>
+				<a href="{{ url_for('main.recipe_new') }}" class="btn-add-recipe">
+					<i class="bi bi-plus-circle-fill"></i> Créer
+				</a>
+			</div>
+		</div>
 
         <!-- Formulaire Global de Filtrage -->
         <form id="filterForm" action="{{ url_for('main.index') }}" method="GET">

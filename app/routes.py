@@ -452,6 +452,34 @@ def history():
     return render_template('history.html', history=history_entries)
 
 
+@main.route('/history/delete/<int:entry_id>', methods=['POST'])
+@login_required
+def history_delete_entry(entry_id):
+    entry = CookingHistory.query.get_or_404(entry_id)
+    if entry.user_id != current_user.id:
+        return jsonify({'success': False, 'message': 'Non autorisé'}), 403
+    try:
+        db.session.delete(entry)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': 'Erreur technique'}), 500
+
+
+@main.route('/history/clear', methods=['POST'])
+@login_required
+def history_clear():
+    try:
+        CookingHistory.query.filter_by(user_id=current_user.id).delete()
+        db.session.commit()
+        flash("Historique vidé avec succès.", 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash("Erreur lors de la suppression.", 'danger')
+    return redirect(url_for('main.history'))
+
+
 # ============================================================
 #  API — PROTÉGÉES
 # ============================================================

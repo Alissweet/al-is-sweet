@@ -7,6 +7,16 @@
     <div class="text-center mb-5">
         <h1 class="font-playfair text-choco-dark display-4">Souvenirs Gourmands</h1>
         <p class="text-muted">Retrouvez toutes les recettes que vous avez cuisinées.</p>
+        {% if history %}
+        <form action="{{ url_for('main.history_clear') }}" method="POST" id="clearForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        </form>
+        <button type="button" class="btn-reset-history mt-3"
+                data-bs-toggle="modal" data-bs-target="#clearHistoryModal">
+            <i class="bi bi-arrow-counterclockwise"></i>
+            Remettre à zéro
+        </button>
+        {% endif %}
     </div>
 
     {% if history %}
@@ -30,10 +40,11 @@
                     {% else %}
                         <div class="timeline-img-placeholder"><i class="bi bi-egg-fried"></i></div>
                     {% endif %}
-                    
-                    <div>
+
+                    <div class="flex-grow-1">
                         <h5 class="font-playfair mb-1">
-                            <a href="{{ url_for('main.recipe_detail', id=entry.recipe.id) }}" class="text-decoration-none text-choco-dark stretched-link">
+                            <a href="{{ url_for('main.recipe_detail', id=entry.recipe.id) }}" 
+                               class="text-decoration-none text-choco-dark">
                                 {{ entry.recipe.title }}
                             </a>
                         </h5>
@@ -44,6 +55,14 @@
                             {% endif %}
                         </div>
                     </div>
+
+                    <!-- Bouton suppression individuelle -->
+                    <button class="btn btn-link text-danger p-1"
+                            title="Supprimer cette entrée"
+                            style="position: relative; z-index: 2;"
+                            onclick="event.stopPropagation(); openDeleteModal({{ entry.id }}, this)">
+                        <i class="bi bi-x-circle"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -57,4 +76,153 @@
     </div>
     {% endif %}
 </div>
+
+<!-- ═══════════════════════════════════════
+     MODALE CONFIRMATION SUPPRESSION INDIVIDUELLE
+═══════════════════════════════════════ -->
+<div class="modal fade" id="deleteEntryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+
+            <div style="height: 6px; background: linear-gradient(90deg, #8B0000, #c0392b, #e74c3c);"></div>
+
+            <div class="modal-body text-center p-5">
+                <div class="mb-4">
+                    <div style="
+                        width: 80px; height: 80px;
+                        background: linear-gradient(135deg, #fff0f0, #ffe0e0);
+                        border-radius: 50%;
+                        display: flex; align-items: center; justify-content: center;
+                        margin: 0 auto;
+                        box-shadow: 0 4px 20px rgba(139, 0, 0, 0.15);
+                    ">
+                        <i class="bi bi-x-circle" style="font-size: 2rem; color: #c0392b;"></i>
+                    </div>
+                </div>
+
+                <h4 class="font-playfair fw-bold mb-2" style="color: #3e1f00;">
+                    Supprimer cette entrée ?
+                </h4>
+                <p class="text-muted mb-4">
+                    Cette recette sera retirée de votre historique.<br>
+                    <small><i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>Cette action est irréversible.</small>
+                </p>
+
+                <div class="d-flex gap-3 justify-content-center">
+                    <button type="button"
+                            class="btn btn-outline-secondary rounded-pill px-4"
+                            data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-2"></i>Annuler
+                    </button>
+                    <button type="button"
+                            class="btn-reset-history"
+                            id="confirmDeleteEntry">
+                        <i class="bi bi-trash3"></i>
+                        Supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MODALE CONFIRMATION REMISE À ZÉRO
+═══════════════════════════════════════ -->
+<div class="modal fade" id="clearHistoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+
+            <!-- Bandeau dégradé rouge en haut -->
+            <div style="height: 6px; background: linear-gradient(90deg, #8B0000, #c0392b, #e74c3c);"></div>
+
+            <div class="modal-body text-center p-5">
+
+                <!-- Icône dans un cercle -->
+                <div class="mb-4">
+                    <div style="
+                        width: 80px; height: 80px;
+                        background: linear-gradient(135deg, #fff0f0, #ffe0e0);
+                        border-radius: 50%;
+                        display: flex; align-items: center; justify-content: center;
+                        margin: 0 auto;
+                        box-shadow: 0 4px 20px rgba(139, 0, 0, 0.15);
+                    ">
+                        <i class="bi bi-arrow-counterclockwise" style="font-size: 2rem; color: #c0392b;"></i>
+                    </div>
+                </div>
+
+                <h4 class="font-playfair fw-bold mb-2" style="color: #3e1f00;">
+                    Remettre à zéro ?
+                </h4>
+                <p class="text-muted mb-1">
+                    Vous êtes sur le point d'effacer <strong>tout votre historique culinaire</strong>.
+                </p>
+                <p class="small text-muted mb-4">
+                    <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
+                    Cette action est irréversible.
+                </p>
+
+                <div class="d-flex gap-3 justify-content-center">
+                    <button type="button"
+                            class="btn btn-outline-secondary rounded-pill px-4"
+                            data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-2"></i>Annuler
+                    </button>
+                    <button type="button"
+                            class="btn-reset-history"
+                            onclick="document.getElementById('clearForm').submit()">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                        Tout effacer
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ── Suppression individuelle avec modale ──
+let _currentEntryId = null;
+let _currentEntryBtn = null;
+
+function openDeleteModal(entryId, btn) {
+    _currentEntryId = entryId;
+    _currentEntryBtn = btn;
+    const modal = new bootstrap.Modal(document.getElementById('deleteEntryModal'));
+    modal.show();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('confirmDeleteEntry').addEventListener('click', function() {
+        if (!_currentEntryId) return;
+
+        const csrfToken = document.querySelector('input[name="csrf_token"]')?.value ||
+                          document.querySelector('meta[name="csrf-token"]')?.content;
+
+        fetch(`/history/delete/${_currentEntryId}`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken }
+        })
+        .then(r => r.json())
+        .then(data => {
+            bootstrap.Modal.getInstance(document.getElementById('deleteEntryModal')).hide();
+            if (data.success) {
+                const item = _currentEntryBtn.closest('.timeline-item');
+                item.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                item.style.opacity = '0';
+                item.style.transform = 'translateX(20px)';
+                setTimeout(() => item.remove(), 300);
+            } else {
+                alert("Impossible de supprimer cette entrée.");
+            }
+        })
+        .catch(() => alert("Erreur réseau."));
+    });
+});
+</script>
 {% endblock %}

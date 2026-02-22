@@ -31,25 +31,35 @@
         
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('main.index') }}">
-                        <i class="bi bi-house-heart"></i>
-                        <span>Accueil</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('main.all_recipes') }}">
-                        <i class="bi bi-journal-text"></i>
-                        <span>Toutes mes recettes</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#settingsModal">
-                        <i class="bi bi-gear"></i>
-                        <span>Paramètres</span>
-                    </a>
-                </li>
-            </ul>
+				<li class="nav-item">
+					<a class="nav-link-premium {{ 'active' if request.endpoint == 'main.index' else '' }}" 
+					   href="{{ url_for('main.index') }}">
+						<i class="bi bi-house-heart"></i>
+						<span>Accueil</span>
+					</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link-premium {{ 'active' if request.endpoint == 'main.all_recipes' else '' }}" 
+					   href="{{ url_for('main.all_recipes') }}">
+						<i class="bi bi-journal-text"></i>
+						<span>Toutes mes recettes</span>
+					</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link-premium {{ 'active' if request.endpoint == 'main.history' else '' }}" 
+					   href="{{ url_for('main.history') }}">
+						<i class="bi bi-calendar-check"></i>
+						<span>Historique</span>
+					</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link-premium" href="#" 
+					   data-bs-toggle="modal" data-bs-target="#settingsModal">
+						<i class="bi bi-gear"></i>
+						<span>Paramètres</span>
+					</a>
+				</li>
+			</ul>
             
             <div class="navbar-actions">
                 <!-- Smart Search Bar -->

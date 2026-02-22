@@ -113,11 +113,21 @@
                         <td>
                             {% if recipe.image %}
                                 {% if recipe.image.startswith('http') %}
-                                    <img src="{{ recipe.image }}" alt="{{ recipe.title }}" 
-                                         class="rounded shadow-sm" style="width: 70px; height: 70px; object-fit: cover;">
+                                    <div class="img-preview-wrapper">
+                                        <img src="{{ recipe.image }}" alt="{{ recipe.title }}" 
+                                             class="rounded shadow-sm img-thumb">
+                                        <div class="img-preview-zoom">
+                                            <img src="{{ recipe.image }}" alt="{{ recipe.title }}">
+                                        </div>
+                                    </div>
                                 {% else %}
-                                    <img src="{{ url_for('static', filename='uploads/' + recipe.image) }}" alt="{{ recipe.title }}" 
-                                         class="rounded shadow-sm" style="width: 70px; height: 70px; object-fit: cover;">
+                                    <div class="img-preview-wrapper">
+                                        <img src="{{ url_for('static', filename='uploads/' + recipe.image) }}" alt="{{ recipe.title }}" 
+                                             class="rounded shadow-sm img-thumb">
+                                        <div class="img-preview-zoom">
+                                            <img src="{{ url_for('static', filename='uploads/' + recipe.image) }}" alt="{{ recipe.title }}">
+                                        </div>
+                                    </div>
                                 {% endif %}
                             {% else %}
                                 <div class="img-placeholder img-placeholder-thumb">
@@ -246,6 +256,7 @@
 {% endblock %}
 
 {% block scripts %}
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
