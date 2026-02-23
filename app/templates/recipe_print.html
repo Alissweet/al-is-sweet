@@ -214,20 +214,27 @@
 
         /* ═══════════════════════════════════════════
            TWO-COLUMN LAYOUT
+           WeasyPrint : on utilise display:table
+           car flexbox provoque des sauts de page
+           imprévisibles
         ═══════════════════════════════════════════ */
         .two-col {
-            display: flex;
-            gap: 24px;
+            display: table;
+            width: 100%;
+            table-layout: fixed;
             margin-bottom: 28px;
-            align-items: flex-start;
+            border-spacing: 24px 0;
         }
 
         .col-ingredients {
-            flex: 0 0 38%;
+            display: table-cell;
+            width: 38%;
+            vertical-align: top;
         }
 
         .col-steps {
-            flex: 1;
+            display: table-cell;
+            vertical-align: top;
         }
 
         /* ═══════════════════════════════════════════
@@ -266,11 +273,10 @@
         }
 
         .ingredient-item {
-            display: flex;
-            align-items: baseline;
+            display: table;
+            width: 100%;
             padding: 5px 0;
             border-bottom: 1px dashed var(--border);
-            gap: 8px;
         }
 
         .ingredient-item:last-child {
@@ -278,22 +284,25 @@
         }
 
         .ingredient-qty {
+            display: table-cell;
             font-weight: bold;
             color: var(--terracotta-dark);
             font-size: 9.5pt;
-            min-width: 40px;
+            width: 40px;
             text-align: right;
-            flex-shrink: 0;
+            padding-right: 6px;
         }
 
         .ingredient-unit {
+            display: table-cell;
             color: var(--muted);
             font-size: 8.5pt;
-            min-width: 22px;
-            flex-shrink: 0;
+            width: 28px;
+            padding-right: 4px;
         }
 
         .ingredient-name {
+            display: table-cell;
             color: var(--text);
             font-size: 9.5pt;
         }
@@ -302,31 +311,31 @@
            STEPS
         ═══════════════════════════════════════════ */
         .step-item {
-            display: flex;
-            gap: 14px;
+            display: table;
+            width: 100%;
             margin-bottom: 16px;
             page-break-inside: avoid;
-            align-items: flex-start;
         }
 
         .step-number {
-            width: 28px;
+            display: table-cell;
+            width: 32px;
             height: 28px;
             background: var(--terracotta);
             color: white;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            text-align: center;
+            vertical-align: top;
+            padding-top: 5px;
             font-weight: bold;
             font-size: 10pt;
-            flex-shrink: 0;
-            margin-top: 1px;
             font-family: Georgia, serif;
         }
 
         .step-content {
-            flex: 1;
+            display: table-cell;
+            vertical-align: top;
+            padding-left: 14px;
         }
 
         .step-instruction {

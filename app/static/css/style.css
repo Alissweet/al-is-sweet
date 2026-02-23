@@ -1538,12 +1538,116 @@ img { max-width: 100%; }
 .table-check-all, .row-check { width: 16px; height: 16px; accent-color: var(--choco-dark); cursor: pointer; }
 
 @media print {
-    .btn, nav, footer, .no-print { display: none !important; }
-    .table { font-size: 10pt; }
-    .table td, .table th { padding: 0.3rem !important; }
-    img { max-width: 40px !important; max-height: 40px !important; }
-    .collapse { display: block !important; }
-    body { background: white !important; }
+    /* ── Éléments à masquer totalement ── */
+    nav,
+    footer,
+    .btn,
+    .no-print,
+    .navbar,
+    .sidebar,
+    .shopping-bar,
+    .action-grid,
+    .servings-control,
+    .servings-modified-badge,
+    .rating-widget,
+    .similar-recipes-section,
+    #shoppingModal,
+    #cookingMode,
+    #deleteModal,
+    #shareModal,
+    #filterForm,
+    .card.mb-4,
+    thead tr th:first-child,
+    thead tr th:nth-child(2),
+    tbody tr td:first-child,
+    tbody tr td:nth-child(2),
+    .img-preview-wrapper,
+    .img-placeholder,
+    [data-bs-toggle],
+    .sortable i,
+    .btn-outline-primary,
+    .btn-outline-secondary,
+    .btn-outline-danger,
+    .table-check-all,
+    .row-check,
+    nav[aria-label],
+    .pagination,
+    .page-item {
+        display: none !important;
+    }
+
+    /* ── Mise en page générale ── */
+    body {
+        background: white !important;
+        color: #3e2723 !important;
+        font-size: 9pt !important;
+        font-family: 'Georgia', serif !important;
+    }
+
+    .container, .container-fluid {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    h1 {
+        font-size: 16pt !important;
+        margin-bottom: 4px !important;
+        color: #3e2723 !important;
+    }
+
+    /* ── Tableau ── */
+    .table {
+        width: 100% !important;
+        font-size: 8.5pt !important;
+        border-collapse: collapse !important;
+    }
+
+    .table td, .table th {
+        padding: 6px 8px !important;
+        border: 1px solid #e8d5c4 !important;
+        vertical-align: middle !important;
+    }
+
+    thead {
+        background: #3e2723 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    thead th {
+        color: white !important;
+        font-weight: bold !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    tbody tr:nth-child(even) {
+        background: #fdf6f0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* ── Badges ── */
+    .badge {
+        border: 1px solid currentColor !important;
+        padding: 2px 6px !important;
+        font-size: 7.5pt !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* ── Images ── */
+    img {
+        max-width: 50px !important;
+        max-height: 50px !important;
+        object-fit: cover !important;
+    }
+
+    /* ── Sauts de page ── */
+    table { page-break-inside: auto; }
+    tr    { page-break-inside: avoid; }
+    thead { display: table-header-group; }
 }
 
 
