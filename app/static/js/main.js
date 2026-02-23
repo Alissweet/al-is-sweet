@@ -4,11 +4,13 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialisation
+    const saved = JSON.parse(sessionStorage.getItem('selectedRecipes') || '[]');
+    selectedRecipeIds = new Set(saved);
     initAnimations();
     initTooltips();
     initCategoryManagement();
-	autoCloseAlerts();
+    autoCloseAlerts();
+    _syncSelectionUI();
 });
 
 /**
@@ -46,7 +48,7 @@ function initTooltips() {
 }
 
 /**
- * Fermeture automatique des alertes flash après 3 secondes
+ * Fermeture automatique des alertes flash après 2 secondes
  */
 function autoCloseAlerts() {
     const alerts = document.querySelectorAll('.alert');
@@ -57,7 +59,7 @@ function autoCloseAlerts() {
             alert.style.opacity = '0';
             alert.style.transform = 'translateY(-10px)';
             setTimeout(() => alert.remove(), 500);
-        }, 2000); // 3 secondes
+        }, 2000); // 2 secondes
     });
 }
 
@@ -74,7 +76,6 @@ function formatNumber(num, decimals = 1) {
  * ========================================
  */
 function initCategoryManagement() {
-    console.log('🔧 Initialisation de la gestion des catégories');
     
     // Utiliser la délégation d'événements sur le document pour capturer tous les événements
     // même si les éléments sont ajoutés dynamiquement
@@ -82,7 +83,6 @@ function initCategoryManagement() {
     // Gestion de l'ajout de catégorie
     document.addEventListener('submit', function(e) {
         if (e.target && e.target.id === 'formAjoutCategorie') {
-            console.log('📝 Formulaire d\'ajout détecté');
             e.preventDefault();
             e.stopPropagation();
             handleAddCategory(e);
@@ -92,7 +92,6 @@ function initCategoryManagement() {
     // Gestion de la modification de catégorie
     document.addEventListener('submit', function(e) {
         if (e.target && e.target.classList.contains('formEditCategorie')) {
-            console.log('✏️ Formulaire d\'édition détecté');
             e.preventDefault();
             e.stopPropagation();
             handleEditCategory(e);
@@ -102,7 +101,6 @@ function initCategoryManagement() {
     // Gestion de la suppression de catégorie
     document.addEventListener('click', function(e) {
         if (e.target.closest('.btnDeleteCategory')) {
-            console.log('🗑️ Bouton de suppression détecté');
             e.preventDefault();
             e.stopPropagation();
             const btn = e.target.closest('.btnDeleteCategory');
@@ -115,28 +113,22 @@ function initCategoryManagement() {
  * Ajouter une catégorie
  */
 function handleAddCategory(e) {
-    console.log('📝 handleAddCategory appelé');
     
     const form = e.target;
     const formData = new FormData(form);
-    
-    console.log('📤 Envoi des données:', formData.get('category_name'));
     
     fetch('/settings/category/add', {
         method: 'POST',
         body: formData
     })
     .then(response => {
-        console.log('📥 Réponse reçue:', response.status);
+        if (!response.ok) throw new Error(`Erreur serveur : ${response.status}`);
         return response.json();
     })
     .then(data => {
-        console.log('✅ Données JSON:', data);
         if (data.success) {
             showMessage(data.message, 'success');
-            // Vider le champ input
             form.reset();
-            // Recharger la page pour afficher la nouvelle catégorie
             setTimeout(() => {
                 window.location.href = window.location.href.split('#')[0] + '#modalCategories';
                 window.location.reload();
@@ -155,24 +147,21 @@ function handleAddCategory(e) {
  * Modifier une catégorie
  */
 function handleEditCategory(e) {
-    console.log('✏️ handleEditCategory appelé');
     
     const form = e.target;
     const formData = new FormData(form);
     const categoryId = form.dataset.categoryId;
-    
-    console.log('📤 Modification catégorie ID:', categoryId, 'Nouveau nom:', formData.get('new_name'));
-    
+    if (!categoryId) return showMessage('ID de catégorie manquant', 'danger');
+
     fetch(`/settings/category/edit/${categoryId}`, {
         method: 'POST',
         body: formData
     })
     .then(response => {
-        console.log('📥 Réponse reçue:', response.status);
+        if (!response.ok) throw new Error(`Erreur serveur : ${response.status}`);
         return response.json();
     })
     .then(data => {
-        console.log('✅ Données JSON:', data);
         if (data.success) {
             showMessage(data.message, 'success');
             // Recharger la page pour afficher les modifications
@@ -225,7 +214,10 @@ function handleDeleteCategory(button) {
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error(`Erreur serveur : ${response.status}`);
+            return response.json();
+        })
         .then(data => {
             modal.hide();
             if (data.success) {
@@ -257,10 +249,14 @@ function showMessage(message, type = 'info') {
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
     alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-    alertDiv.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
+	const textNode = document.createTextNode(message);
+	alertDiv.appendChild(textNode);
+
+	const closeBtn = document.createElement('button');
+	closeBtn.type = 'button';
+	closeBtn.className = 'btn-close';
+	closeBtn.setAttribute('data-bs-dismiss', 'alert');
+	alertDiv.appendChild(closeBtn);
     
     document.body.appendChild(alertDiv);
     
@@ -276,32 +272,7 @@ function showMessage(message, type = 'info') {
  * ═══════════════════════════════════════════════
  */
 
-let selectedRecipeIds = new Set(
-    JSON.parse(sessionStorage.getItem('selectedRecipes') || '[]')
-);
-
-document.addEventListener('DOMContentLoaded', function() {
-    _syncSelectionUI();
-});
-
-function handleCardClick(event, recipeId, recipeUrl) {
-    if (selectedRecipeIds.size > 0) {
-        const checkEl = document.getElementById('check-' + recipeId);
-        toggleRecipeSelect(recipeId, checkEl);
-    } else {
-        window.location = recipeUrl;
-    }
-}
-
-function toggleRecipeSelect(recipeId, el) {
-    if (selectedRecipeIds.has(recipeId)) {
-        selectedRecipeIds.delete(recipeId);
-    } else {
-        selectedRecipeIds.add(recipeId);
-    }
-    _saveSelection();
-    _syncSelectionUI();
-}
+let selectedRecipeIds = new Set();
 
 function toggleAllRows(masterCheckbox) {
     document.querySelectorAll('.row-check').forEach(cb => {
@@ -315,7 +286,7 @@ function toggleAllRows(masterCheckbox) {
             cb.checked = false;
         }
     });
-    _saveSelection();
+	_saveSelection();
     _syncSelectionUI();
 }
 
@@ -366,18 +337,6 @@ function _syncSelectionUI() {
         }
     }
     if (countEl) countEl.textContent = count;
-
-    document.querySelectorAll('[id^="check-"]').forEach(circle => {
-        const id = parseInt(circle.id.replace('check-', ''));
-        const card = document.getElementById('card-' + id);
-        if (selectedRecipeIds.has(id)) {
-            circle.classList.add('active');
-            card?.classList.add('card-selected');
-        } else {
-            circle.classList.remove('active');
-            card?.classList.remove('card-selected');
-        }
-    });
 
     document.querySelectorAll('.row-check').forEach(cb => {
         const row = cb.closest('tr');
@@ -472,7 +431,10 @@ function rateRecipe(button) {
         },
         body: `rating=${value}`
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) throw new Error(`Erreur serveur : ${response.status}`);
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             updateRatingUI(button, data.rating);
@@ -555,13 +517,20 @@ function markAsCooked(recipeId) {
             'X-CSRFToken': csrfToken
         }
     })
-    .then(r => r.json())
+    .then(r => {
+        if (!r.ok) throw new Error(`Erreur serveur : ${r.status}`);
+        return r.json();
+    })
     .then(data => {
         if (data.success) {
             showMessage(data.message, 'success');
         } else {
             showMessage(data.message, 'danger');
         }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        showMessage('Impossible de marquer la recette comme cuisinée.', 'danger');
     });
 }
 
@@ -569,10 +538,8 @@ function markAsCooked(recipeId) {
  * Réouvrir la modale après rechargement
  */
 window.addEventListener('load', function() {
-    console.log('🔄 Page chargée, hash actuel:', window.location.hash);
     // Vérifier les deux possibilités d'ancre
     if (window.location.hash === '#settingsModal' || window.location.hash === '#modalCategories') {
-        console.log('🔓 Réouverture de la modale...');
         const modalElement = document.getElementById('settingsModal');
         if (modalElement) {
             const modal = new bootstrap.Modal(modalElement);

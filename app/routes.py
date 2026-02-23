@@ -840,7 +840,8 @@ def recipe_pdf(id):
         return redirect(url_for('main.index'))
 
     # Rendre le template HTML
-    html_string = render_template('recipe_print.html', recipe=recipe)
+    from datetime import datetime
+    html_string = render_template('recipe_print.html', recipe=recipe, now=datetime.now(), base_url=request.host_url)
 
     # Générer le PDF avec WeasyPrint
     font_config = FontConfiguration()
@@ -976,21 +977,3 @@ def toggle_favorite(id):
         db.session.rollback()
         logger.error(f"Erreur favori: {e}")
         return jsonify({'success': False, 'message': 'Erreur technique'}), 500
-
-
-# ============================================================
-#  CONTEXT PROCESSOR
-# ============================================================
-
-@main.context_processor
-def inject_categories():
-    def get_all_categories():
-        try:
-            if current_user.is_authenticated:
-                return Category.query.filter_by(
-                    user_id=current_user.id).order_by(Category.name).all()
-            return []
-        except Exception as e:
-            logger.error(f"Erreur context processor: {e}")
-            return []
-    return dict(get_all_categories=get_all_categories)

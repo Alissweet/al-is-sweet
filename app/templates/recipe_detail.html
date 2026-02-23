@@ -433,7 +433,15 @@
         document.getElementById('servingsDisplay').textContent = currentServings;
         document.getElementById('modalServings').textContent = currentServings;
         
-        const ratio = currentServings / baseServings;
+		const badge = document.getElementById('servingsBadge');
+		const ratio = currentServings / baseServings;
+		if (currentServings !== baseServings) {
+			badge.classList.remove('d-none');
+			document.getElementById('servingsRatio').textContent = 
+				`×${ratio.toFixed(2).replace('.00','')}`;
+		} else {
+			badge.classList.add('d-none');
+		}
         
         // Mise à jour des quantités dans la liste
         document.querySelectorAll('.ingredient-text').forEach(item => {
@@ -446,6 +454,19 @@
             }
         });
     }
+	
+	function resetServings() {
+		currentServings = baseServings;
+		document.getElementById('servingsDisplay').textContent = currentServings;
+		document.getElementById('modalServings').textContent = currentServings;
+		document.querySelectorAll('.ingredient-text').forEach(item => {
+			const baseQty = parseFloat(item.dataset.baseQty);
+			if (baseQty > 0) {
+				item.querySelector('.qty-display').textContent = baseQty % 1 === 0 ? baseQty : baseQty.toFixed(1);
+			}
+		});
+		document.getElementById('servingsBadge').classList.add('d-none');
+	}
 
     // --- GESTION DU MODE CUISINE (WIZARD) ---
     let currentStep = 1;

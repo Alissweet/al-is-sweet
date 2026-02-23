@@ -3,6 +3,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from flask_mail import Message
 from app import db, mail
 from app.models import User
+from urllib.parse import urlparse
 import re
 import logging
 
@@ -35,7 +36,9 @@ def login():
             login_user(user, remember=remember)
             flash(f'Ravi de vous revoir, {user.username} !', 'success')
             next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('main.index'))
+            if next_page and urlparse(next_page).netloc == '':
+                return redirect(next_page)
+            return redirect(url_for('main.index'))
         
         flash('Email ou mot de passe incorrect.', 'danger')
         

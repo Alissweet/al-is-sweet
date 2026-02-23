@@ -307,10 +307,10 @@
                 let aVal, bVal;
 
                 switch(column) {
-                    case 'title':
-                        aVal = a.querySelector('td:nth-child(3)').textContent.trim();
-                        bVal = b.querySelector('td:nth-child(3)').textContent.trim();
-                        break;
+                    case 'time':
+						aVal = parseInt(a.querySelector('td:nth-child(6)').textContent.match(/\d+/)[0]);
+						bVal = parseInt(b.querySelector('td:nth-child(6)').textContent.match(/\d+/)[0]);
+						break;
                     case 'category':
                         aVal = a.dataset.category;
                         bVal = b.dataset.category;
@@ -320,9 +320,9 @@
                         bVal = parseInt(b.querySelector('td:nth-child(5)').textContent.match(/\d+/)[0]);
                         break;
                     case 'carbs':
-                        aVal = parseInt(a.querySelector('td:nth-child(6)').textContent.match(/\d+/)[0]);
-                        bVal = parseInt(b.querySelector('td:nth-child(6)').textContent.match(/\d+/)[0]);
-                        break;
+						aVal = parseInt(a.querySelector('td:nth-child(7)').textContent.match(/\d+/)[0]);
+						bVal = parseInt(b.querySelector('td:nth-child(7)').textContent.match(/\d+/)[0]);
+						break;
                     case 'ingredients':
                         aVal = a.querySelector('td:nth-child(4)').textContent.match(/\d+/)[0];
                         bVal = b.querySelector('td:nth-child(4)').textContent.match(/\d+/)[0];
@@ -347,39 +347,456 @@
         });
     });
 
-    // Export PDF
-    function exportToPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('l', 'mm', 'a4');
+	// ═══════════════════════════════════════════════════════════════
+	//  EXPORT PDF — Al' is Sweet
+	//  Remplace la fonction exportToPDF() dans all_recipes.html
+	//  Dépendances déjà présentes : jsPDF 2.5.1 + jsPDF-AutoTable 3.5.31
+	// ═══════════════════════════════════════════════════════════════
 
-        doc.setFontSize(18);
-        doc.text("Toutes mes recettes - Al' is Sweet", 14, 20);
-        doc.setFontSize(10);
-        doc.text('Généré le ' + new Date().toLocaleDateString('fr-FR'), 14, 26);
+	function exportToPDF() {
+		const { jsPDF } = window.jspdf;
+		const doc = new jsPDF('p', 'mm', 'a4');
+		const pageW = doc.internal.pageSize.getWidth();   // 210
+		const pageH = doc.internal.pageSize.getHeight();  // 297
+		const margin = 14;
+		const contentW = pageW - margin * 2;
 
-        const tableData = [];
-        tableRows.forEach(row => {
-            if (row.style.display !== 'none') {
-                const cells = row.querySelectorAll('td');
-                tableData.push([
-                    cells[1].querySelector('.fw-bold').textContent,
-                    cells[2].textContent.trim(),
-                    cells[4].textContent.match(/\d+/)[0] + ' min',
-                    cells[5].textContent.match(/\d+/)[0] + 'g'
-                ]);
-            }
-        });
+		// ── PALETTE ──────────────────────────────────────────────
+		const TERRACOTTA   = [197, 157, 133];
+		const TERRACOTTA_D = [160, 120,  88];
+		const CHOCO        = [ 62,  39,  35];
+		const CHOCO_L      = [109,  76,  65];
+		const CREAM        = [253, 246, 240];
+		const CREAM_D      = [245, 233, 219];
+		const GOLD         = [212, 168,  71];
+		const MUTED        = [141, 110,  99];
+		const WHITE        = [255, 255, 255];
+		const BORDER       = [220, 200, 185];
+		const SUCCESS_BG   = [232, 245, 232];
+		const SUCCESS_FG   = [ 46, 125,  50];
+		const WARNING_BG   = [255, 243, 220];
+		const WARNING_FG   = [200,  90,   0];
+		const DANGER_BG    = [252, 228, 236];
+		const DANGER_FG    = [198,  40,  40];
+		const INCONTOUR_BG = [255, 253, 210];
+		const INCONTOUR_FG = [160, 110,   0];
 
-        doc.autoTable({
-            head: [['Recette', 'Famille', 'Temps', 'Glucides']],
-            body: tableData,
-            startY: 32,
-            theme: 'grid',
-            headStyles: { fillColor: [197, 157, 133] },
-            styles: { fontSize: 9 }
-        });
+		// ── HELPERS ───────────────────────────────────────────────
+		const sf = (rgb) => doc.setFillColor(...rgb);
+		const sd = (rgb) => doc.setDrawColor(...rgb);
+		const st = (rgb) => doc.setTextColor(...rgb);
+		const ss = (pt)  => doc.setFontSize(pt);
+		const bold   = () => doc.setFont('helvetica', 'bold');
+		const normal = () => doc.setFont('helvetica', 'normal');
+		const italic = () => doc.setFont('helvetica', 'italic');
+		const rr = (x, y, w, h, r, style) => doc.roundedRect(x, y, w, h, r, r, style);
 
-        doc.save('mes-recettes.pdf');
-    }
+		// ── COLLECTE DES DONNÉES VISIBLES ─────────────────────────
+		const rows = [];
+		document.querySelectorAll('#recipesTable tbody tr').forEach(row => {
+			if (row.style.display === 'none') return;
+			const cells = row.querySelectorAll('td');
+
+			const titleEl    = cells[2]?.querySelector('.fw-bold');
+			const diffEl     = cells[2]?.querySelector('.badge');
+			const catEl      = cells[3]?.querySelector('.badge');
+			const timeEl     = cells[5];
+			const carbsEl    = cells[6];
+			const ratingEl   = cells[7];
+			const ingEl      = cells[4];
+
+			const timeMatch  = timeEl?.textContent.match(/\d+/);
+			const carbsMatch = carbsEl?.textContent.match(/[\d.]+/);
+			const ratingSpan = ratingEl?.querySelector('span:not(.text-muted)');
+			const ratingText = ratingSpan?.textContent.trim() || '';
+			const ingMatch   = ingEl?.textContent.match(/(\d+)/);
+			const servMatch  = cells[2]?.textContent.match(/(\d+)\s*pers/);
+
+			rows.push({
+				title:       titleEl?.textContent.trim()  || '—',
+				difficulty:  diffEl?.textContent.trim()   || '',
+				category:    catEl?.textContent.trim()    || '—',
+				time:        timeMatch  ? parseInt(timeMatch[0])    : null,
+				carbs:       carbsMatch ? parseFloat(carbsMatch[0]) : null,
+				rating:      ratingText,
+				servings:    servMatch  ? parseInt(servMatch[1])    : null,
+				ingredients: ingMatch   ? parseInt(ingMatch[0])     : null,
+			});
+		});
+
+		const dateStr = new Date().toLocaleDateString('fr-FR', {
+			year: 'numeric', month: 'long', day: 'numeric'
+		});
+
+		// ════════════════════════════════════════════════════════
+		//  PAGE 1 : COUVERTURE
+		// ════════════════════════════════════════════════════════
+
+		// Fond pleine page chocolat
+		sf(CHOCO);
+		doc.rect(0, 0, pageW, pageH, 'F');
+
+		// Cercles décoratifs discrets
+		sf([80, 50, 45]);
+		doc.circle(pageW + 10, -10, 70, 'F');
+		sf([75, 46, 42]);
+		doc.circle(-15, pageH + 10, 55, 'F');
+
+		// ── Titre ─────────────────────────────────────────────────
+		st(WHITE);
+		ss(34);
+		bold();
+		doc.text("Al' is Sweet", pageW / 2, 70, { align: 'center' });
+
+		// Sous-titre en TERRACOTTA (visible sur fond chocolat)
+		st(TERRACOTTA);
+		ss(12);
+		normal();
+		doc.text('Mon carnet de recettes', pageW / 2, 84, { align: 'center' });
+
+		// Ligne dorée
+		sd(GOLD);
+		doc.setLineWidth(0.8);
+		doc.line(pageW / 2 - 35, 91, pageW / 2 + 35, 91);
+
+		// ── Grand chiffre centré ──────────────────────────────────
+		// Positionné largement en dessous du titre pour éviter tout chevauchement
+		st(WHITE);
+		ss(80);
+		bold();
+		doc.text(String(rows.length), pageW / 2, 165, { align: 'center' });
+
+		// "recette(s)" en dessous du chiffre, espacé
+		st(TERRACOTTA);
+		ss(15);
+		normal();
+		doc.text('recette' + (rows.length > 1 ? 's' : ''), pageW / 2, 183, { align: 'center' });
+
+		// Stats secondaires encore en dessous
+		const validTimes  = rows.filter(r => r.time).map(r => r.time);
+		const avgTime     = validTimes.length
+			? Math.round(validTimes.reduce((a, b) => a + b, 0) / validTimes.length)
+			: null;
+		const categories  = [...new Set(rows.map(r => r.category).filter(c => c && c !== '—'))];
+		const statParts   = [];
+		if (avgTime)           statParts.push(`Temps moyen : ${avgTime} min`);
+		if (categories.length) statParts.push(`${categories.length} famille${categories.length > 1 ? 's' : ''}`);
+
+		if (statParts.length) {
+			st([180, 150, 135]);
+			ss(8.5);
+			italic();
+			doc.text(statParts.join('   ·   '), pageW / 2, 196, { align: 'center' });
+		}
+
+		// ── Bande terracotta en bas ───────────────────────────────
+		sf(TERRACOTTA);
+		doc.rect(0, pageH - 55, pageW, 55, 'F');
+
+		sd(GOLD);
+		doc.setLineWidth(1);
+		doc.line(0, pageH - 55, pageW, pageH - 55);
+
+		st(CHOCO);
+		ss(15);
+		bold();
+		doc.text('Catalogue complet', pageW / 2, pageH - 32, { align: 'center' });
+
+		st(CHOCO);
+		ss(9);
+		normal();
+		doc.text(`Généré le ${dateStr}`, pageW / 2, pageH - 20, { align: 'center' });
+
+		// ════════════════════════════════════════════════════════
+		//  FONCTIONS EN-TÊTE / PIED DE PAGE
+		// ════════════════════════════════════════════════════════
+
+		function drawPageHeader() {
+			sf(CHOCO);
+			doc.rect(0, 0, pageW, 20, 'F');
+			st(WHITE);
+			ss(11);
+			bold();
+			doc.text("Al' is Sweet", margin, 13);
+			st(TERRACOTTA);
+			ss(8);
+			normal();
+			doc.text('— Mon carnet de recettes', margin + 28, 13);
+			st([180, 160, 150]);
+			ss(7);
+			doc.text(dateStr, pageW - margin, 13, { align: 'right' });
+			sd(GOLD);
+			doc.setLineWidth(0.5);
+			doc.line(0, 20, pageW, 20);
+		}
+
+		function drawPageFooter(pageNum, totalPages) {
+			sf(CHOCO);
+			doc.rect(0, pageH - 11, pageW, 11, 'F');
+			st([180, 160, 150]);
+			ss(7);
+			normal();
+			doc.text("Al' is Sweet — Mon carnet de recettes", margin, pageH - 4);
+			doc.text(`${pageNum} / ${totalPages}`, pageW - margin, pageH - 4, { align: 'right' });
+		}
+
+		// ════════════════════════════════════════════════════════
+		//  PAGE 2+ : TABLEAU
+		// ════════════════════════════════════════════════════════
+		doc.addPage();
+		drawPageHeader();
+
+		let curY = 28;
+
+		// Titre + compteur
+		st(CHOCO);
+		ss(15);
+		bold();
+		doc.text('Toutes mes recettes', margin, curY);
+		curY += 7;
+
+		const activeFilters = [];
+		const searchVal = document.getElementById('searchInput')?.value?.trim();
+		const catVal    = document.getElementById('categoryFilter')?.value;
+		const diffVal   = document.getElementById('difficultyFilter')?.value;
+		if (searchVal) activeFilters.push(`Recherche : "${searchVal}"`);
+		if (catVal)    activeFilters.push(`Famille : ${catVal}`);
+		if (diffVal)   activeFilters.push(`Difficulté : ${diffVal}`);
+
+		st(MUTED);
+		ss(8);
+		if (activeFilters.length) {
+			italic();
+			doc.text('Filtres actifs : ' + activeFilters.join(' · '), margin, curY);
+		} else {
+			normal();
+			doc.text(`${rows.length} recette${rows.length > 1 ? 's' : ''} au total`, margin, curY);
+		}
+		curY += 8;
+
+		// ── Colonnes ──────────────────────────────────────────────
+		// Total = 182mm  →  65 + 33 + 24 + 20 + 20 + 20 = 182 ✓
+		const COL = [
+			{ label: 'Recette',    w: 65, align: 'left'   },
+			{ label: 'Famille',    w: 33, align: 'center' },
+			{ label: 'Difficulté', w: 24, align: 'center' },
+			{ label: 'Temps',      w: 20, align: 'center' },
+			{ label: 'Glucides',   w: 20, align: 'center' },
+			{ label: 'Avis',       w: 20, align: 'center' },
+		];
+		COL[0].x = margin;
+		for (let i = 1; i < COL.length; i++) COL[i].x = COL[i-1].x + COL[i-1].w;
+
+		const ROW_H  = 17;   // Hauteur augmentée pour accueillir 2 lignes de titre
+		const HEAD_H = 10;
+
+		function drawTableHead(y) {
+			sf(CHOCO);
+			doc.rect(margin, y, contentW, HEAD_H, 'F');
+			COL.forEach(col => {
+				st(WHITE);
+				ss(7.5);
+				bold();
+				const tx = col.align === 'center' ? col.x + col.w / 2 : col.x + 3;
+				doc.text(col.label, tx, y + 6.8, { align: col.align });
+			});
+			return y + HEAD_H;
+		}
+
+		curY = drawTableHead(curY);
+
+		// ── Helpers badges ────────────────────────────────────────
+		function drawBadge(text, colX, colW, rowY, rowH, bgColor, fgColor, fontSize) {
+			ss(fontSize);
+			doc.setFont('helvetica', 'normal'); // reset avant mesure
+			const textW = doc.getTextWidth(text);
+			const badgeW = Math.min(colW - 4, Math.max(textW + 6, 14));
+			const bx = colX + (colW - badgeW) / 2;
+			const by = rowY + (rowH - 5.5) / 2;
+			sf(bgColor);
+			sd(fgColor);
+			doc.setLineWidth(0.35);
+			rr(bx, by, badgeW, 5.5, 1.5, 'FD');
+			st(fgColor);
+			bold();
+			doc.text(text, colX + colW / 2, rowY + rowH / 2 + 1.2, { align: 'center' });
+		}
+
+		function diffColors(d) {
+			if (d === 'Facile')    return { bg: SUCCESS_BG, fg: SUCCESS_FG };
+			if (d === 'Difficile') return { bg: DANGER_BG,  fg: DANGER_FG  };
+			return { bg: WARNING_BG, fg: WARNING_FG };
+		}
+
+		function ratingColors(txt) {
+			if (!txt) return null;
+			const t = txt.toLowerCase();
+			if (t.includes('incontournable'))               return { bg: INCONTOUR_BG, fg: INCONTOUR_FG };
+			if (t.includes('très bien'))                    return { bg: SUCCESS_BG,   fg: SUCCESS_FG   };
+			if (t.includes('bien') && !t.includes('très'))  return { bg: [225, 240, 255], fg: [30, 100, 190] };
+			if (t.includes('bof'))                          return { bg: WARNING_BG,   fg: WARNING_FG   };
+			if (t.includes('revoir'))                       return { bg: DANGER_BG,    fg: DANGER_FG    };
+			return null;
+		}
+
+		// ── Lignes ────────────────────────────────────────────────
+		rows.forEach((r, idx) => {
+			// Saut de page si besoin
+			if (curY + ROW_H > pageH - 18) {
+				doc.addPage();
+				drawPageHeader();
+				curY = 26;
+				curY = drawTableHead(curY);
+			}
+
+			// Fond alterné
+			sf(idx % 2 === 0 ? WHITE : CREAM);
+			doc.rect(margin, curY, contentW, ROW_H, 'F');
+
+			// Séparateur bas
+			sd(BORDER);
+			doc.setLineWidth(0.15);
+			doc.line(margin, curY + ROW_H, margin + contentW, curY + ROW_H);
+
+			const midY = curY + ROW_H / 2;
+
+			// Col 0 — Titre sur 2 lignes max + sous-texte
+			st(CHOCO);
+			ss(8.5);
+			bold();
+			// splitTextToSize coupe proprement sur la largeur disponible
+			const titleLines = doc.splitTextToSize(r.title, COL[0].w - 6);
+			const maxLines   = 2;
+			const displayed  = titleLines.slice(0, maxLines);
+			// Si le titre a été coupé à 2 lignes et qu'il y en avait plus, ajouter "…"
+			if (titleLines.length > maxLines) {
+				displayed[maxLines - 1] = displayed[maxLines - 1].replace(/\s?\S+$/, '') + '…';
+			}
+			// Positionnement vertical : centrer le bloc titre + sous-texte dans la ligne
+			const lineH   = 4.5;  // interligne entre les 2 lignes de titre
+			const subH    = 4.5;  // espace pour le sous-texte
+			const blockH  = displayed.length * lineH + subH;
+			const blockTop = curY + (ROW_H - blockH) / 2 + 1;
+			displayed.forEach((line, i) => {
+				doc.text(line, COL[0].x + 3, blockTop + i * lineH);
+			});
+
+			const sub = [
+				r.ingredients !== null ? `${r.ingredients} ingréd.` : null,
+				r.servings    !== null ? `${r.servings} pers.`       : null,
+			].filter(Boolean).join('  ·  ');
+			if (sub) {
+				st(MUTED);
+				ss(6.5);
+				normal();
+				doc.text(sub, COL[0].x + 3, blockTop + displayed.length * lineH + 1.5);
+			}
+
+			// Col 1 — Famille (taille police réduite pour que le texte complet rentre toujours)
+			if (r.category && r.category !== '—') {
+				// On réduit la police jusqu'à ce que le texte rentre dans la colonne
+				let catFontSize = 7;
+				doc.setFont('helvetica', 'bold');
+				ss(catFontSize);
+				while (doc.getTextWidth(r.category) > COL[1].w - 6 && catFontSize > 4.5) {
+					catFontSize -= 0.5;
+					ss(catFontSize);
+				}
+				const measuredW = doc.getTextWidth(r.category);
+				const catW = Math.min(COL[1].w - 2, measuredW + 6);
+				const cx = COL[1].x + (COL[1].w - catW) / 2;
+				const cy = curY + (ROW_H - 5.5) / 2;
+				sf(CREAM_D);
+				sd(BORDER);
+				doc.setLineWidth(0.3);
+				rr(cx, cy, catW, 5.5, 1.5, 'FD');
+				st(CHOCO_L);
+				// Centrage vertical ancré sur cy (haut du badge)
+				doc.text(r.category, COL[1].x + COL[1].w / 2, cy + 5.5 / 2 + 1, { align: 'center' });
+			}
+
+			// Col 2 — Difficulté
+			if (r.difficulty) {
+				const dc = diffColors(r.difficulty);
+				drawBadge(r.difficulty, COL[2].x, COL[2].w, curY, ROW_H, dc.bg, dc.fg, 6.5);
+			}
+
+			// Col 3 — Temps
+			if (r.time !== null) {
+				st(CHOCO);
+				ss(10);
+				bold();
+				doc.text(String(r.time), COL[3].x + COL[3].w / 2, curY + ROW_H / 2 - 0.5, { align: 'center' });
+				st(MUTED);
+				ss(6);
+				normal();
+				doc.text('min', COL[3].x + COL[3].w / 2, curY + ROW_H / 2 + 4.5, { align: 'center' });
+			} else {
+				st(MUTED); ss(8); normal();
+				doc.text('—', COL[3].x + COL[3].w / 2, curY + ROW_H / 2 + 1, { align: 'center' });
+			}
+
+			// Col 4 — Glucides
+			if (r.carbs !== null) {
+				st(TERRACOTTA_D);
+				ss(10);
+				bold();
+				doc.text(String(Math.round(r.carbs)), COL[4].x + COL[4].w / 2, curY + ROW_H / 2 - 0.5, { align: 'center' });
+				st(MUTED);
+				ss(6);
+				normal();
+				doc.text('g', COL[4].x + COL[4].w / 2, curY + ROW_H / 2 + 4.5, { align: 'center' });
+			} else {
+				st(MUTED); ss(8); normal();
+				doc.text('—', COL[4].x + COL[4].w / 2, curY + ROW_H / 2 + 1, { align: 'center' });
+			}
+
+			// Col 5 — Avis (taille police réduite si texte long, ex: "Incontournable")
+			const ratingClean = r.rating.replace(/[\u{1F300}-\u{1FFFF}\u2728]/gu, '').trim();
+			if (ratingClean) {
+				const rc = ratingColors(r.rating);
+				if (rc) {
+					// Calcul dynamique de la police pour que le texte rentre dans la colonne
+					let rFontSize = 7;
+					doc.setFont('helvetica', 'bold');
+					ss(rFontSize);
+					while (doc.getTextWidth(ratingClean) > COL[5].w - 6 && rFontSize > 4.5) {
+						rFontSize -= 0.5;
+						ss(rFontSize);
+					}
+					const rTextW  = doc.getTextWidth(ratingClean);
+					const badgeW  = Math.min(COL[5].w - 2, rTextW + 6);
+					const bx = COL[5].x + (COL[5].w - badgeW) / 2;
+					const by = curY + (ROW_H - 5.5) / 2;
+					sf(rc.bg);
+					sd(rc.fg);
+					doc.setLineWidth(0.35);
+					rr(bx, by, badgeW, 5.5, 1.5, 'FD');
+					st(rc.fg);
+					// Centrage vertical : milieu du badge = by + 5.5/2, texte baseline = milieu + ~1
+					doc.text(ratingClean, COL[5].x + COL[5].w / 2, by + 5.5 / 2 + 1, { align: 'center' });
+				} else {
+					st(MUTED); ss(7.5); normal();
+					doc.text(ratingClean, COL[5].x + COL[5].w / 2, midY + 1, { align: 'center' });
+				}
+			} else {
+				st(MUTED); ss(8); normal();
+				doc.text('—', COL[5].x + COL[5].w / 2, midY + 1, { align: 'center' });
+			}
+
+			curY += ROW_H;
+		});
+
+		// ── Pied de page sur toutes les pages ────────────────────
+		const total = doc.internal.getNumberOfPages();
+		for (let p = 1; p <= total; p++) {
+			doc.setPage(p);
+			drawPageFooter(p, total);
+		}
+
+		// ── Sauvegarde ────────────────────────────────────────────
+		const filename = `Al-is-Sweet_recettes_${new Date().toISOString().slice(0, 10)}.pdf`;
+		doc.save(filename);
+	}
 </script>
 {% endblock %}

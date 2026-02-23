@@ -40,7 +40,7 @@ class User(UserMixin, db.Model):
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
             user_id = s.loads(token, salt='password-reset-salt', max_age=expires_sec)['user_id']
-        except:
+        except Exception:
             return None
         return User.query.get(user_id)
 

@@ -5,7 +5,9 @@ load_dotenv()
 
 class Config:
     # ✅ Clé secrète robuste sans fallback lisible
-    SECRET_KEY = os.environ.get('SECRET_KEY') or os.urandom(32)
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    if not SECRET_KEY:
+        raise ValueError("SECRET_KEY non définie dans les variables d'environnement")
 
     # ✅ Correction postgres:// → postgresql:// pour Neon + SQLAlchemy
     _db_url = os.environ.get('DATABASE_URL') or \
