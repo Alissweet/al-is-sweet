@@ -1,9 +1,40 @@
+{% from 'macros.html' import face_rating %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <title>{{ recipe.title }} — Al' is Sweet</title>
     <style>
+
+        /* ═══════════════════════════════════════════
+           POLICES — chargées depuis static/ pour
+           garantir la résolution par WeasyPrint
+           (pas de requête réseau en production)
+        ═══════════════════════════════════════════ */
+        @font-face {
+            font-family: 'Playfair Display';
+            font-style: normal;
+            font-weight: 400;
+            src: url('{{ base_url }}static/fonts/PlayfairDisplay-Regular.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'Playfair Display';
+            font-style: normal;
+            font-weight: 700;
+            src: url('{{ base_url }}static/fonts/PlayfairDisplay-Bold.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'Poppins';
+            font-style: normal;
+            font-weight: 400;
+            src: url('{{ base_url }}static/fonts/Poppins-Regular.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'Poppins';
+            font-style: normal;
+            font-weight: 600;
+            src: url('{{ base_url }}static/fonts/Poppins-SemiBold.ttf') format('truetype');
+        }
 
         /* ═══════════════════════════════════════════
            VARIABLES & RESET
@@ -15,34 +46,61 @@
         }
 
         :root {
-            --terracotta:   #c59d85;
+            --terracotta:      #c59d85;
             --terracotta-dark: #a07858;
-            --choco:        #3e2723;
-            --choco-light:  #6d4c41;
-            --cream:        #fdf6f0;
-            --cream-dark:   #f5e9db;
-            --gold:         #d4a847;
-            --text:         #2c1810;
-            --muted:        #8d6e63;
-            --border:       #e8d5c4;
-            --success:      #5a8a5a;
-            --warning-bg:   #fff8e1;
+            --choco:           #3e2723;
+            --choco-light:     #6d4c41;
+            --cream:           #fdf6f0;
+            --cream-dark:      #f5e9db;
+            --gold:            #d4a847;
+            --text:            #2c1810;
+            --muted:           #8d6e63;
+            --border:          #e8d5c4;
+            --success:         #5a8a5a;
+            --warning-bg:      #fff8e1;
         }
 
         /* ═══════════════════════════════════════════
            PAGE SETUP (WeasyPrint)
+           margin 15mm : zone imprimable sur
+           toutes imprimantes (~5-10mm de sécurité)
+           Le hero déborde via margin négatif.
         ═══════════════════════════════════════════ */
         @page {
             size: A4;
-            margin: 0;
+            margin: 15mm 16mm 20mm;
+
+            /* ── Header répété page 2+ ── */
+            @top-left {
+                content: "Al' is Sweet";
+                font-family: 'Playfair Display', Georgia, serif;
+                font-size: 8pt;
+                color: #c59d85;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+            }
+            @top-right {
+                content: "{{ recipe.title | replace('&', 'et') | replace('"', '') | replace("'", '') }}";
+                font-family: 'Poppins', sans-serif;
+                font-size: 7.5pt;
+                color: #8d6e63;
+            }
+            @bottom-right {
+                content: counter(page) " / " counter(pages);
+                font-family: 'Poppins', sans-serif;
+                font-size: 7pt;
+                color: #8d6e63;
+            }
         }
 
+        /* Première page : pas de header (le hero le remplace) */
         @page :first {
-            margin: 0;
+            @top-left  { content: none; }
+            @top-right { content: none; }
         }
 
         body {
-            font-family: 'Georgia', 'Times New Roman', serif;
+            font-family: 'Poppins', 'Helvetica Neue', sans-serif;
             color: var(--text);
             background: white;
             font-size: 10pt;
@@ -51,10 +109,14 @@
 
         /* ═══════════════════════════════════════════
            HERO BANNER
+           margin négatif pour déborder des marges @page
+           et couvrir toute la largeur du papier
         ═══════════════════════════════════════════ */
         .hero {
             position: relative;
-            width: 100%;
+            width: calc(100% + 32mm);   /* compense 16mm × 2 */
+            margin-left: -16mm;
+            margin-top: -15mm;
             height: 220px;
             overflow: hidden;
             page-break-inside: avoid;
@@ -80,14 +142,14 @@
         .hero-no-image {
             height: 220px;
             background: linear-gradient(135deg, var(--terracotta) 0%, var(--choco) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: table;
+            width: 100%;
         }
 
-        .hero-no-image-icon {
-            font-size: 60pt;
-            color: rgba(255,255,255,0.3);
+        .hero-no-image-inner {
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
         }
 
         .hero-content {
@@ -99,9 +161,9 @@
         }
 
         .hero-category {
-            font-family: 'Georgia', serif;
+            font-family: 'Poppins', sans-serif;
             font-size: 7.5pt;
-            font-weight: normal;
+            font-weight: 600;
             color: rgba(255,255,255,0.8);
             letter-spacing: 3px;
             text-transform: uppercase;
@@ -109,9 +171,9 @@
         }
 
         .hero-title {
-            font-family: 'Georgia', 'Times New Roman', serif;
+            font-family: 'Playfair Display', Georgia, serif;
             font-size: 26pt;
-            font-weight: bold;
+            font-weight: 700;
             color: white;
             line-height: 1.1;
             letter-spacing: -0.5px;
@@ -119,9 +181,9 @@
         }
 
         .hero-title-no-image {
-            font-family: 'Georgia', 'Times New Roman', serif;
+            font-family: 'Playfair Display', Georgia, serif;
             font-size: 26pt;
-            font-weight: bold;
+            font-weight: 700;
             color: white;
             line-height: 1.1;
             text-align: center;
@@ -129,25 +191,20 @@
         }
 
         /* ═══════════════════════════════════════════
-           MAIN CONTENT LAYOUT
-        ═══════════════════════════════════════════ */
-        .content {
-            padding: 0 32px 40px;
-        }
-
-        /* ═══════════════════════════════════════════
            META STRIP
         ═══════════════════════════════════════════ */
         .meta-strip {
-            display: flex;
-            align-items: stretch;
+            display: table;
+            width: calc(100% + 32mm);
+            margin-left: -16mm;
+            table-layout: fixed;
             background: var(--choco);
-            margin: 0 0 24px 0;
+            margin-bottom: 24px;
             border-radius: 0 0 8px 8px;
         }
 
         .meta-item {
-            flex: 1;
+            display: table-cell;
             text-align: center;
             padding: 12px 8px;
             border-right: 1px solid rgba(255,255,255,0.1);
@@ -158,18 +215,19 @@
         }
 
         .meta-label {
+            font-family: 'Poppins', sans-serif;
             font-size: 6.5pt;
             color: rgba(255,255,255,0.55);
             text-transform: uppercase;
             letter-spacing: 1.5px;
             display: block;
             margin-bottom: 3px;
-            font-family: Georgia, serif;
         }
 
         .meta-value {
+            font-family: 'Poppins', sans-serif;
             font-size: 11pt;
-            font-weight: bold;
+            font-weight: 600;
             color: white;
             display: block;
             line-height: 1.2;
@@ -177,6 +235,13 @@
 
         .meta-value.highlight {
             color: var(--gold);
+        }
+
+        /* ═══════════════════════════════════════════
+           MAIN CONTENT
+        ═══════════════════════════════════════════ */
+        .content {
+            padding-bottom: 32px;
         }
 
         /* ═══════════════════════════════════════════
@@ -212,38 +277,38 @@
             color: var(--choco-light);
         }
 
+        .source-block a {
+            color: var(--terracotta-dark);
+            text-decoration: underline;
+        }
+
         /* ═══════════════════════════════════════════
-           TWO-COLUMN LAYOUT
-           WeasyPrint : on utilise display:table
-           car flexbox provoque des sauts de page
-           imprévisibles
+           LAYOUT PLEINE LARGEUR
+           Ingrédients en tableau natif,
+           Étapes en dessous pleine largeur.
         ═══════════════════════════════════════════ */
-        .two-col {
-            display: table;
-            width: 100%;
-            table-layout: fixed;
+        .section-ingredients {
             margin-bottom: 28px;
-            border-spacing: 24px 0;
+            page-break-inside: avoid;
         }
 
-        .col-ingredients {
-            display: table-cell;
-            width: 38%;
-            vertical-align: top;
+        .section-steps {
+            margin-bottom: 28px;
         }
 
-        .col-steps {
-            display: table-cell;
-            vertical-align: top;
+        /* Le heading ne doit jamais rester seul en bas de page :
+           il est solidaire du contenu qui suit. */
+        .section-steps .section-heading {
+            page-break-after: avoid;
         }
 
         /* ═══════════════════════════════════════════
            SECTION HEADINGS
         ═══════════════════════════════════════════ */
         .section-heading {
-            font-family: Georgia, 'Times New Roman', serif;
+            font-family: 'Playfair Display', Georgia, serif;
             font-size: 12pt;
-            font-weight: bold;
+            font-weight: 700;
             color: var(--choco);
             padding-bottom: 6px;
             border-bottom: 2px solid var(--terracotta);
@@ -251,64 +316,67 @@
             letter-spacing: 0.3px;
         }
 
-        .section-heading-icon {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            background: var(--terracotta);
-            border-radius: 50%;
-            vertical-align: middle;
-            margin-right: 8px;
-            margin-bottom: 2px;
-        }
-
         /* ═══════════════════════════════════════════
-           INGREDIENTS
+           INGREDIENTS — vrai tableau HTML natif
+           WeasyPrint gère <table> nativement,
+           bien plus fiable que display:table CSS.
         ═══════════════════════════════════════════ */
         .ingredients-box {
             background: var(--cream);
             border: 1px solid var(--border);
             border-radius: 8px;
-            padding: 16px;
+            overflow: hidden;
         }
 
-        .ingredient-item {
-            display: table;
+        table.ing-table {
             width: 100%;
-            padding: 5px 0;
-            border-bottom: 1px dashed var(--border);
+            border-collapse: collapse;
+            table-layout: fixed;
         }
 
-        .ingredient-item:last-child {
+        table.ing-table td {
+            padding: 7px 12px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+            font-family: 'Poppins', sans-serif;
+            font-size: 9.5pt;
+            line-height: 1.4;
+        }
+
+        table.ing-table tr:last-child td {
             border-bottom: none;
         }
 
-        .ingredient-qty {
-            display: table-cell;
-            font-weight: bold;
-            color: var(--terracotta-dark);
-            font-size: 9.5pt;
-            width: 40px;
-            text-align: right;
-            padding-right: 6px;
+        /* Zèbre discret : rangées paires légèrement plus claires */
+        table.ing-table tr:nth-child(even) td {
+            background: rgba(255, 255, 255, 0.6);
         }
 
-        .ingredient-unit {
-            display: table-cell;
-            color: var(--muted);
-            font-size: 8.5pt;
-            width: 28px;
+        td.ing-qty {
+            font-weight: 600;
+            color: var(--terracotta-dark);
+            text-align: right;
+            white-space: nowrap;
             padding-right: 4px;
         }
 
-        .ingredient-name {
-            display: table-cell;
+        td.ing-unit {
+            color: var(--muted);
+            font-size: 8.5pt;
+            white-space: nowrap;
+            padding-left: 4px;
+            padding-right: 8px;
+        }
+
+        td.ing-name {
             color: var(--text);
-            font-size: 9.5pt;
         }
 
         /* ═══════════════════════════════════════════
            STEPS
+           Numéro : display:table-cell ne supporte pas
+           border-radius sous WeasyPrint → on imbrique
+           un bloc <div> qui reçoit le fond et le rayon.
         ═══════════════════════════════════════════ */
         .step-item {
             display: table;
@@ -317,42 +385,60 @@
             page-break-inside: avoid;
         }
 
-        .step-number {
+        /* Cellule conteneur — transparente, taille fixe */
+        .step-number-cell {
             display: table-cell;
-            width: 32px;
-            height: 28px;
+            width: 30px;
+            vertical-align: top;
+            padding-top: 1px;
+        }
+
+        /* Bloc interne qui reçoit vraiment le style visuel */
+        .step-number {
+            display: block;
+            width: 26px;
+            height: 26px;
             background: var(--terracotta);
             color: white;
-            border-radius: 50%;
+            border-radius: 4px;          /* coins légèrement arrondis, WeasyPrint safe */
             text-align: center;
-            vertical-align: top;
-            padding-top: 5px;
-            font-weight: bold;
+            padding-top: 3px;
+            font-family: 'Playfair Display', Georgia, serif;
+            font-weight: 700;
             font-size: 10pt;
-            font-family: Georgia, serif;
+            line-height: 1.35;
         }
 
         .step-content {
             display: table-cell;
             vertical-align: top;
-            padding-left: 14px;
+            padding-left: 12px;
         }
 
         .step-instruction {
+            font-family: 'Poppins', sans-serif;
             font-size: 9.5pt;
             line-height: 1.65;
             color: var(--text);
         }
 
+        /* Durée d'étape — SVG inline remplace ⏱ */
         .step-duration {
-            display: inline-block;
+            display: table;
             margin-top: 5px;
+            font-family: 'Poppins', sans-serif;
             font-size: 8pt;
             color: var(--muted);
             background: var(--cream-dark);
             border: 1px solid var(--border);
             border-radius: 20px;
             padding: 2px 10px;
+        }
+
+        .step-duration svg {
+            vertical-align: middle;
+            margin-right: 4px;
+            margin-bottom: 1px;
         }
 
         /* ═══════════════════════════════════════════
@@ -368,15 +454,22 @@
         }
 
         .tips-title {
-            font-size: 9pt;
-            font-weight: bold;
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 9.5pt;
+            font-weight: 700;
             color: var(--choco);
             margin-bottom: 7px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
+        }
+
+        .tips-title svg {
+            vertical-align: middle;
+            margin-right: 6px;
+            margin-bottom: 2px;
         }
 
         .tips-text {
+            font-family: 'Poppins', sans-serif;
             font-size: 9.5pt;
             color: var(--choco-light);
             line-height: 1.6;
@@ -384,12 +477,10 @@
         }
 
         /* ═══════════════════════════════════════════
-           RATING BLOCK
+           RATING BLOCK — display:table WeasyPrint safe
         ═══════════════════════════════════════════ */
         .rating-block {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
+            display: table;
             background: var(--cream);
             border: 1px solid var(--border);
             border-radius: 30px;
@@ -397,18 +488,8 @@
             margin-bottom: 20px;
         }
 
-        .rating-emoji {
-            font-size: 18pt;
-        }
-
-        .rating-label {
-            font-size: 9pt;
-            color: var(--choco-light);
-        }
-
-        .rating-label strong {
-            color: var(--choco);
-            font-size: 10pt;
+        .rating-block .rating-face-wrap {
+            display: table-row;
         }
 
         /* ═══════════════════════════════════════════
@@ -423,6 +504,7 @@
             background: var(--cream-dark);
             border: 1px solid var(--border);
             color: var(--choco-light);
+            font-family: 'Poppins', sans-serif;
             font-size: 8pt;
             padding: 3px 10px;
             border-radius: 20px;
@@ -439,11 +521,12 @@
         }
 
         /* ═══════════════════════════════════════════
-           NUTRITION SUMMARY
+           NUTRITION SUMMARY — display:table safe
         ═══════════════════════════════════════════ */
         .nutrition-bar {
-            display: flex;
-            gap: 12px;
+            display: table;
+            width: 100%;
+            table-layout: fixed;
             background: var(--cream);
             border: 1px solid var(--border);
             border-radius: 8px;
@@ -452,19 +535,21 @@
         }
 
         .nutrition-item {
-            flex: 1;
+            display: table-cell;
             text-align: center;
         }
 
         .nutrition-value {
+            font-family: 'Playfair Display', Georgia, serif;
             font-size: 14pt;
-            font-weight: bold;
+            font-weight: 700;
             color: var(--terracotta-dark);
             display: block;
             line-height: 1.2;
         }
 
         .nutrition-label {
+            font-family: 'Poppins', sans-serif;
             font-size: 7pt;
             color: var(--muted);
             text-transform: uppercase;
@@ -472,32 +557,51 @@
         }
 
         .nutrition-sep {
+            display: table-cell;
             width: 1px;
             background: var(--border);
-            margin: 2px 0;
         }
 
         /* ═══════════════════════════════════════════
-           FOOTER
+           FOOTER — display:table WeasyPrint safe
         ═══════════════════════════════════════════ */
         .footer {
+            display: table;
+            width: 100%;
             margin-top: 32px;
             padding-top: 14px;
             border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        }
+
+        .footer-left {
+            display: table-cell;
+            vertical-align: middle;
+        }
+
+        .footer-right {
+            display: table-cell;
+            vertical-align: middle;
+            text-align: right;
         }
 
         .footer-brand {
-            font-family: Georgia, serif;
+            font-family: 'Playfair Display', Georgia, serif;
             font-size: 10pt;
-            font-weight: bold;
+            font-weight: 700;
             color: var(--terracotta);
             letter-spacing: 0.5px;
         }
 
+        .footer-url {
+            font-family: 'Poppins', sans-serif;
+            font-size: 7pt;
+            color: var(--muted);
+            display: block;
+            margin-top: 1px;
+        }
+
         .footer-date {
+            font-family: 'Poppins', sans-serif;
             font-size: 7.5pt;
             color: var(--muted);
         }
@@ -514,24 +618,25 @@
         ═══════════════════════════════════════════ */
         .diff-badge {
             display: inline-block;
+            font-family: 'Poppins', sans-serif;
             font-size: 7.5pt;
             padding: 2px 8px;
             border-radius: 12px;
-            font-weight: bold;
+            font-weight: 600;
             letter-spacing: 0.5px;
         }
 
-        .diff-facile   { background: #e8f5e9; color: #2e7d32; }
-        .diff-moyen    { background: #fff8e1; color: #e65100; }
-        .diff-difficile{ background: #fce4ec; color: #c62828; }
+        .diff-facile    { background: #e8f5e9; color: #2e7d32; }
+        .diff-moyen     { background: #fff8e1; color: #e65100; }
+        .diff-difficile { background: #fce4ec; color: #c62828; }
 
     </style>
 </head>
 <body>
 
-    <!-- ═══════════════════════════════════════
-         HERO : Image + Titre
-    ═══════════════════════════════════════ -->
+    {# ═══════════════════════════════════════
+       HERO : Image + Titre
+    ═══════════════════════════════════════ #}
     {% if recipe.image_filename %}
         <div class="hero">
             {% if recipe.image_filename.startswith('http') %}
@@ -549,18 +654,18 @@
         </div>
     {% else %}
         <div class="hero hero-no-image">
-            <div>
+            <div class="hero-no-image-inner">
                 <div class="hero-title-no-image">{{ recipe.title }}</div>
                 {% if recipe.category %}
-                <div style="text-align:center; margin-top:8px; font-size:8pt; color:rgba(255,255,255,0.6); letter-spacing:3px; text-transform:uppercase;">{{ recipe.category }}</div>
+                <div style="text-align:center; margin-top:8px; font-family:'Poppins',sans-serif; font-size:8pt; color:rgba(255,255,255,0.6); letter-spacing:3px; text-transform:uppercase;">{{ recipe.category }}</div>
                 {% endif %}
             </div>
         </div>
     {% endif %}
 
-    <!-- ═══════════════════════════════════════
-         META STRIP
-    ═══════════════════════════════════════ -->
+    {# ═══════════════════════════════════════
+       META STRIP
+    ═══════════════════════════════════════ #}
     <div class="meta-strip">
         <div class="meta-item">
             <span class="meta-label">Préparation</span>
@@ -572,7 +677,8 @@
         </div>
         <div class="meta-item">
             <span class="meta-label">Temps total</span>
-            <span class="meta-value highlight">{{ (recipe.prep_time or 0) + (recipe.cook_time or 0) }} min</span>
+            {% set total = (recipe.prep_time or 0) + (recipe.cook_time or 0) %}
+            <span class="meta-value highlight">{{ (total ~ ' min') if total else '—' }}</span>
         </div>
         <div class="meta-item">
             <span class="meta-label">Portions</span>
@@ -596,41 +702,38 @@
         </div>
     </div>
 
-    <!-- ═══════════════════════════════════════
-         CONTENU PRINCIPAL
-    ═══════════════════════════════════════ -->
+    {# ═══════════════════════════════════════
+       CONTENU PRINCIPAL
+    ═══════════════════════════════════════ #}
     <div class="content">
 
-        <!-- Description -->
+        {# Description #}
         {% if recipe.description %}
         <div class="description-block no-break">
             <p class="description-text">"{{ recipe.description }}"</p>
         </div>
         {% endif %}
 
-        <!-- Source -->
+        {# Source — lien cliquable si URL, texte brut sinon #}
         {% if recipe.source %}
         <div class="source-block">
             <strong>Source :</strong>
             {% if recipe.source.startswith('http') %}
-                {{ recipe.source }}
+                <a href="{{ recipe.source }}">{{ recipe.source }}</a>
             {% else %}
                 {{ recipe.source }}
             {% endif %}
         </div>
         {% endif %}
 
-        <!-- Avis -->
+        {# Avis — visages SVG via macro #}
         {% if recipe.rating %}
-        {% set emojis  = {1: '😕', 2: '😐', 3: '🙂', 4: '😊', 5: '🤩'} %}
-        {% set labels  = {1: 'À revoir', 2: 'Bof…', 3: 'Bien', 4: 'Très bien', 5: 'Incontournable !'} %}
         <div class="rating-block no-break">
-            <span class="rating-emoji">{{ emojis[recipe.rating] }}</span>
-            <span class="rating-label">Mon avis : <strong>{{ labels[recipe.rating] }}</strong></span>
+            {{ face_rating(recipe.rating, size=32) }}
         </div>
         {% endif %}
 
-        <!-- Tags -->
+        {# Tags #}
         {% if recipe.tags %}
         <div class="tags-section">
             {% for tag in recipe.tags %}
@@ -639,60 +742,92 @@
         </div>
         {% endif %}
 
-        <!-- ═══ INGRÉDIENTS + ÉTAPES ═══ -->
-        <div class="two-col">
-
-            <!-- COLONNE GAUCHE : Ingrédients -->
-            <div class="col-ingredients">
-                <div class="section-heading">Ingrédients</div>
-                <div class="ingredients-box">
-                    {% for ing in recipe.ingredients %}
-                    <div class="ingredient-item">
-                        <span class="ingredient-qty">
-                            {% if ing.quantity %}{{ ing.quantity | int if ing.quantity == ing.quantity | int else ing.quantity }}{% endif %}
-                        </span>
-                        <span class="ingredient-unit">{{ ing.unit or '' }}</span>
-                        <span class="ingredient-name">{{ ing.name }}</span>
-                    </div>
-                    {% else %}
-                    <p style="color: var(--muted); font-size: 9pt; font-style: italic;">Aucun ingrédient renseigné.</p>
-                    {% endfor %}
-                </div>
+        {# ═══ INGRÉDIENTS — tableau natif HTML ═══ #}
+        <div class="section-ingredients no-break">
+            <div class="section-heading">Ingrédients</div>
+            <div class="ingredients-box">
+                <table class="ing-table">
+                    <colgroup>
+                        <col style="width: 9%;">   {# quantité  #}
+                        <col style="width: 16%;">  {# unité     #}
+                        <col style="width: 75%;">  {# nom       #}
+                    </colgroup>
+                    <tbody>
+                        {% for ing in recipe.ingredients %}
+                        <tr>
+                            <td class="ing-qty">
+                                {% if ing.quantity is not none %}
+                                    {{ ing.quantity | int if ing.quantity == (ing.quantity | int) else ing.quantity }}
+                                {% endif %}
+                            </td>
+                            <td class="ing-unit">{{ ing.unit or '' }}</td>
+                            <td class="ing-name">{{ ing.name }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" style="color: var(--muted); font-size: 9pt; font-style: italic; padding: 12px;">
+                                Aucun ingrédient renseigné.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-
-            <!-- COLONNE DROITE : Étapes -->
-            <div class="col-steps">
-                <div class="section-heading">Préparation</div>
-
-                {% for step in recipe.steps.order_by('order') %}
-                <div class="step-item no-break">
-                    <div class="step-number">{{ loop.index }}</div>
-                    <div class="step-content">
-                        <p class="step-instruction">{{ step.instruction }}</p>
-                        {% if step.duration %}
-                        <span class="step-duration">⏱ {{ step.duration }} min</span>
-                        {% endif %}
-                    </div>
-                </div>
-                {% else %}
-                <p style="color: var(--muted); font-size: 9pt; font-style: italic;">Aucune étape renseignée.</p>
-                {% endfor %}
-            </div>
-
         </div>
 
-        <!-- Conseil du Chef -->
+        {# ═══ ÉTAPES (pleine largeur) ═══ #}
+        <div class="section-steps">
+            <div class="section-heading">Préparation</div>
+
+            {% for step in recipe.steps.order_by('order') %}
+            <div class="step-item no-break">
+                <div class="step-number-cell">
+                    <div class="step-number">{{ loop.index }}</div>
+                </div>
+                <div class="step-content">
+                    <p class="step-instruction">{{ step.instruction }}</p>
+                    {% if step.duration %}
+                    <span class="step-duration">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                             stroke="#8d6e63" stroke-width="2" stroke-linecap="round">
+                            <circle cx="12" cy="13" r="8"/>
+                            <polyline points="12 9 12 13 15 15"/>
+                            <path d="M9 2h6"/>
+                        </svg>
+                        {{ step.duration }} min
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <p style="color: var(--muted); font-size: 9pt; font-style: italic;">Aucune étape renseignée.</p>
+            {% endfor %}
+        </div>
+
+        {# Conseil du Chef #}
         {% if recipe.tips %}
         <div class="tips-box no-break">
-            <div class="tips-title">✦ Le conseil du Chef</div>
+            <div class="tips-title">
+                {# SVG ampoule — remplace ✦ #}
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="#3e2723" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 4 12.9V17H8v-2.1A7 7 0 0 1 12 2z"/>
+                </svg>
+                Le conseil du Chef
+            </div>
             <p class="tips-text">{{ recipe.tips }}</p>
         </div>
         {% endif %}
 
-        <!-- Footer -->
+        {# Footer #}
         <div class="footer">
-            <span class="footer-brand">Al' is Sweet</span>
-            <span class="footer-date">Imprimé le {{ now.strftime('%d/%m/%Y') if now else '' }}</span>
+            <div class="footer-left">
+                <span class="footer-brand">Al' is Sweet</span>
+                <span class="footer-url">alisweet.fr</span>
+            </div>
+            <div class="footer-right">
+                <span class="footer-date">Imprimé le {{ now.strftime('%d/%m/%Y') if now else '' }}</span>
+            </div>
         </div>
 
     </div>

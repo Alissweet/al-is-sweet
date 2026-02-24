@@ -834,36 +834,45 @@ def recipe_public(token):
 def recipe_pdf(id):
     recipe = Recipe.query.get_or_404(id)
 
-    # Sécurité : seul le propriétaire peut télécharger
     if recipe.user_id != current_user.id:
         flash("Accès non autorisé.", 'danger')
         return redirect(url_for('main.index'))
 
-    # Rendre le template HTML
     from datetime import datetime
-    html_string = render_template('recipe_print.html', recipe=recipe, now=datetime.now(), base_url=request.host_url)
+    import re
 
-    # Générer le PDF avec WeasyPrint
+    html_string = render_template(
+        'recipe_print.html',
+        recipe=recipe,
+        now=datetime.now(),
+        base_url=request.host_url
+    )
+
     font_config = FontConfiguration()
+
+    # CSS supplémentaire pour enregistrer les @font-face
+    # auprès de FontConfiguration (nécessaire WeasyPrint >= 53)
+    extra_css = CSS(
+        string="",           # vide : les @font-face sont dans le template
+        font_config=font_config,
+        base_url=request.host_url
+    )
+
     pdf_bytes = HTML(
         string=html_string,
-        base_url=request.host_url          # nécessaire pour charger les images locales
+        base_url=request.host_url
     ).write_pdf(
+        stylesheets=[extra_css],
         font_config=font_config
     )
 
-    # Nom de fichier propre (sans espaces ni caractères spéciaux)
-    import re
     safe_title = re.sub(r'[^\w\-]', '_', recipe.title)
 
-    # Retourner le PDF en téléchargement direct
     return Response(
         pdf_bytes,
         mimetype='application/pdf',
         headers={
             'Content-Disposition': f'inline; filename="{safe_title}.pdf"'
-            # 'inline' = s'ouvre dans le navigateur
-            # Remplacer par 'attachment' pour forcer le téléchargement
         }
     )
 

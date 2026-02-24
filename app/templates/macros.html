@@ -1,0 +1,114 @@
+{# ═══════════════════════════════════════════════════════════════
+   MACROS — Al' is Sweet
+   Usage : {% from 'macros.html' import face_rating %}
+           {{ face_rating(recipe.rating) }}
+═══════════════════════════════════════════════════════════════ #}
+
+{% macro face_rating(rating, size=32) %}
+{#
+    Affiche un visage SVG expressif selon la note (1→5).
+    Les visages sont dessinés dans la palette terracotta/choco.
+    Aucun emoji — rendu garanti WeasyPrint et navigateurs.
+
+    Paramètres :
+      rating  : int 1–5
+      size    : taille en px (défaut 32)
+#}
+
+{# ── Palette ── #}
+{% set colors = {
+    1: {'face': '#e8c4b0', 'detail': '#a07858', 'label': 'À revoir',        'text': '#a07858'},
+    2: {'face': '#d4b896', 'detail': '#8d6e63', 'label': 'Bof…',            'text': '#8d6e63'},
+    3: {'face': '#c59d85', 'detail': '#6d4c41', 'label': 'Bien',            'text': '#6d4c41'},
+    4: {'face': '#a07858', 'detail': '#3e2723', 'label': 'Très bien',       'text': '#3e2723'},
+    5: {'face': '#3e2723', 'detail': '#c59d85', 'label': 'Incontournable !','text': '#3e2723'}
+} %}
+
+{% if rating and rating in colors %}
+{% set c = colors[rating] %}
+<span class="rating-face-wrap" style="display:inline-flex; align-items:center; gap:10px;">
+
+    {# ══ Note 1 : visage triste ══ #}
+    {% if rating == 1 %}
+    <svg width="{{ size }}" height="{{ size }}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Note 1 sur 5 : À revoir">
+        <circle cx="20" cy="20" r="19" fill="{{ c.face }}" stroke="{{ c.detail }}" stroke-width="1.5"/>
+        <!-- Yeux tristes -->
+        <ellipse cx="14" cy="16" rx="2" ry="2.5" fill="{{ c.detail }}"/>
+        <ellipse cx="26" cy="16" rx="2" ry="2.5" fill="{{ c.detail }}"/>
+        <!-- Sourcils froncés -->
+        <path d="M11 12.5 Q14 11 17 12.5" stroke="{{ c.detail }}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        <path d="M23 12.5 Q26 11 29 12.5" stroke="{{ c.detail }}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        <!-- Bouche triste -->
+        <path d="M13 27 Q20 22 27 27" stroke="{{ c.detail }}" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <!-- Larme -->
+        <path d="M15 20 Q14.5 22.5 15.5 23 Q16.5 23.5 16 21 Z" fill="{{ c.detail }}" opacity="0.5"/>
+    </svg>
+
+    {# ══ Note 2 : visage neutre-déçu ══ #}
+    {% elif rating == 2 %}
+    <svg width="{{ size }}" height="{{ size }}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Note 2 sur 5 : Bof">
+        <circle cx="20" cy="20" r="19" fill="{{ c.face }}" stroke="{{ c.detail }}" stroke-width="1.5"/>
+        <!-- Yeux mi-clos -->
+        <ellipse cx="14" cy="17" rx="2" ry="1.8" fill="{{ c.detail }}"/>
+        <ellipse cx="26" cy="17" rx="2" ry="1.8" fill="{{ c.detail }}"/>
+        <!-- Sourcils plats -->
+        <line x1="11" y1="13" x2="17" y2="13" stroke="{{ c.detail }}" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="23" y1="13" x2="29" y2="13" stroke="{{ c.detail }}" stroke-width="1.5" stroke-linecap="round"/>
+        <!-- Bouche plate légèrement tombante -->
+        <path d="M14 26.5 Q20 25 26 26.5" stroke="{{ c.detail }}" stroke-width="2" stroke-linecap="round" fill="none"/>
+    </svg>
+
+    {# ══ Note 3 : visage neutre ══ #}
+    {% elif rating == 3 %}
+    <svg width="{{ size }}" height="{{ size }}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Note 3 sur 5 : Bien">
+        <circle cx="20" cy="20" r="19" fill="{{ c.face }}" stroke="{{ c.detail }}" stroke-width="1.5"/>
+        <!-- Yeux ronds calmes -->
+        <circle cx="14" cy="17" r="2" fill="{{ c.detail }}"/>
+        <circle cx="26" cy="17" r="2" fill="{{ c.detail }}"/>
+        <!-- Reflets -->
+        <circle cx="14.8" cy="16.2" r="0.7" fill="white"/>
+        <circle cx="26.8" cy="16.2" r="0.7" fill="white"/>
+        <!-- Bouche neutre légèrement courbée -->
+        <path d="M14 25 Q20 27 26 25" stroke="{{ c.detail }}" stroke-width="2" stroke-linecap="round" fill="none"/>
+    </svg>
+
+    {# ══ Note 4 : visage souriant ══ #}
+    {% elif rating == 4 %}
+    <svg width="{{ size }}" height="{{ size }}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Note 4 sur 5 : Très bien">
+        <circle cx="20" cy="20" r="19" fill="{{ c.face }}" stroke="{{ c.detail }}" stroke-width="1.5"/>
+        <!-- Yeux en arc (souriants) -->
+        <path d="M12 17 Q14 15 16 17" stroke="{{ c.detail }}" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <path d="M24 17 Q26 15 28 17" stroke="{{ c.detail }}" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <!-- Joues rosées -->
+        <ellipse cx="11" cy="22" rx="3" ry="2" fill="{{ c.detail }}" opacity="0.2"/>
+        <ellipse cx="29" cy="22" rx="3" ry="2" fill="{{ c.detail }}" opacity="0.2"/>
+        <!-- Grand sourire -->
+        <path d="M13 24 Q20 30 27 24" stroke="{{ c.detail }}" stroke-width="2" stroke-linecap="round" fill="none"/>
+    </svg>
+
+    {# ══ Note 5 : visage euphorique ══ #}
+    {% elif rating == 5 %}
+    <svg width="{{ size }}" height="{{ size }}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Note 5 sur 5 : Incontournable">
+        <circle cx="20" cy="20" r="19" fill="{{ c.face }}" stroke="{{ c.detail }}" stroke-width="1.5"/>
+        <!-- Yeux étoilés -->
+        <path d="M14 13 L14.8 15.5 L17.5 15.5 L15.3 17.1 L16.1 19.6 L14 18 L11.9 19.6 L12.7 17.1 L10.5 15.5 L13.2 15.5 Z" fill="{{ c.detail }}"/>
+        <path d="M26 13 L26.8 15.5 L29.5 15.5 L27.3 17.1 L28.1 19.6 L26 18 L23.9 19.6 L24.7 17.1 L22.5 15.5 L25.2 15.5 Z" fill="{{ c.detail }}"/>
+        <!-- Joues très marquées -->
+        <ellipse cx="10" cy="23" rx="3.5" ry="2.5" fill="{{ c.detail }}" opacity="0.25"/>
+        <ellipse cx="30" cy="23" rx="3.5" ry="2.5" fill="{{ c.detail }}" opacity="0.25"/>
+        <!-- Sourire large avec dents -->
+        <path d="M12 24 Q20 32 28 24" stroke="{{ c.detail }}" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <path d="M12 24 Q20 28 28 24" fill="{{ c.detail }}" opacity="0.15"/>
+        <!-- Petites étoiles autour -->
+        <path d="M5 10 L5.5 11.5 L7 11.5 L5.8 12.4 L6.3 14 L5 13.1 L3.7 14 L4.2 12.4 L3 11.5 L4.5 11.5 Z" fill="{{ c.detail }}" opacity="0.4"/>
+        <path d="M33 8 L33.4 9.2 L34.6 9.2 L33.6 10 L34 11.2 L33 10.5 L32 11.2 L32.4 10 L31.4 9.2 L32.6 9.2 Z" fill="{{ c.detail }}" opacity="0.4"/>
+    </svg>
+    {% endif %}
+
+    <span style="font-family: 'Poppins', 'Georgia', sans-serif; font-size: 9pt; color: {{ c.text }};">
+        Mon avis : <strong>{{ c.label }}</strong>
+    </span>
+
+</span>
+{% endif %}
+{% endmacro %}
