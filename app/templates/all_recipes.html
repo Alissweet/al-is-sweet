@@ -12,19 +12,17 @@
             </h1>
             <p class="text-muted">{{ recipe_data|length }} recette(s) au total</p>
         </div>
-        <div class="col-md-4 text-end">
-            <div class="btn-group shadow-sm" role="group" aria-label="Actions d'export">
-                <button class="btn btn-outline-terracotta" onclick="window.print()" title="Imprimer">
-                    <i class="bi bi-printer"></i>
-                </button>
-                <button class="btn btn-outline-terracotta" onclick="exportToPDF()" title="Télécharger en PDF">
-                    <i class="bi bi-file-pdf"></i> PDF
-                </button>
-                <button class="btn btn-terracotta" onclick="exportSelectedToJSON()" title="Partager la sélection (JSON)">
-                    <i class="bi bi-share-fill me-1"></i> Partager
-                </button>
-            </div>
-        </div>
+        <div class="col-md-4 d-flex justify-content-end align-items-center gap-2">
+			<button class="btn-magic" onclick="window.print()" title="Imprimer">
+				<i class="bi bi-printer"></i> Imprimer
+			</button>
+			<button class="btn-magic" onclick="exportToPDF()" title="Télécharger en PDF">
+				<i class="bi bi-file-pdf"></i> PDF
+			</button>
+			<button class="btn-add-recipe" onclick="exportSelectedToJSON()" title="Partager la sélection">
+				<i class="bi bi-share-fill"></i> Partager
+			</button>
+		</div>
     </div>
 
     <!-- Filtres -->
