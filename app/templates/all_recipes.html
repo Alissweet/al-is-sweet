@@ -258,6 +258,30 @@
         </a>
     </div>
     {% endif %}
+	
+	<!-- Modale confirmation suppression bulk -->
+	<div class="modal fade" id="deleteBulkModal" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content border-0 shadow-lg rounded-4">
+				<div class="modal-body text-center p-5">
+					<div class="mb-3" style="font-size: 2.5rem;">🗑️</div>
+					<h5 class="fw-bold mb-2" id="deleteBulkTitle">Supprimer les recettes ?</h5>
+					<p class="text-muted mb-4" id="deleteBulkMessage">Cette action est irréversible.</p>
+					<form id="deleteBulkForm" method="POST" action="/recipes/delete-bulk">
+						<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+						<input type="hidden" name="ids" id="deleteBulkIds">
+						<div class="d-flex justify-content-center gap-3">
+							<button type="button" class="btn btn-outline-secondary rounded-pill px-4"
+								data-bs-dismiss="modal">Annuler</button>
+							<button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">
+								<i class="bi bi-trash3-fill me-1"></i> Supprimer
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 {% endblock %}
 
