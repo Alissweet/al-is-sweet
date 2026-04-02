@@ -13,12 +13,17 @@
             <p class="text-muted">{{ recipe_data|length }} recette(s) au total</p>
         </div>
         <div class="col-md-4 text-end">
-            <button class="btn btn-outline-terracotta me-2" onclick="window.print()">
-                <i class="bi bi-printer"></i> Imprimer
-            </button>
-            <button class="btn btn-terracotta" onclick="exportToPDF()">
-                <i class="bi bi-file-pdf"></i> Export PDF
-            </button>
+            <div class="btn-group shadow-sm" role="group" aria-label="Actions d'export">
+                <button class="btn btn-outline-terracotta" onclick="window.print()" title="Imprimer">
+                    <i class="bi bi-printer"></i>
+                </button>
+                <button class="btn btn-outline-terracotta" onclick="exportToPDF()" title="Télécharger en PDF">
+                    <i class="bi bi-file-pdf"></i> PDF
+                </button>
+                <button class="btn btn-terracotta" onclick="exportSelectedToJSON()" title="Partager la sélection (JSON)">
+                    <i class="bi bi-share-fill me-1"></i> Partager
+                </button>
+            </div>
         </div>
     </div>
 
@@ -797,6 +802,66 @@
 		// ── Sauvegarde ────────────────────────────────────────────
 		const filename = `Al-is-Sweet_recettes_${new Date().toISOString().slice(0, 10)}.pdf`;
 		doc.save(filename);
+	}
+	
+	// ═══════════════════════════════════════════════════════════════
+	//  EXPORT JSON (PARTAGE) — Al' is Sweet
+	// ═══════════════════════════════════════════════════════════════
+	async function exportSelectedToJSON() {
+		const checkedBoxes = document.querySelectorAll('.row-check:checked');
+		
+		if (checkedBoxes.length === 0) {
+			alert("Veuillez sélectionner au moins une recette à partager.");
+			return;
+		}
+
+		const selectedIds = Array.from(checkedBoxes).map(cb => {
+			return parseInt(cb.closest('tr').dataset.recipeId);
+		});
+
+		// 🆕 Récupération du token CSRF depuis la balise meta
+		const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+		const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
+
+		try {
+			const response = await fetch('/export_selected', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': csrfToken // 🆕 Ajout du token de sécurité
+				},
+				body: JSON.stringify({ ids: selectedIds })
+			});
+
+			if (!response.ok) {
+				// 🆕 Gestion d'erreur robuste (vérifie si c'est du JSON ou du HTML)
+				const contentType = response.headers.get("content-type");
+				if (contentType && contentType.indexOf("application/json") !== -1) {
+					const errData = await response.json();
+					throw new Error(errData.error || "Erreur lors de la génération du fichier.");
+				} else {
+					throw new Error(`Erreur serveur (HTTP ${response.status}). Consultez les logs Flask.`);
+				}
+			}
+
+			const blob = await response.blob();
+			const url = window.URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			
+			const dateStr = new Date().toISOString().slice(0, 10);
+			a.download = `Al-is-Sweet_Partage_${dateStr}.json`;
+			
+			document.body.appendChild(a);
+			a.click();
+			
+			a.remove();
+			window.URL.revokeObjectURL(url);
+			
+		} catch (error) {
+			console.error("Erreur d'export JSON:", error);
+			alert(error.message);
+		}
 	}
 </script>
 {% endblock %}

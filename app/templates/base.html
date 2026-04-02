@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}Al' is Sweet{% endblock %}</title>
     
     <!-- Bootstrap 5 CSS -->
@@ -251,35 +252,34 @@
 								</script>
 							</div>
 
-							<!-- ONGLET 2 : IMPORT / EXPORT -->
-							<div class="tab-pane fade" id="tab-data">
-								<h6 class="fw-bold mb-3 text-choco">Sauvegarde & Partage</h6>
-								
-								<div class="card bg-light border-0 mb-3">
-									<div class="card-body text-center">
-										<p class="small text-muted mb-2">Sauvegarder mes recettes (JSON)</p>
-										<a href="{{ url_for('main.export_data') }}" class="btn btn-outline-dark rounded-pill w-100">
+							<!-- Contenu de l'onglet Données -->
+							<div class="tab-pane fade" id="tab-data" role="tabpanel">
+								<h5 class="text-choco mb-4 fw-bold">Sauvegarde & Partage</h5>
+
+								<!-- Bloc Export -->
+								<div class="card border-0 bg-light mb-4 shadow-sm">
+									<div class="card-body text-center py-4">
+										<p class="text-muted small mb-3">Sauvegarder toutes mes recettes (JSON)</p>
+										<!-- Remplace la href par ta route d'export total existante si tu en as une -->
+										<a href="{{ url_for('main.export_all') if 'export_all' in url_for.__globals__ else '#' }}" class="btn btn-outline-choco rounded-pill px-4">
 											<i class="bi bi-download me-2"></i>Exporter
 										</a>
 									</div>
 								</div>
 
-								<div class="card bg-light border-0">
-									<div class="card-body text-center">
-										<p class="small text-muted mb-2">Importer des recettes</p>
-										<form action="{{ url_for('main.import_data') }}" method="POST" enctype="multipart/form-data">
-											<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-											<div class="mb-2">
-												<input class="form-control form-control-sm" type="file" name="file" accept=".json" required>
-											</div>
-											<button type="submit" class="btn btn-dark rounded-pill w-100">
-												<i class="bi bi-cloud-upload me-2"></i>Importer
-											</button>
-										</form>
+								<!-- Bloc Import -->
+								<div class="card border-0 bg-light shadow-sm">
+									<div class="card-body py-4">
+										<p class="text-muted small mb-3 text-center">Importer des recettes</p>
+										<div class="input-group mb-3">
+											<input type="file" class="form-control" id="importFileInput" accept=".json">
+										</div>
+										<button class="btn btn-choco w-100 rounded-pill text-white" onclick="analyzeImport()" id="btnAnalyzeImport" style="background-color: #3e2723;">
+											<i class="bi bi-cloud-upload me-2"></i>Importer
+										</button>
 									</div>
 								</div>
 							</div>
-
 						</div>
 					</div>
 				</div>
@@ -318,5 +318,206 @@
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block scripts %}{% endblock %}
+
+<!-- 🆕 MODALE D'IMPORTATION (Affiche tout) -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-terracotta text-white border-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-cloud-arrow-down-fill me-2"></i>Validation de l'importation
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body bg-light">
+                <p class="text-muted small mb-3">
+                    Voici les recettes trouvées dans votre fichier. Sélectionnez celles que vous souhaitez importer.
+                </p>
+                <div class="table-responsive bg-white rounded shadow-sm border">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 40px;" class="text-center">
+                                    <input type="checkbox" class="form-check-input" id="checkAllImport" onchange="toggleAllImport(this)" checked>
+                                </th>
+                                <th>Recette</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody id="importTableBody">
+                            <!-- Rempli dynamiquement par JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-choco text-white" onclick="submitFinalImport()" id="btnFinalImport" style="background-color: #3e2723;">
+                    Valider l'importation
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 🆕 MODALE DE SUCCÈS (Fini les alertes moches) -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-body text-center p-4">
+                <div class="text-success mb-3">
+                    <i class="bi bi-check-circle-fill" style="font-size: 3.5rem;"></i>
+                </div>
+                <h5 class="fw-bold text-choco mb-3" id="successModalMessage">Importation réussie !</h5>
+                <button type="button" class="btn btn-terracotta w-100 rounded-pill" onclick="window.location.reload()">
+                    Continuer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+let allAnalyzedRecipes =[];
+
+// 1. Envoi du fichier pour analyse
+async function analyzeImport() {
+    const fileInput = document.getElementById('importFileInput');
+    if (!fileInput.files.length) {
+        alert("Veuillez sélectionner un fichier JSON.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+
+    const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+    const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
+
+    const btn = document.getElementById('btnAnalyzeImport');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Analyse...';
+    btn.disabled = true;
+
+    try {
+        const response = await fetch('/analyze_import', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken },
+            body: formData
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || "Erreur lors de l'analyse.");
+        }
+
+        const data = await response.json();
+        
+        // On fusionne les nouvelles recettes et les conflits dans un seul tableau
+        allAnalyzedRecipes = [
+            ...(data.new_recipes || []).map(r => ({ ...r, _status: 'ok' })),
+            ...(data.conflicts ||[]).map(r => ({ ...r, _status: 'conflict' }))
+        ];
+
+        if (allAnalyzedRecipes.length === 0) {
+            alert("Le fichier ne contient aucune recette valide.");
+            return;
+        }
+
+        // Remplissage du tableau
+        const tbody = document.getElementById('importTableBody');
+        tbody.innerHTML = '';
+        
+        allAnalyzedRecipes.forEach((recipe, index) => {
+            const isConflict = recipe._status === 'conflict';
+            // Les recettes saines sont cochées par défaut, les conflits sont décochés
+            const checked = isConflict ? '' : 'checked';
+            
+            // Badge de statut visuel
+            const statusHtml = isConflict 
+                ? `<span class="badge bg-danger-subtle text-danger border border-danger-subtle"><i class="bi bi-exclamation-triangle-fill me-1"></i>${recipe._conflict_reason}</span>`
+                : `<span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-check-circle-fill me-1"></i>Prête à importer</span>`;
+            
+            tbody.innerHTML += `
+                <tr>
+                    <td class="text-center">
+                        <input type="checkbox" class="form-check-input import-check" value="${index}" ${checked}>
+                    </td>
+                    <td class="fw-bold text-choco">${recipe.title}</td>
+                    <td>${statusHtml}</td>
+                </tr>
+            `;
+        });
+        
+        // Affichage de la modale globale
+        const importModal = new bootstrap.Modal(document.getElementById('importModal'));
+        importModal.show();
+
+    } catch (error) {
+        alert(error.message);
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        fileInput.value = ''; 
+    }
+}
+
+// 2. Coche/Décoche toutes les cases
+function toggleAllImport(source) {
+    document.querySelectorAll('.import-check').forEach(cb => cb.checked = source.checked);
+}
+
+// 3. Validation finale
+async function submitFinalImport() {
+    const selectedRecipes =[];
+    document.querySelectorAll('.import-check:checked').forEach(cb => {
+        selectedRecipes.push(allAnalyzedRecipes[parseInt(cb.value)]);
+    });
+
+    if (selectedRecipes.length === 0) {
+        alert("Aucune recette sélectionnée pour l'importation.");
+        return;
+    }
+
+    const btn = document.getElementById('btnFinalImport');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Importation...';
+    btn.disabled = true;
+
+    const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+    const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
+
+    try {
+        const response = await fetch('/finalize_import', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ recipes: selectedRecipes })
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || "Erreur lors de l'importation.");
+        }
+
+        const result = await response.json();
+        
+        // On ferme la modale d'import
+        const importModalEl = document.getElementById('importModal');
+        const importModal = bootstrap.Modal.getInstance(importModalEl);
+        importModal.hide();
+
+        // On ouvre la belle modale de succès
+        document.getElementById('successModalMessage').innerText = result.message;
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        successModal.show();
+
+    } catch (error) {
+        alert(error.message);
+        btn.innerHTML = 'Valider l\'importation';
+        btn.disabled = false;
+    }
+}
+</script>
 </body>
 </html>

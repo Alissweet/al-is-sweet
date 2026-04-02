@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app, Response
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app, Response, send_file
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from weasyprint import HTML, CSS
@@ -9,6 +9,8 @@ from app.forms import RecipeForm
 from datetime import datetime
 from sqlalchemy import func, case
 import json
+import io
+import difflib
 import os
 import uuid
 import logging
@@ -51,6 +53,25 @@ def save_image(file):
             file.save(filepath)
             return filename
     return None
+
+def safe_int(val, default=0, min_val=0, max_val=9999):
+    try:
+        if val is None or val == '': return default
+        return max(min_val, min(max_val, int(val)))
+    except (TypeError, ValueError):
+        return default
+
+def safe_float(val, default=0.0, min_val=0.0, max_val=9999.0):
+    try:
+        if val is None or val == '': return default
+        return max(min_val, min(max_val, float(val)))
+    except (TypeError, ValueError):
+        return default
+
+def safe_str(val, max_length=None):
+    if val is None: return None
+    s = str(val).strip()
+    return s[:max_length] if max_length else s
 
 
 # ============================================================
@@ -986,3 +1007,201 @@ def toggle_favorite(id):
         db.session.rollback()
         logger.error(f"Erreur favori: {e}")
         return jsonify({'success': False, 'message': 'Erreur technique'}), 500
+
+
+# =======================================================================================================
+# ROUTE DE PARTAGE DE RECETTES CHOISIES
+# =======================================================================================================
+@main.route('/export_selected', methods=['POST'])
+@login_required
+def export_selected():
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Données invalides'}), 400
+
+    recipe_ids = data.get('ids', [])
+
+    if not recipe_ids:
+        return jsonify({'error': 'Aucune recette sélectionnée'}), 400
+
+    if not all(isinstance(i, int) for i in recipe_ids):
+        return jsonify({'error': 'IDs invalides'}), 400
+
+    if len(recipe_ids) > 100:
+        return jsonify({'error': 'Trop de recettes sélectionnées'}), 400
+
+    recipes = Recipe.query.filter(
+        Recipe.id.in_(recipe_ids),
+        Recipe.user_id == current_user.id
+    ).all()
+
+    export_data = []
+    for recipe in recipes:
+        r_dict = recipe.to_dict()
+        r_dict.pop('id', None)
+        r_dict.pop('is_favorite', None)
+
+        for ing in r_dict.get('ingredients', []):
+            ing.pop('id', None)
+
+        for step in r_dict.get('steps', []):
+            step.pop('id', None)
+
+        export_data.append(r_dict)
+
+    mem_file = io.BytesIO()
+    mem_file.write(json.dumps(export_data, ensure_ascii=False, indent=4).encode('utf-8'))
+    mem_file.seek(0)
+
+    return send_file(
+        mem_file,
+        mimetype='application/json',
+        as_attachment=True,
+        download_name='recettes_selectionnees.json'
+    )
+
+@main.route('/analyze_import', methods=['POST'])
+@login_required
+def analyze_import():
+    if 'file' not in request.files:
+        return jsonify({'error': 'Aucun fichier fourni'}), 400
+        
+    file = request.files['file']
+    try:
+        imported_recipes = json.load(file)
+    except Exception as e:
+        return jsonify({'error': 'Fichier JSON invalide'}), 400
+        
+    # 🟡 Point 5 : Validation du type
+    if not isinstance(imported_recipes, list):
+        return jsonify({'error': 'Format invalide : une liste de recettes est attendue'}), 400
+        
+    # 🔴 Point 2 : Limite de taille
+    MAX_RECIPES = 100
+    if len(imported_recipes) > MAX_RECIPES:
+        return jsonify({'error': f'Maximum {MAX_RECIPES} recettes par import pour préserver le serveur'}), 400
+        
+    existing_recipes = Recipe.query.filter_by(user_id=current_user.id).all()
+    existing_titles = {r.title.lower(): r for r in existing_recipes}
+    existing_titles_list = list(existing_titles.keys())
+    
+    new_recipes = []
+    conflicts =[]
+    
+    for recipe in imported_recipes:
+        title = recipe.get('title', '')
+        if not title:
+            continue
+            
+        title_lower = str(title).lower()
+        
+        if title_lower in existing_titles:
+            recipe['_conflict_reason'] = 'Nom identique'
+            conflicts.append(recipe)
+            continue
+            
+        matches = difflib.get_close_matches(title_lower, existing_titles_list, n=1, cutoff=0.8)
+        if matches:
+            recipe['_conflict_reason'] = f'Très proche de "{existing_titles[matches[0]].title}"'
+            conflicts.append(recipe)
+        else:
+            new_recipes.append(recipe)
+            
+    return jsonify({
+        'new_recipes': new_recipes,
+        'conflicts': conflicts
+    })
+
+@main.route('/finalize_import', methods=['POST'])
+@login_required
+def finalize_import():
+    data = request.get_json()
+    
+    if not data or 'recipes' not in data:
+        return jsonify({'error': 'Données invalides'}), 400
+        
+    recipes_to_add = data['recipes']
+    
+    if not isinstance(recipes_to_add, list):
+        return jsonify({'error': 'Données invalides'}), 400
+
+    # 🔴 Point 1 : Re-vérification côté serveur (Ne jamais faire confiance au client)
+    existing_titles = {r.title.lower() for r in Recipe.query.filter_by(user_id=current_user.id).all()}
+    
+    imported_count = 0
+    
+    # 🟠 Point 4 : Transaction explicite
+    try:
+        for r_data in recipes_to_add:
+            title = safe_str(r_data.get('title', ''), 200)
+            
+            # On ignore les doublons ou les recettes sans titre
+            if not title or title.lower() in existing_titles:
+                continue 
+                
+            # 🟡 Point 6 & 🟠 Point 3 : Troncature et validation des types
+            new_recipe = Recipe(
+                user_id=current_user.id,
+                title=title,
+                description=safe_str(r_data.get('description')),
+                tips=safe_str(r_data.get('tips')),
+                prep_time=safe_int(r_data.get('prep_time')),
+                cook_time=safe_int(r_data.get('cook_time')),
+                servings=safe_int(r_data.get('servings'), default=4, min_val=1, max_val=100),
+                difficulty=safe_str(r_data.get('difficulty'), 50),
+                category=safe_str(r_data.get('category'), 100),
+                total_carbs=safe_float(r_data.get('total_carbs')),
+                rating=safe_int(r_data.get('rating'), min_val=0, max_val=5),
+                source=safe_str(r_data.get('source'), 500)
+            )
+            db.session.add(new_recipe)
+            db.session.flush() # Génère l'ID de la recette pour lier les enfants
+            
+            # Ajout des ingrédients
+            if 'ingredients' in r_data:
+                for ing_data in r_data['ingredients']:
+                    new_ing = Ingredient(
+                        recipe_id=new_recipe.id,
+                        name=safe_str(ing_data.get('name', 'Ingrédient inconnu'), 200),
+                        quantity=safe_float(ing_data.get('quantity')),
+                        unit=safe_str(ing_data.get('unit'), 50)
+                    )
+                    db.session.add(new_ing)
+                
+            # Ajout des étapes (La partie qui bloquait !)
+            if 'steps' in r_data:
+                for step_data in r_data['steps']:
+                    new_step = Step(
+                        recipe_id=new_recipe.id,
+                        order=safe_int(step_data.get('order'), default=1),
+                        instruction=safe_str(step_data.get('instruction', ''), 5000),
+                        duration=safe_int(step_data.get('duration'))
+                    )
+                    db.session.add(new_step)
+                    
+            # Ajout des tags (si tu les avais exportés)
+            if 'tags' in r_data:
+                for tag_name in r_data['tags']:
+                    clean_tag = safe_str(tag_name, 50)
+                    if clean_tag:
+                        # On cherche si le tag existe déjà pour cet utilisateur
+                        from app.models import Tag # Assure-toi de l'import
+                        tag = Tag.query.filter_by(name=clean_tag, user_id=current_user.id).first()
+                        if not tag:
+                            tag = Tag(name=clean_tag, user_id=current_user.id)
+                            db.session.add(tag)
+                        new_recipe.tags.append(tag)
+
+            imported_count += 1
+            # On ajoute le titre à notre set pour éviter les doublons au sein du même fichier JSON
+            existing_titles.add(title.lower())
+
+        # Si tout s'est bien passé, on valide la transaction
+        db.session.commit()
+        return jsonify({'message': f'{imported_count} recette(s) importée(s) avec succès !'})
+
+    except Exception as e:
+        # En cas de crash, on annule tout (Rollback)
+        db.session.rollback()
+        print(f"Erreur d'importation : {str(e)}") # Pour tes logs Render
+        return jsonify({'error': "Une erreur est survenue lors de l'enregistrement. L'importation a été annulée."}), 500

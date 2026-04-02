@@ -274,9 +274,21 @@ function showMessage(message, type = 'info') {
 
 let selectedRecipeIds = new Set();
 
+function toggleRecipeSelect(recipeId, checkbox) {
+    if (checkbox.checked) {
+        selectedRecipeIds.add(recipeId);
+    } else {
+        selectedRecipeIds.delete(recipeId);
+    }
+    _saveSelection();
+    _syncSelectionUI();
+}
+
 function toggleAllRows(masterCheckbox) {
+    // ✅ Seulement les lignes visibles
     document.querySelectorAll('.row-check').forEach(cb => {
         const row = cb.closest('tr');
+        if (row.style.display === 'none') return; // ← ignorer les filtrées
         const recipeId = parseInt(row.dataset.recipeId);
         if (masterCheckbox.checked) {
             selectedRecipeIds.add(recipeId);
@@ -286,7 +298,7 @@ function toggleAllRows(masterCheckbox) {
             cb.checked = false;
         }
     });
-	_saveSelection();
+    _saveSelection();
     _syncSelectionUI();
 }
 

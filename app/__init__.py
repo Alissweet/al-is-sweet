@@ -22,6 +22,9 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
     
+    # 🛡️ SÉCURITÉ : Limite la taille des uploads à 5 Mo maximum
+    app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
+    
     # Initialisation des extensions
     db.init_app(app)
     migrate.init_app(app, db)
