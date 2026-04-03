@@ -1867,6 +1867,25 @@ img { max-width: 100%; }
 }
 .shopping-bar-btn-go:hover { background: var(--gold-light); }
 
+.shopping-bar-btn-delete {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #8B0000;
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 0 1.2rem;
+    height: 38px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.shopping-bar-btn-delete:hover { background: #5a0000; }
 
 /* ════════════════════════════════════════════════════════════════
    14. UTILITAIRES
