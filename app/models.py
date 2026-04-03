@@ -109,7 +109,7 @@ class Recipe(db.Model):
             'is_favorite': self.is_favorite,
             'carbs_per_serving': self.carbs_per_serving,
             'ingredients': [ing.to_dict() for ing in self.ingredients],
-            'steps': [step.to_dict() for step in self.steps.order_by(Step.order)],
+            'steps': [step.to_dict() for step in sorted(self.steps, key=lambda s: s.order)],
             'tags': [tag.name for tag in self.tags] # 🆕
         }
 

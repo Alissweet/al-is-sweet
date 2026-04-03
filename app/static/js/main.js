@@ -4,8 +4,21 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    const saved = JSON.parse(sessionStorage.getItem('selectedRecipes') || '[]');
-    selectedRecipeIds = new Set(saved);
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('cleared')) {
+        sessionStorage.removeItem('selectedRecipes');
+        selectedRecipeIds = new Set();
+    } else {
+        const saved = JSON.parse(sessionStorage.getItem('selectedRecipes') || '[]');
+        const validIds = new Set(
+            Array.from(document.querySelectorAll('tr[data-recipe-id]'))
+                 .map(tr => parseInt(tr.getAttribute('data-recipe-id')))
+        );
+        selectedRecipeIds = new Set(saved.filter(id => validIds.has(id)));
+        if (selectedRecipeIds.size !== saved.length) {
+            sessionStorage.setItem('selectedRecipes', JSON.stringify(Array.from(selectedRecipeIds)));
+        }
+    }
     initAnimations();
     initTooltips();
     initCategoryManagement();
@@ -356,6 +369,33 @@ function _syncSelectionUI() {
         const recipeId = parseInt(row.dataset.recipeId);
         cb.checked = selectedRecipeIds.has(recipeId);
     });
+}
+
+function confirmBulkDelete() {
+    const count = selectedRecipeIds.size;
+    if (count === 0) return;
+
+    const title = count === 1
+        ? 'Supprimer cette recette ?'
+        : `Supprimer ces ${count} recettes ?`;
+    const message = count === 1
+        ? 'Cette recette sera supprimée définitivement.'
+        : `Ces ${count} recettes seront supprimées définitivement.`;
+
+    document.getElementById('deleteBulkTitle').textContent = title;
+    document.getElementById('deleteBulkMessage').textContent = message;
+    document.getElementById('deleteBulkIds').value = Array.from(selectedRecipeIds).join(',');
+
+    const modal = new bootstrap.Modal(document.getElementById('deleteBulkModal'));
+    modal.show();
+}
+
+function submitBulkDelete() {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('deleteBulkModal'));
+    modal.hide();
+    setTimeout(() => {
+        document.getElementById('deleteBulkForm').submit();
+    }, 300);
 }
 
 

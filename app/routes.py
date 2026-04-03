@@ -447,7 +447,34 @@ def recipe_delete(id):
     flash('Recette supprimée avec succès!', 'success')
     return redirect(url_for('main.index'))
 
-
+@main.route('/recipes/delete-bulk', methods=['POST'])
+@login_required
+def recipes_delete_bulk():
+    ids_raw = request.form.get('ids', '')
+    if not ids_raw:
+        flash('Aucune recette sélectionnée.', 'warning')
+        return redirect(url_for('main.all_recipes', cleared=1))
+    
+    ids = [int(i) for i in ids_raw.split(',') if i.strip().isdigit()]
+    deleted = 0
+    for recipe_id in ids:
+        recipe = Recipe.query.get(recipe_id)
+        if recipe and recipe.user_id == current_user.id:
+            if recipe.image_filename:
+                image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], recipe.image_filename)
+                if os.path.exists(image_path):
+                    try:
+                        os.remove(image_path)
+                    except Exception as e:
+                        logger.error(f"Erreur suppression image: {e}")
+            Ingredient.query.filter_by(recipe_id=recipe.id).delete()
+            Step.query.filter_by(recipe_id=recipe.id).delete()
+            db.session.delete(recipe)
+            deleted += 1
+    
+    db.session.commit()
+    flash(f'{deleted} recette(s) supprimée(s) avec succès.', 'success')
+    return redirect(url_for('main.all_recipes'))
 
 # ============================================================
 #  FONCTIONNALITÉS PREMIUM (Random, Tags, History)
@@ -1040,6 +1067,7 @@ def export_selected():
         r_dict = recipe.to_dict()
         r_dict.pop('id', None)
         r_dict.pop('is_favorite', None)
+        r_dict['image_filename'] = None
 
         for ing in r_dict.get('ingredients', []):
             ing.pop('id', None)

@@ -406,9 +406,14 @@ async function analyzeImport() {
         });
 
         if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.error || "Erreur lors de l'analyse.");
-        }
+			const text = await response.text();
+			try {
+				const err = JSON.parse(text);
+				throw new Error(err.error || "Erreur lors de l'analyse.");
+			} catch {
+				throw new Error("Erreur serveur inattendue. Vérifiez les logs.");
+			}
+		}
 
         const data = await response.json();
         
