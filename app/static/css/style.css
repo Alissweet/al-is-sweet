@@ -706,16 +706,21 @@ img { max-width: 100%; }
 }
 .btn-reset-filters:hover { background: rgba(192,57,43,0.06); color: #c0392b; transform: rotate(90deg); }
 
-/* Catégories — onglets éditoriaux, plus de pills */
+/* ── CATEGORY NAV PREMIUM ─────────────────────────────── */
+.category-nav-wrapper {
+    position: relative;
+    margin-bottom: 2.5rem;
+}
+
 .category-nav {
     display: flex;
     align-items: center;
     gap: 0;
     border-bottom: 1px solid var(--cream-deep);
-    margin-bottom: 2.5rem;
     overflow-x: auto;
     scrollbar-width: none;
     flex-wrap: nowrap;
+    scroll-behavior: smooth;
 }
 .category-nav::-webkit-scrollbar { display: none; }
 
@@ -740,13 +745,57 @@ img { max-width: 100%; }
     border-radius: 0;
     box-shadow: none;
 }
-.cat-pill:hover { color: var(--choco-dark); background: none; transform: none; box-shadow: none; }
+.cat-pill:hover { color: var(--choco-dark); }
 .cat-pill.active {
     color: var(--choco-dark);
     font-weight: 700;
     border-bottom-color: var(--gold);
-    background: none; transform: none; box-shadow: none;
 }
+
+/* Dégradés gauche / droite */
+.cat-fade-left,
+.cat-fade-right {
+    position: absolute;
+    top: 0;
+    bottom: 1px; /* au-dessus de la bordure */
+    width: 80px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    z-index: 2;
+}
+.cat-fade-left {
+    left: 0;
+    background: linear-gradient(to right, #fdf6f0 40%, transparent);
+}
+.cat-fade-right {
+    right: 0;
+    background: linear-gradient(to left, #fdf6f0 40%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    pointer-events: none;
+}
+.cat-fade-left.visible,
+.cat-fade-right.visible { opacity: 1; }
+
+/* Badge (+N) */
+.cat-overflow-badge {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--terracotta, #c59d85);
+    background: white;
+    border: 1.5px solid var(--terracotta, #c59d85);
+    border-radius: 2rem;
+    padding: 0.15rem 0.55rem;
+    margin-right: 4px;
+    pointer-events: none;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+.cat-overflow-badge.visible { opacity: 1; }
 
 
 /* ════════════════════════════════════════════════════════════════

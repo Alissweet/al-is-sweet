@@ -92,34 +92,39 @@
                 </div>
                 {% endif %}
             </div>
+		</form>
+            <!-- Ligne 2 : Navigation Catégories -->
+			<div class="category-nav-wrapper">
+				<!-- Dégradé gauche -->
+				<div class="cat-fade-left" id="catFadeLeft"></div>
 
-            <!-- Ligne 2 : Navigation Pillules (Catégories) -->
-            <div class="category-nav">
-                <!-- Bouton "Toutes" -->
-                <button type="button" 
-                        class="cat-pill {{ 'active' if not current_category else '' }}"
-                        onclick="selectCategory('')">
-                    Toutes
-                </button>
-                
-                <!-- Bouton "Favoris" -->
-                <button type="button" 
-                        class="cat-pill {{ 'active' if current_category == 'favorites' else '' }}"
-                        onclick="selectCategory('favorites')">
-                    <i class="bi bi-heart-fill text-danger"></i> Favoris
-                </button>
+				<!-- La barre scrollable -->
+				<div class="category-nav" id="categoryNav">
+					<button type="button"
+							class="cat-pill {{ 'active' if not current_category else '' }}"
+							onclick="selectCategory('')">
+						Toutes
+					</button>
+					<button type="button"
+							class="cat-pill {{ 'active' if current_category == 'favorites' else '' }}"
+							onclick="selectCategory('favorites')">
+						<i class="bi bi-heart-fill text-danger"></i> Favoris
+					</button>
+					{% for cat in categories %}
+					<button type="button"
+							class="cat-pill {{ 'active' if current_category == cat else '' }}"
+							onclick="selectCategory('{{ cat }}')">
+						{{ cat }}
+					</button>
+					{% endfor %}
+				</div>
 
-                <!-- Catégories Dynamiques -->
-                {% for cat in categories %}
-                <button type="button" 
-                        class="cat-pill {{ 'active' if current_category == cat else '' }}"
-                        onclick="selectCategory('{{ cat }}')">
-                    {{ cat }}
-                </button>
-                {% endfor %}
-            </div>
-
-        </form>
+				<!-- Dégradé droit + badge -->
+				<div class="cat-fade-right" id="catFadeRight">
+					<span class="cat-overflow-badge" id="catOverflowBadge" onclick="return false;"></span>
+				</div>
+			</div>
+        
     </section>
 
     <!-- GRILLE DES RECETTES -->
@@ -238,4 +243,59 @@
         {% endif %}
     </section>
 </div>
+<script>
+// ── CATEGORY NAV : fades + badge (+N) ──────────────────
+(function() {
+    const nav    = document.getElementById('categoryNav');
+    const fadeL  = document.getElementById('catFadeLeft');
+    const fadeR  = document.getElementById('catFadeRight');
+    const badge  = document.getElementById('catOverflowBadge');
+    if (!nav) return;
+
+    function countHidden() {
+        const navRight = nav.getBoundingClientRect().right;
+        let hidden = 0;
+        nav.querySelectorAll('.cat-pill').forEach(pill => {
+            if (pill.getBoundingClientRect().right > navRight + 4) hidden++;
+        });
+        return hidden;
+    }
+
+    function update() {
+        const scrollLeft  = nav.scrollLeft;
+        const maxScroll   = nav.scrollWidth - nav.clientWidth;
+
+        // Dégradé gauche
+        fadeL.classList.toggle('visible', scrollLeft > 8);
+
+        // Dégradé droit + badge
+        const hasRight = scrollLeft < maxScroll - 8;
+        fadeR.classList.toggle('visible', hasRight);
+
+        if (hasRight) {
+            const n = countHidden();
+            if (n > 0) {
+                badge.textContent = `+${n}`;
+                badge.classList.add('visible');
+            } else {
+                badge.classList.remove('visible');
+            }
+        } else {
+            badge.classList.remove('visible');
+        }
+    }
+
+    // Scroll la pill active en vue
+    const active = nav.querySelector('.cat-pill.active');
+    if (active) {
+        setTimeout(() => {
+            active.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+        }, 100);
+    }
+
+    nav.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+})();
+</script>
 {% endblock %}
