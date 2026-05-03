@@ -10,17 +10,17 @@
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
 			<h1 class="h3 mb-0">Mes Recettes</h1>
 			<div class="d-flex gap-2 align-items-center">
-				<a href="{{ url_for('main.random_recipe') }}" class="btn-magic">
+				<a href="{{ url_for('recipes.random_recipe') }}" class="btn-magic">
 					<i class="bi bi-stars"></i> Inspiration
 				</a>
-				<a href="{{ url_for('main.recipe_new') }}" class="btn-add-recipe">
+				<a href="{{ url_for('recipes.recipe_new') }}" class="btn-add-recipe">
 					<i class="bi bi-plus-circle-fill"></i> Créer
 				</a>
 			</div>
 		</div>
 
         <!-- Formulaire Global de Filtrage -->
-        <form id="filterForm" action="{{ url_for('main.index') }}" method="GET">
+        <form id="filterForm" action="{{ url_for('recipes.index') }}" method="GET">
             
             <!-- Champ caché pour la catégorie (géré par les pillules) -->
             <input type="hidden" name="category" id="categoryInput" value="{{ current_category }}">
@@ -86,7 +86,7 @@
                 <!-- Bouton Reset (Mise à jour de la condition pour inclure le tri et le tag) -->
                 {% if search or current_category or current_difficulty or current_max_time or current_sort != 'date_desc' or current_tag %}
                 <div class="filter-wrapper" style="flex: 0; min-width: auto;">
-                    <a href="{{ url_for('main.index') }}" class="btn-reset-filters" title="Réinitialiser">
+                    <a href="{{ url_for('recipes.index') }}" class="btn-reset-filters" title="Réinitialiser">
                         <i class="bi bi-x-lg"></i>
                     </a>
                 </div>
@@ -129,7 +129,7 @@
             {% for recipe in recipes.items %}
             <div class="col-md-6 col-lg-4">
                 <!-- Clic direct vers le détail (plus de sélection) -->
-                <div class="recipe-card" onclick="window.location='{{ url_for('main.recipe_detail', id=recipe.id) }}';">
+                <div class="recipe-card" onclick="window.location='{{ url_for('recipes.recipe_detail', id=recipe.id) }}';">
 
                     <!-- IMAGE + BADGES -->
                     <div class="recipe-card-image">
@@ -212,13 +212,13 @@
                 <ul class="pagination pagination-pill">
                     {% if recipes.has_prev %}
                     <li class="page-item">
-                        <a class="page-link" href="{{ url_for('main.index', page=recipes.prev_num, category=current_category, search=search) }}">Précédent</a>
+                        <a class="page-link" href="{{ url_for('recipes.index', page=recipes.prev_num, category=current_category, search=search) }}">Précédent</a>
                     </li>
                     {% endif %}
                     <li class="page-item disabled"><span class="page-link">{{ recipes.page }} / {{ recipes.pages }}</span></li>
                     {% if recipes.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="{{ url_for('main.index', page=recipes.next_num, category=current_category, search=search) }}">Suivant</a>
+                        <a class="page-link" href="{{ url_for('recipes.index', page=recipes.next_num, category=current_category, search=search) }}">Suivant</a>
                     </li>
                     {% endif %}
                 </ul>

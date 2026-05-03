@@ -96,7 +96,7 @@
 				{% if recipe.tags %}
                 <div class="tags-container mt-3 d-flex justify-content-center gap-2 flex-wrap">
                     {% for tag in recipe.tags %}
-                    <a href="{{ url_for('main.index', tag=tag.name) }}" class="recipe-tag recipe-tag-link">#{{ tag.name }}</a>
+                    <a href="{{ url_for('recipes.index', tag=tag.name) }}" class="recipe-tag recipe-tag-link">#{{ tag.name }}</a>
                     {% endfor %}
                 </div>
                 {% endif %}
@@ -129,11 +129,11 @@
 				   data-bs-toggle="modal" data-bs-target="#shareModal">
 					<i class="bi bi-share"></i> Partager
 				</a>
-				<a href="{{ url_for('main.recipe_pdf', id=recipe.id) }}"
+				<a href="{{ url_for('tools.recipe_pdf', id=recipe.id) }}"
 				   target="_blank" class="text-muted small me-3 text-decoration-none">
 					<i class="bi bi-file-earmark-pdf"></i> PDF
 				</a>
-				<a href="{{ url_for('main.recipe_edit', id=recipe.id) }}" class="text-muted small me-3 text-decoration-none">
+				<a href="{{ url_for('recipes.recipe_edit', id=recipe.id) }}" class="text-muted small me-3 text-decoration-none">
 					<i class="bi bi-pencil"></i> Modifier
 				</a>
 				<a href="#" class="text-danger small text-decoration-none" data-bs-toggle="modal" data-bs-target="#deleteModal">
@@ -184,7 +184,7 @@
                 <div class="row g-3">
                     {% for sim in similar_recipes %}
                     <div class="col-md-4">
-                        <a href="{{ url_for('main.recipe_detail', id=sim.id) }}" class="similar-recipe-card">
+                        <a href="{{ url_for('recipes.recipe_detail', id=sim.id) }}" class="similar-recipe-card">
                             <div class="similar-recipe-img">
                                 {% if sim.image_filename %}
                                     {% if sim.image_filename.startswith('http') %}
@@ -405,7 +405,7 @@
             <div class="modal-body text-center p-4">
                 <h5 class="mb-3">Supprimer cette recette ?</h5>
                 
-                <form action="{{ url_for('main.recipe_delete', id=recipe.id) }}" method="POST">
+                <form action="{{ url_for('recipes.recipe_delete', id=recipe.id) }}" method="POST">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     
                     <button type="button" class="btn btn-light me-2" data-bs-dismiss="modal">Non</button>

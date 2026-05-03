@@ -224,17 +224,17 @@
                         
                         <!-- Actions -->
 						<td class="text-center" style="white-space: nowrap;">
-							<a href="{{ url_for('main.recipe_detail', id=recipe.id) }}" 
+							<a href="{{ url_for('recipes.recipe_detail', id=recipe.id) }}" 
 							   class="btn btn-sm btn-outline-primary me-1" 
 							   title="Voir">
 								<i class="bi bi-eye"></i>
 							</a>
-							<a href="{{ url_for('main.recipe_edit', id=recipe.id) }}" 
+							<a href="{{ url_for('recipes.recipe_edit', id=recipe.id) }}" 
 							   class="btn btn-sm btn-outline-secondary me-1" 
 							   title="Modifier">
 								<i class="bi bi-pencil"></i>
 							</a>
-							<a href="{{ url_for('main.recipe_pdf', id=recipe.id) }}" 
+							<a href="{{ url_for('tools.recipe_pdf', id=recipe.id) }}" 
 							   class="btn btn-sm btn-outline-danger" 
 							   title="Télécharger PDF"
 							   target="_blank">
@@ -253,7 +253,7 @@
     <div class="text-center py-5">
         <i class="bi bi-journal-x display-1 text-muted"></i>
         <p class="lead text-muted mt-3">Aucune recette pour le moment</p>
-        <a href="{{ url_for('main.recipe_new') }}" class="btn btn-terracotta">
+        <a href="{{ url_for('recipes.recipe_new') }}" class="btn btn-terracotta">
             <i class="bi bi-plus-circle"></i> Créer ma première recette
         </a>
     </div>

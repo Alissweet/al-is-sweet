@@ -1,0 +1,429 @@
+{% extends "base.html" %}
+
+{% block title %}Administration — Al' is Sweet{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+
+  <!-- EN-TÊTE -->
+  <div class="admin-header">
+    <div class="admin-header-inner">
+      <div class="admin-title-block">
+        <span class="admin-eyebrow">Espace privé</span>
+        <h1 class="admin-title">Administration</h1>
+      </div>
+      <div class="admin-stats-row">
+        <div class="admin-stat">
+          <span class="admin-stat-value">{{ stats.total_recipes }}</span>
+          <span class="admin-stat-label">Recettes</span>
+        </div>
+        <div class="admin-stat-sep"></div>
+        <div class="admin-stat">
+          <span class="admin-stat-value">{{ stats.total_categories }}</span>
+          <span class="admin-stat-label">Familles</span>
+        </div>
+        <div class="admin-stat-sep"></div>
+        <div class="admin-stat">
+          <span class="admin-stat-value">{{ stats.total_favorites }}</span>
+          <span class="admin-stat-label">Favoris</span>
+        </div>
+        <div class="admin-stat-sep"></div>
+        <div class="admin-stat">
+          <span class="admin-stat-value">{{ stats.total_tags }}</span>
+          <span class="admin-stat-label">Tags</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-body">
+
+    <!-- ═══════════════════════════════════════
+         ESPACE GESTION DES RECETTES
+    ═══════════════════════════════════════ -->
+    <section class="admin-section">
+      <div class="admin-section-label">
+        <i class="bi bi-journal-bookmark-fill"></i>
+        Gestion des Recettes
+      </div>
+
+      <div class="admin-cards-grid">
+
+        <!-- CARD : Ajouter une famille -->
+        <div class="admin-card">
+          <div class="admin-card-icon-wrap" style="--card-color: #c59d85;">
+            <i class="bi bi-folder-plus"></i>
+          </div>
+          <div class="admin-card-content">
+            <h3 class="admin-card-title">Familles de recettes</h3>
+            <p class="admin-card-desc">
+              Créez et gérez les familles (catégories) pour organiser vos recettes.
+              Une famille regroupe des recettes du même type : Gâteau, Tarte, Boisson…
+            </p>
+
+            <!-- Familles existantes -->
+            {% if categories %}
+            <div class="admin-tag-list" id="categoryTagList">
+              {% for cat in categories %}
+              <span class="admin-tag" data-id="{{ cat.id }}">
+                {{ cat.name }}
+                <button class="admin-tag-del" onclick="deleteCategory({{ cat.id }}, '{{ cat.name }}')" title="Supprimer">
+                  <i class="bi bi-x"></i>
+                </button>
+              </span>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p class="admin-empty-hint">Aucune famille créée.</p>
+            {% endif %}
+
+            <!-- Formulaire ajout -->
+            <div class="admin-inline-form" id="addCatForm">
+              <input type="text" id="newCategoryName" class="admin-input"
+                     placeholder="Nom de la nouvelle famille…" maxlength="100">
+              <button class="admin-btn-primary" onclick="addCategory()">
+                <i class="bi bi-plus-lg"></i> Ajouter
+              </button>
+            </div>
+
+            <!-- Init catégories par défaut -->
+            <a href="{{ url_for('admin.init_categories') }}" class="admin-btn-ghost mt-2">
+              <i class="bi bi-magic"></i> Initialiser les familles par défaut
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════
+         ESPACE BASE DE DONNÉES
+    ═══════════════════════════════════════ -->
+    <section class="admin-section">
+      <div class="admin-section-label">
+        <i class="bi bi-database-fill"></i>
+        Base de Données
+      </div>
+
+      <div class="admin-cards-grid">
+
+        <!-- CARD : Sauvegarder -->
+        <div class="admin-card">
+          <div class="admin-card-icon-wrap" style="--card-color: #6d4c41;">
+            <i class="bi bi-cloud-arrow-down-fill"></i>
+          </div>
+          <div class="admin-card-content">
+            <h3 class="admin-card-title">Sauvegarder ma base</h3>
+            <p class="admin-card-desc">
+              Télécharge l'intégralité de tes recettes au format JSON.
+              Les liens images Cloudinary sont inclus — la sauvegarde est complète et réutilisable.
+            </p>
+            <div class="admin-card-info">
+              <i class="bi bi-info-circle"></i>
+              <span>{{ stats.total_recipes }} recette(s) seront exportées</span>
+            </div>
+            <button class="admin-btn-primary" onclick="confirmExport()">
+              <i class="bi bi-download"></i> Télécharger la sauvegarde
+            </button>
+          </div>
+        </div>
+
+        <!-- CARD : Uploader une BDD -->
+        <div class="admin-card">
+          <div class="admin-card-icon-wrap" style="--card-color: #3e2723;">
+            <i class="bi bi-cloud-arrow-up-fill"></i>
+          </div>
+          <div class="admin-card-content">
+            <h3 class="admin-card-title">Intégrer une base externe</h3>
+            <p class="admin-card-desc">
+              Importe le fichier JSON partagé par un ami. Seules les recettes absentes
+              de ta collection seront ajoutées — pas de doublons.
+            </p>
+            <div class="admin-card-info">
+              <i class="bi bi-shield-check"></i>
+              <span>Vérification automatique des doublons avant import</span>
+            </div>
+            <label class="admin-btn-primary" style="cursor:pointer;">
+              <i class="bi bi-upload"></i> Choisir un fichier JSON
+              <input type="file" id="importFileInput" accept=".json" style="display:none"
+                     onchange="handleImportFile(this)">
+            </label>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- ── MODAL CONFIRMATION SUPPRESSION ─────────────────── -->
+<div class="admin-modal-overlay" id="deleteCatModal" style="display:none">
+  <div class="admin-modal">
+    <div class="admin-modal-icon" style="color:#c0392b;">
+      <i class="bi bi-trash3-fill"></i>
+    </div>
+    <h3>Supprimer cette famille ?</h3>
+    <p id="deleteCatMsg"></p>
+    <div class="admin-modal-actions">
+      <button class="admin-btn-ghost" onclick="closeModal('deleteCatModal')">Annuler</button>
+      <button class="admin-btn-primary" id="deleteCatConfirmBtn" style="background:#c0392b;">
+        <i class="bi bi-trash3"></i> Supprimer
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL CONFIRMATION EXPORT ───────────────────────────── -->
+<div class="admin-modal-overlay" id="exportModal" style="display:none">
+  <div class="admin-modal">
+    <div class="admin-modal-icon"><i class="bi bi-shield-lock-fill"></i></div>
+    <h3>Confirmer l'export</h3>
+    <p>Tu es sur le point de télécharger <strong>{{ stats.total_recipes }} recette(s)</strong>.<br>
+    Confirme ton mot de passe pour continuer.</p>
+    <input type="password" id="exportPasswordInput" class="admin-input" placeholder="Mot de passe…">
+    <div class="admin-modal-actions">
+      <button class="admin-btn-ghost" onclick="closeModal('exportModal')">Annuler</button>
+      <button class="admin-btn-primary" onclick="doExport()">
+        <i class="bi bi-download"></i> Télécharger
+      </button>
+    </div>
+    <div id="exportError" class="admin-modal-error" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ── MODAL PREVIEW IMPORT ────────────────────────────────── -->
+<div class="admin-modal-overlay" id="importModal" style="display:none">
+  <div class="admin-modal admin-modal--wide">
+    <div class="admin-modal-icon"><i class="bi bi-file-earmark-arrow-up-fill"></i></div>
+    <h3>Aperçu de l'import</h3>
+    <div id="importPreviewContent"></div>
+    <div class="admin-modal-actions">
+      <button class="admin-btn-ghost" onclick="closeModal('importModal')">Annuler</button>
+      <button class="admin-btn-primary" id="confirmImportBtn" onclick="doImport()" style="display:none">
+        <i class="bi bi-check-lg"></i> Importer les recettes
+      </button>
+    </div>
+    <div id="importError" class="admin-modal-error" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ── TOAST ────────────────────────────────────────────────── -->
+<div id="adminToast" class="admin-toast" style="display:none"></div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ── CATÉGORIES ───────────────────────────────────────────────
+function addCategory() {
+  const name = document.getElementById('newCategoryName').value.trim();
+  if (!name) return;
+
+  fetch("{{ url_for('admin.add_category') }}", {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-CSRFToken': '{{ csrf_token() }}'
+    },
+    body: `category_name=${encodeURIComponent(name)}`
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      showToast(data.message, 'success');
+      document.getElementById('newCategoryName').value = '';
+      addTagToDOM(data.category);
+    } else {
+      showToast(data.message, 'error');
+    }
+  });
+}
+
+function addTagToDOM(cat) {
+  const list = document.getElementById('categoryTagList') ||
+    (() => {
+      const el = document.createElement('div');
+      el.className = 'admin-tag-list';
+      el.id = 'categoryTagList';
+      document.getElementById('addCatForm').before(el);
+      return el;
+    })();
+
+  const tag = document.createElement('span');
+  tag.className = 'admin-tag';
+  tag.dataset.id = cat.id;
+  tag.innerHTML = `${cat.name}
+    <button class="admin-tag-del" onclick="deleteCategory(${cat.id}, '${cat.name}')" title="Supprimer">
+      <i class="bi bi-x"></i>
+    </button>`;
+  list.appendChild(tag);
+}
+
+function deleteCategory(id, name) {
+  document.getElementById('deleteCatMsg').innerHTML =
+    `Les recettes de la famille <strong>${name}</strong> seront déplacées vers "Autre".`;
+  document.getElementById('deleteCatModal').style.display = 'flex';
+  document.getElementById('deleteCatConfirmBtn').onclick = () => {
+    fetch(`{{ url_for('admin.delete_category', id=0) }}`.replace('/0', `/${id}`), {
+      method: 'POST',
+      headers: { 'X-CSRFToken': '{{ csrf_token() }}' }
+    })
+    .then(r => r.json())
+    .then(data => {
+      closeModal('deleteCatModal');
+      if (data.success) {
+        showToast(data.message, 'success');
+        document.querySelector(`.admin-tag[data-id="${id}"]`)?.remove();
+      } else {
+        showToast(data.message, 'error');
+      }
+    });
+  };
+}
+
+document.getElementById('newCategoryName').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addCategory();
+});
+
+// ── EXPORT ───────────────────────────────────────────────────
+function confirmExport() {
+  document.getElementById('exportPasswordInput').value = '';
+  document.getElementById('exportError').style.display = 'none';
+  document.getElementById('exportModal').style.display = 'flex';
+}
+
+function doExport() {
+  const pwd = document.getElementById('exportPasswordInput').value;
+  if (!pwd) {
+    showModalError('exportError', 'Mot de passe requis.');
+    return;
+  }
+
+  fetch("{{ url_for('auth.verify_password') }}", {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-CSRFToken': '{{ csrf_token() }}'
+    },
+    body: `password=${encodeURIComponent(pwd)}`
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.valid) {
+      closeModal('exportModal');
+      window.location.href = "{{ url_for('admin.export_data') }}";
+    } else {
+      showModalError('exportError', 'Mot de passe incorrect.');
+    }
+  });
+}
+
+// ── IMPORT ───────────────────────────────────────────────────
+let recipesToImport = [];
+
+function handleImportFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  fetch("{{ url_for('tools.analyze_import') }}", {
+    method: 'POST',
+    headers: { 'X-CSRFToken': '{{ csrf_token() }}' },
+    body: formData
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.error) { showToast(data.error, 'error'); return; }
+    showImportPreview(data);
+  });
+
+  input.value = '';
+}
+
+function showImportPreview(data) {
+  const { new_recipes, conflicts } = data;
+  recipesToImport = new_recipes;
+
+  let html = '';
+
+  if (new_recipes.length > 0) {
+    html += `<div class="import-section import-section--new">
+      <div class="import-section-title"><i class="bi bi-check-circle-fill"></i> ${new_recipes.length} recette(s) à importer</div>
+      <ul class="import-list">
+        ${new_recipes.map(r => `<li>${r.title}</li>`).join('')}
+      </ul>
+    </div>`;
+  }
+
+  if (conflicts.length > 0) {
+    html += `<div class="import-section import-section--conflict">
+      <div class="import-section-title"><i class="bi bi-exclamation-triangle-fill"></i> ${conflicts.length} conflit(s) ignoré(s)</div>
+      <ul class="import-list">
+        ${conflicts.map(r => `<li>${r.title} <span class="conflict-reason">${r._conflict_reason}</span></li>`).join('')}
+      </ul>
+    </div>`;
+  }
+
+  if (new_recipes.length === 0 && conflicts.length === 0) {
+    html = '<p class="admin-empty-hint">Aucune recette trouvée dans ce fichier.</p>';
+  }
+
+  document.getElementById('importPreviewContent').innerHTML = html;
+  document.getElementById('confirmImportBtn').style.display =
+    new_recipes.length > 0 ? 'flex' : 'none';
+  document.getElementById('importModal').style.display = 'flex';
+}
+
+function doImport() {
+  if (!recipesToImport.length) return;
+
+  fetch("{{ url_for('tools.finalize_import') }}", {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': '{{ csrf_token() }}'
+    },
+    body: JSON.stringify({ recipes: recipesToImport })
+  })
+  .then(r => r.json())
+  .then(data => {
+    closeModal('importModal');
+    if (data.message) {
+      showToast(data.message, 'success');
+      setTimeout(() => location.reload(), 1500);
+    } else {
+      showToast(data.error || 'Erreur import', 'error');
+    }
+  });
+}
+
+// ── UTILITAIRES ──────────────────────────────────────────────
+function closeModal(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
+function showModalError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('adminToast');
+  t.textContent = msg;
+  t.className = `admin-toast admin-toast--${type}`;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 3500);
+}
+
+// Fermer modals en cliquant hors
+document.querySelectorAll('.admin-modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.style.display = 'none';
+  });
+});
+</script>
+{% endblock %}

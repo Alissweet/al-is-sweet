@@ -23,10 +23,12 @@ services:
     container_name: alsweet_app
     ports:
       - "5000:5000"
+    env_file:
+      - .env
     environment:
-      - DATABASE_URL=postgresql://postgres:sweetpassword123@db:5432/al_is_sweet
       - SECRET_KEY=al-is-sweet-docker-secret-key-2024
       - FLASK_ENV=development
+      - DATABASE_URL=postgresql://neondb_owner:npg_rMz3ULB2XKeF@ep-hidden-firefly-alan0r4l.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
     volumes:
       - .:/app
       - uploads_data:/app/app/static/uploads

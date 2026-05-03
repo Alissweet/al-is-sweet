@@ -8,4 +8,13 @@ app/static/uploads/
 *.db
 .DS_Store
 venv/
-env/
+env/__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+*.bak
+docker_log.txt
+snapshot_*.txt
+structure.txt
+app/__init__old.py

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import jsonify, Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, current_user, login_required
 from flask_mail import Message
 from app import db, mail
@@ -23,7 +23,7 @@ def validate_password(password):
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('recipes.index'))
         
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
@@ -38,7 +38,7 @@ def login():
             next_page = request.args.get('next')
             if next_page and urlparse(next_page).netloc == '':
                 return redirect(next_page)
-            return redirect(url_for('main.index'))
+            return redirect(url_for('recipes.index'))
         
         flash('Email ou mot de passe incorrect.', 'danger')
         
@@ -47,7 +47,7 @@ def login():
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('recipes.index'))
         
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
@@ -87,7 +87,7 @@ def logout():
 @auth.route("/reset_password", methods=['GET', 'POST'])
 def reset_request():
     if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('recipes.index'))
     
     if request.method == 'POST':
         email = request.form.get('email')
@@ -128,7 +128,7 @@ L'équipe Al' is Sweet
 @auth.route("/reset_password/<token>", methods=['GET', 'POST'])
 def reset_token(token):
     if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('recipes.index'))
     
     user = User.verify_reset_token(token)
     if user is None:
@@ -152,3 +152,10 @@ def reset_token(token):
                 return redirect(url_for('auth.login'))
                 
     return render_template('reset_token.html')
+@auth.route('/verify-password', methods=['POST'])
+@login_required
+def verify_password():
+    from flask_login import current_user
+    password = request.form.get('password', '')
+    valid = current_user.check_password(password)
+    return jsonify({'valid': valid})

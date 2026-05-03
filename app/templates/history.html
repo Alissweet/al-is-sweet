@@ -8,7 +8,7 @@
         <h1 class="font-playfair text-choco-dark display-4">Souvenirs Gourmands</h1>
         <p class="text-muted">Retrouvez toutes les recettes que vous avez cuisinées.</p>
         {% if history %}
-        <form action="{{ url_for('main.history_clear') }}" method="POST" id="clearForm">
+        <form action="{{ url_for('recipes.history_clear') }}" method="POST" id="clearForm">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         </form>
         <button type="button" class="btn-reset-history mt-3"
@@ -43,7 +43,7 @@
 
                     <div class="flex-grow-1">
                         <h5 class="font-playfair mb-1">
-                            <a href="{{ url_for('main.recipe_detail', id=entry.recipe.id) }}" 
+                            <a href="{{ url_for('recipes.recipe_detail', id=entry.recipe.id) }}" 
                                class="text-decoration-none text-choco-dark">
                                 {{ entry.recipe.title }}
                             </a>
@@ -72,7 +72,7 @@
     <div class="text-center py-5">
         <i class="bi bi-calendar-x display-1 text-muted opacity-25"></i>
         <p class="mt-3 text-muted">Votre historique est vide.<br>Cuisinez quelque chose et cliquez sur "J'ai cuisiné ça" !</p>
-        <a href="{{ url_for('main.index') }}" class="btn btn-terracotta mt-2">Trouver une recette</a>
+        <a href="{{ url_for('recipes.index') }}" class="btn btn-terracotta mt-2">Trouver une recette</a>
     </div>
     {% endif %}
 </div>

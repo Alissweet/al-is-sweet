@@ -20,10 +20,9 @@ class Config:
     
     # ✅ Neon : SSL + gestion du cold start (instance gratuite)
     SQLALCHEMY_ENGINE_OPTIONS = {
-        "connect_args": {"sslmode": "require"},
-        "pool_pre_ping": True,
-        "pool_recycle": 300,
-}
+    "pool_pre_ping": True,
+    "pool_recycle": 300,
+    }
 
     # --- IMAGES (Hybride Cloud/Local) ---
     CLOUDINARY_URL = os.environ.get('CLOUDINARY_URL')
