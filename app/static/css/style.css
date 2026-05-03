@@ -2748,3 +2748,33 @@ img { max-width: 100%; }
   .admin-card { flex-direction: column; }
   .admin-body { padding: 0 1rem 3rem; }
 }
+
+/* ── BOUTON ADMIN NAVBAR ─────────────────────────────── */
+.nav-link-admin {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 1rem;
+  border-radius: 2rem;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: #fff !important;
+  background: linear-gradient(135deg, #3e2723, #6d4c41);
+  border: none;
+  text-decoration: none;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(62,39,35,0.25);
+}
+
+.nav-link-admin:hover {
+  background: linear-gradient(135deg, #6d4c41, #a07858);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(62,39,35,0.35);
+  color: #fff !important;
+}
+
+.nav-link-admin i {
+  font-size: 0.9rem;
+}
