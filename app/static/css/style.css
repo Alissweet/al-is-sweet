@@ -2754,7 +2754,7 @@ img { max-width: 100%; }
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.45rem 1rem;
+  padding: 0.45rem;
   border-radius: 2rem;
   font-family: 'Poppins', sans-serif;
   font-size: 0.82rem;
