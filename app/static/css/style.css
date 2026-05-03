@@ -2754,27 +2754,40 @@ img { max-width: 100%; }
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.45rem;
+  padding: 0.2rem 1rem;  /* ← padding vertical réduit */
+  margin: 0.85rem 0;      /* ← écart haut et bas */
   border-radius: 2rem;
   font-family: 'Poppins', sans-serif;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   color: #fff !important;
-  background: linear-gradient(135deg, #3e2723, #6d4c41);
+  background: linear-gradient(135deg, #c59d85 0%, #a07858 100%);
   border: none;
   text-decoration: none;
-  transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(62,39,35,0.25);
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 10px rgba(197,157,133,0.45);
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-link-admin::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+  border-radius: inherit;
 }
 
 .nav-link-admin:hover {
-  background: linear-gradient(135deg, #6d4c41, #a07858);
+  background: linear-gradient(135deg, #a07858 0%, #7a5c42 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(62,39,35,0.35);
+  box-shadow: 0 5px 18px rgba(197,157,133,0.55);
   color: #fff !important;
 }
 
 .nav-link-admin i {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  opacity: 0.9;
 }

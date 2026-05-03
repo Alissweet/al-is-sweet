@@ -26,14 +26,14 @@
 					</div>
 				{% endif %}
 
-                <!-- 🆕 BOUTON FAVORI INTERACTIF (Haut Gauche) -->
+                <!-- BOUTON FAVORI INTERACTIF (Haut Gauche) -->
                 <button class="btn-favorite-toggle {{ 'active' if recipe.is_favorite else '' }}" 
                         onclick="toggleFavorite({{ recipe.id }}, this)"
                         title="Ajouter aux favoris">
                     <i class="bi {{ 'bi-heart-fill' if recipe.is_favorite else 'bi-heart' }}"></i>
                 </button>
                 
-                <!-- Badge Glucides Flottant (Toujours par dessus) -->
+                <!-- Badge Glucides Flottant -->
                 <div class="badge-carbs" style="top: 20px; right: 20px; font-size: 1rem; padding: 8px 18px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
                     <i class="bi bi-lightning-fill text-warning"></i>
                     {{ "%.0f"|format(recipe.total_carbs) }}g <span class="fw-light ms-1 small opacity-75">totaux</span>
@@ -92,7 +92,6 @@
                 <p class="mt-3 text-muted fst-italic">"{{ recipe.description }}"</p>
                 {% endif %}
 
-
 				{% if recipe.tags %}
                 <div class="tags-container mt-3 d-flex justify-content-center gap-2 flex-wrap">
                     {% for tag in recipe.tags %}
@@ -102,15 +101,12 @@
                 {% endif %}
             </div>
 
-            <!-- GRILLE D'ACTION (Le coeur de l'UX) -->
+            <!-- GRILLE D'ACTION -->
             <div class="action-grid">
-                <!-- Bouton Liste de Courses -->
                 <button class="btn-action-big btn-shopping" data-bs-toggle="modal" data-bs-target="#shoppingModal">
                     <i class="bi bi-basket3"></i>
                     <span>Liste de courses</span>
                 </button>
-                
-                <!-- Bouton Let's Cook -->
                 <button class="btn-action-big btn-cook" onclick="startCooking()">
                     <i class="bi bi-play-circle-fill"></i>
                     <span>Let's Cook !</span>
@@ -123,7 +119,7 @@
                 </button>
             </div>
 
-            <!-- Actions Admin (Discrètes en bas) -->
+            <!-- Actions Admin -->
 			<div class="text-center mt-5 pt-4 border-top">
 				<a href="#" class="text-muted small me-3 text-decoration-none"
 				   data-bs-toggle="modal" data-bs-target="#shareModal">
@@ -169,9 +165,7 @@
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════
-     RECETTES SIMILAIRES
-═══════════════════════════════════════ -->
+<!-- RECETTES SIMILAIRES -->
 {% if similar_recipes %}
 <div class="container pb-5">
     <div class="row justify-content-center">
@@ -204,7 +198,6 @@
                                     <span><i class="bi bi-clock"></i> {{ sim.total_time }} min</span>
                                     <span><i class="bi bi-bar-chart"></i> {{ sim.difficulty }}</span>
                                 </div>
-                                <!-- Tags communs mis en évidence -->
                                 <div class="similar-recipe-tags">
                                     {% for tag in sim.tags %}
                                         {% if tag in recipe.tags %}
@@ -233,7 +226,6 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
-                <!-- Calculateur — miroir du contrôle principal -->
 				<div class="d-flex justify-content-between align-items-center mb-4 bg-light p-2 rounded-pill">
 					<span class="ms-3 text-muted small">Portions :</span>
 					<div class="d-flex align-items-center gap-2">
@@ -246,8 +238,6 @@
 						</button>
 					</div>
 				</div>
-
-                <!-- Liste à cocher -->
                 <div class="list-group list-group-flush">
                     {% for ing in recipe.ingredients %}
                     <label class="list-group-item d-flex gap-3 align-items-center cursor-pointer">
@@ -285,6 +275,25 @@
         <div class="progress-fill" id="cookingProgress"></div>
     </div>
 
+    <!-- Overlay sombre derrière le drawer -->
+    <div class="ing-drawer-overlay" id="ingDrawerOverlay" onclick="closeIngDrawer()"></div>
+
+    <!-- Drawer Ingrédients (glisse depuis la gauche) -->
+    <div class="ing-drawer" id="ingDrawer">
+        <div class="ing-drawer-header">
+            <span><i class="bi bi-list-check me-2"></i>Ingrédients</span>
+            <button class="ing-drawer-close" onclick="closeIngDrawer()"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <ul class="ing-drawer-list">
+            {% for ing in recipe.ingredients %}
+            <li class="ing-drawer-item">
+                <span class="ing-drawer-qty">{% if ing.quantity is not none %}{{ ing.quantity | int if ing.quantity == (ing.quantity | int) else ing.quantity }}{% endif %} {{ ing.unit or "" }}</span>
+                <span class="ing-drawer-name">{{ ing.name }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
     <!-- Conteneur des étapes -->
     <div id="stepsContainer" class="flex-grow-1 d-flex flex-column">
         {% for step in recipe.steps.order_by('order') %}
@@ -312,18 +321,22 @@
         </div>
     </div>
 
+    <!-- Bouton ingrédients — entre étapes et contrôles -->
+    <div class="ing-drawer-btn-wrap">
+        <button class="ing-drawer-btn" id="ingDrawerBtn" onclick="openIngDrawer()">
+            <i class="bi bi-list-check me-2"></i> Voir les ingrédients
+        </button>
+    </div>
+
     <!-- Contrôles de Navigation & Astuces -->
     <div class="cooking-controls">
         
         <!-- Wrapper Mobile -->
         <div class="mobile-btn-group d-contents-lg">
-            <!-- Bouton Précédent (Cercle/Pilule gris) -->
             <button class="btn btn-outline-secondary btn-lg rounded-pill px-4" 
                     id="prevBtn" onclick="changeStep(-1)" disabled>
                 <i class="bi bi-arrow-left"></i>
             </button>
-            
-            <!-- Bouton Suivant Mobile (Même style que Précédent) -->
             <button class="btn btn-outline-secondary btn-lg rounded-pill px-4 d-lg-none" 
                     id="nextBtnMobile" onclick="changeStep(1)">
                 <i class="bi bi-arrow-right"></i>
@@ -350,7 +363,7 @@
         <div></div>
         {% endif %}
 
-        <!-- Bouton Suivant Desktop (Même style que Précédent) -->
+        <!-- Bouton Suivant Desktop -->
         <button class="btn btn-outline-secondary btn-lg rounded-pill px-4 d-none d-lg-block" 
                 id="nextBtnDesktop" onclick="changeStep(1)">
             <i class="bi bi-arrow-right"></i>
@@ -368,16 +381,12 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4 text-center">
-
-                <!-- État : pas encore de lien -->
                 <div id="shareInit">
                     <p class="text-muted mb-3">Génère un lien public pour partager cette recette, même avec des personnes sans compte.</p>
                     <button class="btn btn-terracotta rounded-pill px-4" onclick="generateShareLink()">
                         <i class="bi bi-link-45deg me-2"></i>Générer le lien
                     </button>
                 </div>
-
-                <!-- État : lien généré -->
                 <div id="shareResult" class="d-none">
                     <p class="text-muted mb-2">Lien de partage actif :</p>
                     <div class="input-group mb-3">
@@ -391,27 +400,22 @@
                         <i class="bi bi-x-circle me-1"></i>Désactiver le lien
                     </button>
                 </div>
-
             </div>
         </div>
     </div>
 </div>
 
-
-<!-- Modal Suppression (Classique) -->
+<!-- Modal Suppression -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-body text-center p-4">
                 <h5 class="mb-3">Supprimer cette recette ?</h5>
-                
                 <form action="{{ url_for('recipes.recipe_delete', id=recipe.id) }}" method="POST">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    
                     <button type="button" class="btn btn-light me-2" data-bs-dismiss="modal">Non</button>
                     <button type="submit" class="btn btn-danger">Oui, supprimer</button>
                 </form>
-                
             </div>
         </div>
     </div>
@@ -419,6 +423,95 @@
 {% endblock %}
 
 {% block scripts %}
+<style>
+.ing-drawer {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 300px;
+    background: #fdf6f0;
+    z-index: 1060;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.18);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+}
+.ing-drawer.open { transform: translateX(0); }
+.ing-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 1059;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s;
+}
+.ing-drawer-overlay.open { opacity: 1; pointer-events: auto; }
+.ing-drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: #c59d85;
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+.ing-drawer-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.3rem;
+    cursor: pointer;
+    line-height: 1;
+}
+.ing-drawer-list {
+    list-style: none;
+    padding: 16px 0;
+    margin: 0;
+    overflow-y: auto;
+    flex: 1;
+}
+.ing-drawer-item {
+    display: flex;
+    gap: 10px;
+    padding: 10px 20px;
+    border-bottom: 1px solid #f0e0d0;
+    align-items: baseline;
+}
+.ing-drawer-qty {
+    font-weight: 700;
+    color: #c59d85;
+    white-space: nowrap;
+    min-width: 60px;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+}
+.ing-drawer-name { color: #3e2723; font-size: 0.9rem; }
+.ing-drawer-btn-wrap {
+    display: none;
+    justify-content: center;
+    padding: 10px 0 4px;
+}
+.ing-drawer-btn-wrap.visible { display: flex; }
+.ing-drawer-btn {
+    background: #c59d85;
+    border: none;
+    color: white;
+    border-radius: 50px;
+    padding: 10px 22px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s;
+}
+.ing-drawer-btn:hover { background: #a07858; }
+</style>
 <script>
     // --- GESTION DES PORTIONS (LISTE DE COURSES) ---
     const baseServings = {{ recipe.servings }};
@@ -427,46 +520,50 @@
     function adjustServings(delta) {
         let newServings = currentServings + delta;
         if (newServings < 1) return;
-        
         currentServings = newServings;
-        // Mise à jour affichage principal et modal
         document.getElementById('servingsDisplay').textContent = currentServings;
         document.getElementById('modalServings').textContent = currentServings;
-        
-		const badge = document.getElementById('servingsBadge');
-		const ratio = currentServings / baseServings;
-		if (currentServings !== baseServings) {
-			badge.classList.remove('d-none');
-			document.getElementById('servingsRatio').textContent = 
-				`×${ratio.toFixed(2).replace('.00','')}`;
-		} else {
-			badge.classList.add('d-none');
-		}
-        
-        // Mise à jour des quantités dans la liste
+        const badge = document.getElementById('servingsBadge');
+        const ratio = currentServings / baseServings;
+        if (currentServings !== baseServings) {
+            badge.classList.remove('d-none');
+            document.getElementById('servingsRatio').textContent = 
+                `×${ratio.toFixed(2).replace('.00','')}`;
+        } else {
+            badge.classList.add('d-none');
+        }
         document.querySelectorAll('.ingredient-text').forEach(item => {
             const baseQty = parseFloat(item.dataset.baseQty);
             if (baseQty > 0) {
                 const qtyElement = item.querySelector('.qty-display');
                 let val = baseQty * ratio;
-                // Formatage intelligent (pas de .0)
                 qtyElement.textContent = Number.isInteger(val) ? val : val.toFixed(1);
             }
         });
     }
 	
-	function resetServings() {
-		currentServings = baseServings;
-		document.getElementById('servingsDisplay').textContent = currentServings;
-		document.getElementById('modalServings').textContent = currentServings;
-		document.querySelectorAll('.ingredient-text').forEach(item => {
-			const baseQty = parseFloat(item.dataset.baseQty);
-			if (baseQty > 0) {
-				item.querySelector('.qty-display').textContent = baseQty % 1 === 0 ? baseQty : baseQty.toFixed(1);
-			}
-		});
-		document.getElementById('servingsBadge').classList.add('d-none');
-	}
+    function resetServings() {
+        currentServings = baseServings;
+        document.getElementById('servingsDisplay').textContent = currentServings;
+        document.getElementById('modalServings').textContent = currentServings;
+        document.querySelectorAll('.ingredient-text').forEach(item => {
+            const baseQty = parseFloat(item.dataset.baseQty);
+            if (baseQty > 0) {
+                item.querySelector('.qty-display').textContent = baseQty % 1 === 0 ? baseQty : baseQty.toFixed(1);
+            }
+        });
+        document.getElementById('servingsBadge').classList.add('d-none');
+    }
+
+    // --- DRAWER INGRÉDIENTS ---
+    function openIngDrawer() {
+        document.getElementById("ingDrawer").classList.add("open");
+        document.getElementById("ingDrawerOverlay").classList.add("open");
+    }
+    function closeIngDrawer() {
+        document.getElementById("ingDrawer").classList.remove("open");
+        document.getElementById("ingDrawerOverlay").classList.remove("open");
+    }
 
     // --- GESTION DU MODE CUISINE (WIZARD) ---
     let currentStep = 1;
@@ -474,47 +571,39 @@
     
     function startCooking() {
         document.getElementById('cookingMode').classList.remove('d-none');
-        document.body.style.overflow = 'hidden'; // Empêche le scroll de la page derrière
+        document.getElementById('ingDrawerBtn').closest('.ing-drawer-btn-wrap').classList.add('visible');
+        document.body.style.overflow = 'hidden';
         showStep(1);
     }
 
     function stopCooking() {
         document.getElementById('cookingMode').classList.add('d-none');
         document.body.style.overflow = 'auto';
+        document.getElementById('ingDrawerBtn').closest('.ing-drawer-btn-wrap').classList.remove('visible');
+        closeIngDrawer();
     }
 
     function showStep(stepIndex) {
-        // Masquer toutes les slides
         document.querySelectorAll('.step-slide').forEach(el => el.classList.add('d-none'));
-        
-        // Afficher la slide courante
         let activeSlide;
         const nextBtns = [document.getElementById('nextBtnDesktop'), document.getElementById('nextBtnMobile')];
         
         if (stepIndex > totalSteps) {
-            // Écran de fin
             activeSlide = document.querySelector('.step-slide[data-step="finish"]');
-            
             nextBtns.forEach(btn => {
                 if(btn) {
-                    // On change juste l'icône pour une coche verte
                     btn.innerHTML = '<i class="bi bi-check-lg text-success"></i>';
                     btn.onclick = stopCooking;
-                    // Optionnel : on peut colorer la bordure en vert pour marquer la fin
                     btn.classList.remove('btn-outline-secondary');
                     btn.classList.add('btn-outline-success');
                 }
             });
         } else {
-            // Étape normale
             activeSlide = document.querySelector(`.step-slide[data-step="${stepIndex}"]`);
-            
             nextBtns.forEach(btn => {
                 if(btn) {
-                    // On remet la flèche standard
                     btn.innerHTML = '<i class="bi bi-arrow-right"></i>';
                     btn.onclick = () => changeStep(1);
-                    // On remet le style gris standard
                     btn.classList.add('btn-outline-secondary');
                     btn.classList.remove('btn-outline-success');
                 }
@@ -522,15 +611,10 @@
         }
         
         if(activeSlide) activeSlide.classList.remove('d-none');
-
-        // Mise à jour bouton Précédent
         const prevBtn = document.getElementById('prevBtn');
         if(prevBtn) prevBtn.disabled = (stepIndex === 1);
-        
-        // Mise à jour barre de progression
         const progress = (stepIndex / (totalSteps + 1)) * 100;
         document.getElementById('cookingProgress').style.width = `${progress}%`;
-        
         currentStep = stepIndex;
     }
 
