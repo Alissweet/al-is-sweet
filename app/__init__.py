@@ -4,7 +4,6 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
 from config import Config
-from flask_mail import Mail
 import os
 import logging
 
@@ -14,7 +13,6 @@ login = LoginManager()
 csrf = CSRFProtect()
 login.login_view = 'auth.login'
 login.login_message = 'Veuillez vous connecter pour accéder à cette page.'
-mail = Mail()
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +26,6 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     login.init_app(app)
     csrf.init_app(app)
-    mail.init_app(app)
 
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 

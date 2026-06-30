@@ -1,11 +1,12 @@
 from flask import jsonify, Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, current_user, login_required
-from flask_mail import Message
-from app import db, mail
+from app import db
 from app.models import User
 from urllib.parse import urlparse
 import re
 import logging
+import os
+import requests
 
 auth = Blueprint('auth', __name__)
 logger = logging.getLogger(__name__)
@@ -94,27 +95,32 @@ def reset_request():
         user = User.query.filter_by(email=email).first()
         if user:
             token = user.get_reset_token()
-            
-            # Création du message
-            msg = Message('Réinitialisation de votre mot de passe - Al\' is Sweet',
-                          recipients=[user.email])
-            
-            # Lien absolu (http://...)
             link = url_for('auth.reset_token', token=token, _external=True)
             
-            # Corps du mail
-            msg.body = f'''Bonjour {user.username},
-
-Pour réinitialiser votre mot de passe, cliquez sur le lien suivant :
-{link}
-
-Si vous n'avez pas fait cette demande, ignorez simplement cet email.
-
-Gourmandisement,
-L'équipe Al' is Sweet
-'''
+            html_content = f'''
+            <p>Bonjour {user.username},</p>
+            <p>Pour réinitialiser votre mot de passe, cliquez sur le lien suivant :</p>
+            <p><a href="{link}">{link}</a></p>
+            <p>Si vous n'avez pas fait cette demande, ignorez simplement cet email.</p>
+            <p>Gourmandisement,<br>L'équipe Al' is Sweet</p>
+            '''
+            
             try:
-                mail.send(msg) # 🚀 ENVOI
+                response = requests.post(
+                    "https://api.brevo.com/v3/smtp/email",
+                    headers={
+                        "api-key": os.environ.get("BREVO_API_KEY"),
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "sender": {"email": os.environ.get("MAIL_USERNAME"), "name": "Al' is Sweet"},
+                        "to": [{"email": user.email}],
+                        "subject": "Réinitialisation de votre mot de passe - Al' is Sweet",
+                        "htmlContent": html_content
+                    },
+                    timeout=10
+                )
+                response.raise_for_status()
                 flash('Un email a été envoyé avec les instructions.', 'info')
                 return redirect(url_for('auth.login'))
             except Exception as e:
