@@ -113,7 +113,7 @@ def reset_request():
                         "Content-Type": "application/json"
                     },
                     json={
-                        "sender": {"email": os.environ.get("MAIL_USERNAME"), "name": "Al' is Sweet"},
+                        "sender": {"email": os.environ.get("MAIL_SENDER"), "name": "Al' is Sweet"},
                         "to": [{"email": user.email}],
                         "subject": "Réinitialisation de votre mot de passe - Al' is Sweet",
                         "htmlContent": html_content
