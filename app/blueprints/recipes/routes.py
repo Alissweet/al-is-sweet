@@ -516,3 +516,81 @@ def _save_tags(recipe, tags_input):
                 tag = Tag(name=tag_name, user_id=current_user.id)
                 db.session.add(tag)
             recipe.tags.append(tag)
+
+@recipes_bp.route('/api/foods/search', methods=['GET'])
+def search_foods():
+    """Recherche d'aliments dans la base CIQUAL"""
+    query = request.args.get('q', '').strip()
+    if len(query) < 2:
+        return jsonify([])
+    
+    # Recherche dans la base de données
+    foods = CiqualFood.query.filter(
+        CiqualFood.name.ilike(f'%{query}%')
+    ).limit(20).all()
+    
+    return jsonify([{
+        'id': food.id,
+        'name': food.name,
+        'carbs_per_100g': food.carbs_per_100g
+    } for food in foods])
+
+@recipes_bp.route('/api/calculate-carbs', methods=['POST'])
+@login_required
+def calculate_carbs():
+    data = request.json
+    ingredients = data.get('ingredients', [])
+    
+    if not ingredients:
+        return jsonify({'success': False, 'message': 'Aucun ingrédient'}), 400
+
+    # 1. Préparer texte pour Mistral
+    text_ingredients = "\n".join([f"{i['qty']} {i['unit']} {i['name']}" for i in ingredients])
+    
+    # 2. Appeler Mistral
+    api_key = os.environ.get("MISTRAL_API_KEY")
+    if not api_key:
+        return jsonify({'success': False, 'message': 'Clé API manquante'}), 500
+        
+    client = MistralClient(api_key=api_key)
+    
+    prompt = f"""
+    Tu es un expert en nutrition. Voici une liste d'ingrédients de recette.
+    Convertis chaque ingrédient en grammes.
+    Trouve le nom générique simple (ex: "farine de blé", "sucre blanc", "pomme").
+    Réponds UNIQUEMENT en JSON strict avec ce format :
+    {{"items": [{{"name": "nom simple", "weight_g": 100}}]}}
+    
+    Ingrédients :
+    {text_ingredients}
+    """
+    
+    try:
+        response = client.chat(
+            model="mistral-small-latest",
+            response_format={"type": "json_object"},
+            messages=[ChatMessage(role="user", content=prompt)]
+        )
+        
+        result_json = json.loads(response.choices[0].message.content)
+        items = result_json.get('items', [])
+        
+        # 3. Calculer avec base CIQUAL
+        total_carbs = 0.0
+        
+        for item in items:
+            name = item.get('name', '').lower()
+            weight = float(item.get('weight_g', 0))
+            
+            # Chercher aliment dans base (recherche approximative)
+            food = CiqualFood.query.filter(CiqualFood.name.ilike(f"%{name}%")).first()
+            
+            if food:
+                carbs = (weight * food.carbs_per_100g) / 100.0
+                total_carbs += carbs
+                
+        return jsonify({'success': True, 'total_carbs': round(total_carbs, 1)})
+        
+    except Exception as e:
+        logger.error(f"Erreur Mistral: {e}")
+        return jsonify({'success': False, 'message': 'Erreur calcul IA'}), 500
