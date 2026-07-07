@@ -1,11 +1,11 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, Response, send_file
 from flask_login import login_required, current_user
-from weasyprint import HTML, CSS
-from weasyprint.text.fonts import FontConfiguration
 from app import db
 from app.models import Recipe, Ingredient, Step, Tag, Category
 from app.utils.helpers import safe_int, safe_float, safe_str
 from datetime import datetime
+from mistralai.client import MistralClient
+from mistralai.models.chat_completion import ChatMessage
 import json
 import io
 import re
@@ -20,6 +20,9 @@ logger = logging.getLogger(__name__)
 @tools_bp.route('/recipe/<int:id>/pdf')
 @login_required
 def recipe_pdf(id):
+    from weasyprint import HTML, CSS
+    from weasyprint.text.fonts import FontConfiguration
+
     recipe = db.get_or_404(Recipe, id)
     if recipe.user_id != current_user.id:
         flash("Accès non autorisé.", 'danger')
@@ -241,3 +244,63 @@ def finalize_import():
         db.session.rollback()
         logger.error(f"Erreur importation: {e}")
         return jsonify({'error': "Erreur lors de l'enregistrement."}), 500
+
+@recipes_bp.route('/api/calculate-carbs', methods=['POST'])
+@login_required
+def calculate_carbs():
+    data = request.json
+    ingredients = data.get('ingredients', [])
+    
+    if not ingredients:
+        return jsonify({'success': False, 'message': 'Aucun ingrédient'}), 400
+
+    # 1. Préparer texte pour Mistral
+    text_ingredients = "\n".join([f"{i['qty']} {i['unit']} {i['name']}" for i in ingredients])
+    
+    # 2. Appeler Mistral
+    api_key = os.environ.get("MISTRAL_API_KEY")
+    if not api_key:
+        return jsonify({'success': False, 'message': 'Clé API manquante'}), 500
+        
+    client = MistralClient(api_key=api_key)
+    
+    prompt = f"""
+    Tu es un expert en nutrition. Voici une liste d'ingrédients de recette.
+    Convertis chaque ingrédient en grammes.
+    Trouve le nom générique simple (ex: "farine de blé", "sucre blanc", "pomme").
+    Réponds UNIQUEMENT en JSON strict avec ce format :
+    {{"items": [{{"name": "nom simple", "weight_g": 100}}]}}
+    
+    Ingrédients :
+    {text_ingredients}
+    """
+    
+    try:
+        response = client.chat(
+            model="mistral-small-latest",
+            response_format={"type": "json_object"},
+            messages=[ChatMessage(role="user", content=prompt)]
+        )
+        
+        result_json = json.loads(response.choices[0].message.content)
+        items = result_json.get('items', [])
+        
+        # 3. Calculer avec base CIQUAL
+        total_carbs = 0.0
+        
+        for item in items:
+            name = item.get('name', '').lower()
+            weight = float(item.get('weight_g', 0))
+            
+            # Chercher aliment dans base (recherche approximative)
+            food = CiqualFood.query.filter(CiqualFood.name.ilike(f"%{name}%")).first()
+            
+            if food:
+                carbs = (weight * food.carbs_per_100g) / 100.0
+                total_carbs += carbs
+                
+        return jsonify({'success': True, 'total_carbs': round(total_carbs, 1)})
+        
+    except Exception as e:
+        logger.error(f"Erreur Mistral: {e}")
+        return jsonify({'success': False, 'message': 'Erreur calcul IA'}), 500

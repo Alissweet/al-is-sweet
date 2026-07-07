@@ -224,17 +224,23 @@
                             
                             <!-- Glucides totaux -->
                             <div class="form-group-premium highlight-input">
-                                <label class="form-label-premium">
-                                    <i class="bi bi-lightning-charge-fill label-icon text-warning"></i>
-                                    <span class="label-text">Glucides totaux</span>
+                                <label class="form-label-premium d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi bi-lightning-charge-fill label-icon text-warning"></i>
+                                        <span class="label-text">Glucides totaux</span>
+                                    </div>
+                                    <!-- BOUTON MAGIQUE ICI -->
+                                    <button type="button" class="btn btn-sm btn-outline-warning rounded-pill" onclick="autoCalculateCarbs()" id="btnCalcCarbs">
+                                        <i class="bi bi-magic"></i> Calcul Auto
+                                    </button>
                                 </label>
                                 <div class="input-with-unit-large">
-                                    <input type="number" name="total_carbs" class="form-control-premium" 
-                                           value="{{ recipe.total_carbs if recipe else 0 }}" 
-                                           step="0.1" min="0" placeholder="0">
+                                    <input type="number" name="total_carbs" id="totalCarbsInput" class="form-control-premium" 
+                                        value="{{ recipe.total_carbs if recipe else 0 }}" 
+                                        step="0.1" min="0" placeholder="0">
                                     <span class="unit-badge-large">g</span>
                                 </div>
-                                <small class="form-hint">
+                                <small class="form-hint" id="calcCarbsHint">
                                     <i class="bi bi-info-circle"></i> Pour l'ensemble de la recette
                                 </small>
                             </div>
@@ -822,5 +828,65 @@
             }, index * 150);
         });
     });
+
+    async function autoCalculateCarbs() {
+        const btn = document.getElementById('btnCalcCarbs');
+        const hint = document.getElementById('calcCarbsHint');
+        const input = document.getElementById('totalCarbsInput');
+        
+        // Récupérer ingrédients du formulaire
+        const names = document.querySelectorAll('input[name="ingredient_name[]"]');
+        const qties = document.querySelectorAll('input[name="ingredient_quantity[]"]');
+        const units = document.querySelectorAll('select[name="ingredient_unit[]"]');
+        
+        let ingredients = [];
+        names.forEach((nameInput, index) => {
+            if (nameInput.value.trim() !== '') {
+                ingredients.push({
+                    name: nameInput.value.trim(),
+                    qty: qties[index].value || 1,
+                    unit: units[index].value
+                });
+            }
+        });
+
+        if (ingredients.length === 0) {
+            alert("Ajoute des ingrédients d'abord !");
+            return;
+        }
+
+        // Animation chargement
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Calcul...';
+        btn.disabled = true;
+
+        try {
+            const response = await fetch('/api/calculate-carbs', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ ingredients: ingredients })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                input.value = data.total_carbs;
+                hint.innerHTML = '<i class="bi bi-check-circle text-success"></i> Calculé par IA avec succès !';
+                // Animation flash vert
+                input.style.backgroundColor = '#d4edda';
+                setTimeout(() => input.style.backgroundColor = '', 1000);
+            } else {
+                alert("Erreur : " + data.message);
+            }
+        } catch (error) {
+            console.error("Erreur:", error);
+            alert("Erreur de connexion au serveur.");
+        } finally {
+            // Remettre bouton normal
+            btn.innerHTML = '<i class="bi bi-magic"></i> Calcul Auto';
+            btn.disabled = false;
+        }
+    }
 </script>
 {% endblock %}

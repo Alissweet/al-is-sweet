@@ -169,3 +169,12 @@ class CookingHistory(db.Model):
             'recipe_id': self.recipe.id,
             'date': self.cooked_at.strftime('%Y-%m-%d %H:%M')
         }
+
+class CiqualFood(db.Model):
+    __tablename__ = 'ciqual_foods'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False, index=True)
+    carbs_per_100g = db.Column(db.Float, nullable=False)
+    
+    def __repr__(self):
+        return f"<CiqualFood {self.name}>"
