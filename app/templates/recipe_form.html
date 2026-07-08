@@ -189,7 +189,7 @@
                                     </label>
                                     <div class="input-with-unit">
                                         <input type="number" name="prep_time" class="form-control-premium" 
-                                               value="{{ recipe.prep_time if recipe else '' }}" min="0" placeholder="0">
+                                               value="{{ recipe.prep_time if recipe and recipe.prep_time is not none else '' }}"
                                         <span class="unit-badge">min</span>
                                     </div>
                                 </div>
@@ -201,7 +201,7 @@
                                     </label>
                                     <div class="input-with-unit">
                                         <input type="number" name="cook_time" class="form-control-premium" 
-                                               value="{{ recipe.cook_time if recipe else '' }}" min="0" placeholder="0">
+                                               value="{{ recipe.cook_time if recipe and recipe.cook_time is not none else '' }}"
                                         <span class="unit-badge">min</span>
                                     </div>
                                 </div>
