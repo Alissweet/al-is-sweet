@@ -595,5 +595,5 @@ def calculate_carbs():
         return jsonify({'success': True, 'total_carbs': round(total_carbs, 1)})
         
     except Exception as e:
-    logger.error(f"Erreur Mistral: {e}")
-    return jsonify({'success': False, 'message': f'Erreur calcul IA : {repr(e)}'}), 500
+        logger.error(f"Erreur Mistral: {e}")
+        return jsonify({'success': False, 'message': f'Erreur calcul IA : {repr(e)}'}), 500
