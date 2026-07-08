@@ -571,11 +571,11 @@ def calculate_carbs():
         client = MistralClient(api_key=api_key)
         response = client.chat(
             model="mistral-small-latest",
-            response_format={"type": "json_object"},
             messages=[ChatMessage(role="user", content=prompt)]
         )
-        
-        result_json = json.loads(response.choices[0].message.content)
+        raw = response.choices[0].message.content.strip()
+        raw = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+        result_json = json.loads(raw)
         items = result_json.get('items', [])
         
         # 3. Calculer avec base CIQUAL
