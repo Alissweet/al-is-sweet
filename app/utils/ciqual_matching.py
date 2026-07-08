@@ -2,8 +2,11 @@ import re
 from sqlalchemy import func
 from app.models import CiqualFood
 
+# Mots signalant un produit transformé/composé — pénalisés fortement
+# sauf si l'ingrédient de la recette les mentionne explicitement
 EXCLUDED_KEYWORDS = ['préemballé', 'tartinade', 'sauce', 'plat cuisiné',
-                     'conserve', 'surgelé', 'pané', 'nappage', 'chips']
+                     'conserve', 'surgelé', 'pané', 'nappage', 'chips',
+                     'glace', 'gâteau', 'cake', 'biscuit', 'tzatziki']
 
 
 def singularize_fr(word):
@@ -15,6 +18,18 @@ def singularize_fr(word):
 def normalize_words(text):
     words = re.findall(r"[a-zàâäéèêëïîôöùûüç']+", text.lower())
     return [singularize_fr(w) for w in words if len(w) > 2]
+
+
+def words_match(search_word, food_word):
+    """Compare par préfixe (min 4 lettres communes) pour absorber les variantes
+    grammaticales : grec/grecque, poivron/poivrons, etc."""
+    if search_word == food_word:
+        return True
+    min_len = min(len(search_word), len(food_word))
+    if min_len < 4:
+        return False
+    prefix_len = min(min_len, 5)
+    return search_word[:prefix_len] == food_word[:prefix_len]
 
 
 def find_best_ciqual_match(ingredient_name):
@@ -34,15 +49,21 @@ def find_best_ciqual_match(ingredient_name):
         CiqualFood.name.ilike(f"%{search_words[0]}%")
     ).all()
 
+    if not candidates:
+        return None
+
     def score(food):
         food_words = normalize_words(food.name)
-        matched = sum(1 for w in search_words if w in food_words)
+        matched = sum(
+            1 for sw in search_words
+            if any(words_match(sw, fw) for fw in food_words)
+        )
+        match_ratio = matched / len(search_words)
         is_transformed = any(kw in food.name.lower() for kw in EXCLUDED_KEYWORDS)
-        return (matched, -len(food.name), 0 if not is_transformed else -100)
+        transform_penalty = -10 if is_transformed else 0
+        return (round(match_ratio, 3), transform_penalty, -len(food.name))
 
-    if candidates:
-        best = max(candidates, key=score)
-        if score(best)[0] > 0:
-            return best
-
+    best = max(candidates, key=score)
+    if score(best)[0] > 0:
+        return best
     return None
