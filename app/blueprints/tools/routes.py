@@ -4,8 +4,6 @@ from app import db
 from app.models import Recipe, Ingredient, Step, Tag, Category
 from app.utils.helpers import safe_int, safe_float, safe_str
 from datetime import datetime
-from mistralai.client import MistralClient
-from mistralai.models.chat_completion import ChatMessage
 import json
 import io
 import re
