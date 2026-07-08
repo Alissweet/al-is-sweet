@@ -514,7 +514,30 @@
         </div>
     </div>
 </div>
-
+<!-- MODALE DÉTAIL DU CALCUL DE GLUCIDES -->
+<div class="modal fade" id="carbsDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0">
+            <div class="modal-header bg-terracotta text-white">
+                <h5 class="modal-title"><i class="bi bi-lightning-charge-fill me-2"></i>Détail du calcul</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-unstyled mb-3" id="carbsDetailList">
+                    <!-- Rempli par JS -->
+                </ul>
+                <div class="alert alert-warning small mb-0">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    Estimation basée sur CIQUAL (ANSES) et équivalences culinaires USDA.
+                    Pour un dosage d'insuline, vérifiez toujours avec une pesée réelle.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 {% block scripts %}
 <script>
@@ -887,15 +910,25 @@
         input.style.backgroundColor = '#d4edda';
         setTimeout(() => input.style.backgroundColor = '', 1000);
 
-        const detailLines = result.details.map(d =>
-            `${d.ingredient} → ${d.matched_food} (${d.weight_g} g) = ${d.carbs_g} g glucides`
-        ).join('\n');
+        // Remplit la modale Bootstrap avec le détail
+        const list = document.getElementById('carbsDetailList');
+        list.innerHTML = result.details.map(d => `
+            <li class="d-flex justify-content-between align-items-center border-bottom py-2">
+                <div>
+                    <strong>${d.ingredient}</strong>
+                    <div class="text-muted small">${d.matched_food} — ${d.weight_g} g</div>
+                </div>
+                <span class="badge bg-warning text-dark">${d.carbs_g} g</span>
+            </li>
+        `).join('');
 
         hint.innerHTML = `<i class="bi bi-check-circle text-success"></i> Calculé avec succès.
-            <button type="button" class="btn btn-link btn-sm p-0 ms-2" id="btnShowDetail">Voir le détail</button>
-            <br><small class="text-muted">⚠️ Estimation CIQUAL/USDA — vérifiez avec une balance pour un dosage d'insuline.</small>`;
+            <button type="button" class="btn btn-link btn-sm p-0 ms-2" id="btnShowDetail">Voir le détail</button>`;
 
-        document.getElementById('btnShowDetail').addEventListener('click', () => alert(detailLines));
+        document.getElementById('btnShowDetail').addEventListener('click', () => {
+            const modal = new bootstrap.Modal(document.getElementById('carbsDetailModal'));
+            modal.show();
+        });
     }
 
     function askManualWeights(unresolvedList) {
