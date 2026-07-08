@@ -40,9 +40,9 @@ INGREDIENT_WEIGHTS = {
     'sel': {'c.à.s': 18.0, 'tablespoon': 18.0, 'c.à.c': 6.0, 'teaspoon': 6.0},
     'levure': {'c.à.s': 9.0, 'tablespoon': 9.0, 'c.à.c': 3.0, 'teaspoon': 3.0,
                'sachet': 7.0},
-    'crème': {'c.à.s': 15.0, 'tablespoon': 15.0, 'c.à.c': 5.0, 'teaspoon': 5.0,
+    'crème': {'c.à.s': 20.0, 'tablespoon': 15.0, 'c.à.c': 5.0, 'teaspoon': 5.0,
               'tasse': 240.0, 'cup': 240.0},
-    'yaourt': {'c.à.s': 15.0, 'tablespoon': 15.0, 'c.à.c': 5.0, 'teaspoon': 5.0,
+    'yaourt': {'c.à.s': 20.0, 'tablespoon': 15.0, 'c.à.c': 5.0, 'teaspoon': 5.0,
                'tasse': 245.0, 'cup': 245.0},
 }
 
