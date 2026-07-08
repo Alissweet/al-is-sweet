@@ -269,37 +269,6 @@
                         </div>
                         
                         <div class="card-body-modern ingredients-scroll-premium">
-                            <!-- CALCULATEUR INTÉGRÉ -->
-                            <div class="calculator-integrated mb-4 p-3 bg-light rounded-3 border border-warning">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <h6 class="mb-0 text-warning fw-bold">
-                                        <i class="bi bi-calculator-fill me-1"></i> Calculateur de glucides
-                                    </h6>
-                                    <small class="text-muted">Recherchez un aliment</small>
-                                </div>
-                                <div class="row g-2">
-                                    <div class="col-8">
-                                        <input type="text" id="foodSearch" class="form-control form-control-sm" placeholder="Ex: pomme, farine...">
-                                        <div id="searchResults" class="list-group mt-1" style="max-height: 120px; overflow-y: auto; display: none;"></div>
-                                    </div>
-                                    <div class="col-4">
-                                        <input type="number" id="foodQuantity" class="form-control form-control-sm" value="100" min="1" placeholder="g">
-                                        <button type="button" class="btn btn-warning btn-sm w-100 mt-1" id="addCalculatedIngredient">
-                                            <i class="bi bi-plus-circle"></i> Ajouter
-                                        </button>
-                                    </div>
-                                </div>
-                                <div id="calculatedIngredients" class="mt-2">
-                                    <small class="text-muted">Aucun ingrédient calculé</small>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mt-2 border-top pt-2">
-                                    <span class="fw-bold">Total : <span id="calculatedTotal">0.0</span> g</span>
-                                    <button type="button" class="btn btn-outline-primary btn-sm" id="copyToIngredients">
-                                        <i class="bi bi-clipboard"></i> Copier
-                                    </button>
-                                </div>
-                            </div>
-
                             <div id="ingredientsList" class="ingredients-list-premium">
                                 {% if recipe and recipe.ingredients.count() > 0 %}
                                     {% for ing in recipe.ingredients %}
@@ -1087,6 +1056,9 @@
         const hint = document.getElementById('calcCarbsHint');
         const input = document.getElementById('totalCarbsInput');
         
+        // Récupérer le token CSRF (à ajouter dans <head> si pas fait)
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
         const names = document.querySelectorAll('input[name="ingredient_name[]"]');
         const qties = document.querySelectorAll('input[name="ingredient_quantity[]"]');
         const units = document.querySelectorAll('select[name="ingredient_unit[]"]');
@@ -1116,23 +1088,21 @@
         btn.disabled = true;
 
         try {
-            console.log("📤 Envoi:", ingredients);
             const response = await fetch('/api/calculate-carbs', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
                 },
                 body: JSON.stringify({ ingredients: ingredients })
             });
 
             if (!response.ok) {
                 const text = await response.text();
-                console.error("❌ Réponse du serveur:", text);
                 throw new Error(`HTTP ${response.status} - ${response.statusText}`);
             }
 
             const data = await response.json();
-            console.log("✅ Réponse:", data);
 
             if (data.success) {
                 input.value = data.total_carbs;
@@ -1143,8 +1113,7 @@
                 alert("Erreur : " + data.message);
             }
         } catch (error) {
-            console.error("❌ Erreur calcul:", error);
-            alert(`Erreur de connexion au serveur : ${error.message}\nVérifiez la console (F12) pour plus de détails.`);
+            alert(`Erreur : ${error.message}\nVérifiez la console (F12).`);
         } finally {
             btn.innerHTML = '<i class="bi bi-magic"></i> Calcul Auto';
             btn.disabled = false;
