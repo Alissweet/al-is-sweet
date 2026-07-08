@@ -2,10 +2,6 @@
 
 {% block title %}{{ 'Modifier' if recipe else 'Nouvelle' }} Recette - Al' is Sweet{% endblock %}
 
-{% extends "base.html" %}
-
-{% block title %}{{ 'Modifier' if recipe else 'Nouvelle' }} Recette - Al' is Sweet{% endblock %}
-
 {% block content %}
 <div class="recipe-form-container">
     <!-- Hero Header Premium -->
@@ -58,9 +54,7 @@
             </div>
 
             <div class="row g-4">
-                <!-- ========================================
-                     COLONNE GAUCHE - Infos générales + Photo
-                     ======================================== -->
+                <!-- COLONNE GAUCHE - Infos générales + Photo -->
                 <div class="col-lg-4">
                     <div class="form-card-modern" data-section="1">
                         <div class="card-header-elegant">
@@ -85,7 +79,6 @@
                                         <img src="" alt="Preview" id="imagePreview" class="preview-hidden">
                                     {% endif %}
 
-                                    <!-- L'overlay est caché si une image existe déjà -->
                                     <div class="upload-overlay" id="uploadPlaceholder" 
                                          style="{{ 'display: none;' if recipe and recipe.image_filename else '' }}">
                                         <div class="upload-icon-wrapper">
@@ -233,7 +226,6 @@
                                         <i class="bi bi-lightning-charge-fill label-icon text-warning"></i>
                                         <span class="label-text">Glucides totaux</span>
                                     </div>
-                                    <!-- BOUTON MAGIQUE ICI -->
                                     <button type="button" class="btn btn-sm btn-outline-warning rounded-pill" onclick="autoCalculateCarbs()" id="btnCalcCarbs">
                                         <i class="bi bi-magic"></i> Calcul Auto
                                     </button>
@@ -262,9 +254,7 @@
                     </div>
                 </div>
                 
-                <!-- ========================================
-                     COLONNE CENTRALE - Ingrédients + CALCULATEUR
-                     ======================================== -->
+                <!-- COLONNE CENTRALE - Ingrédients + CALCULATEUR -->
                 <div class="col-lg-4">
                     <div class="form-card-modern" data-section="2">
                         <div class="card-header-elegant">
@@ -279,7 +269,7 @@
                         </div>
                         
                         <div class="card-body-modern ingredients-scroll-premium">
-                            <!-- CALCULATEUR INTÉGRÉ ICI -->
+                            <!-- CALCULATEUR INTÉGRÉ -->
                             <div class="calculator-integrated mb-4 p-3 bg-light rounded-3 border border-warning">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <h6 class="mb-0 text-warning fw-bold">
@@ -321,7 +311,6 @@
                                             <input type="text" name="ingredient_name[]" class="form-control-premium ingredient-name" 
                                                    value="{{ ing.name }}" placeholder="Ingrédient" required>
                                             <div class="ingredient-quantity-group">
-                                                <!-- CORRECTION ICI : valeur par défaut 0 si None -->
                                                 <input type="number" name="ingredient_quantity[]" class="form-control-premium ingredient-qty" 
                                                        value="{{ ing.quantity if ing.quantity is not none else 0 }}" placeholder="Qté" step="0.1">
                                                 <select name="ingredient_unit[]" class="form-select-premium ingredient-unit">
@@ -355,7 +344,6 @@
                                             <input type="text" name="ingredient_name[]" class="form-control-premium ingredient-name" 
                                                    placeholder="Ingrédient">
                                             <div class="ingredient-quantity-group">
-                                                <!-- CORRECTION ICI : pas de value pour un ingrédient vide -->
                                                 <input type="number" name="ingredient_quantity[]" class="form-control-premium ingredient-qty" 
                                                        placeholder="Qté" step="0.1">
                                                 <select name="ingredient_unit[]" class="form-select-premium ingredient-unit">
@@ -390,9 +378,7 @@
                     </div>
                 </div>
                 
-                <!-- ========================================
-                     COLONNE DROITE - Étapes de préparation
-                     ======================================== -->
+                <!-- COLONNE DROITE - Étapes de préparation -->
                 <div class="col-lg-4">
                     <div class="form-card-modern" data-section="3">
                         <div class="card-header-elegant">
@@ -476,9 +462,7 @@
     </form>
 </div>
 
-<!-- ============================================
-     MODALE APERÇU (PREVIEW)
-     ============================================ -->
+<!-- MODALE APERÇU (PREVIEW) -->
 <div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content border-0">
@@ -563,76 +547,75 @@
 </div>
 
 {% endblock %}
-
 {% block scripts %}
 <script>
-	// Gestion de l'upload d'image
-	const imageUploadZone = document.getElementById('imageUploadZone');
-	const imageInput = document.getElementById('imageInput');
-	const imagePreview = document.getElementById('imagePreview');
-	const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    // ============================================
+    // GESTION DE L'UPLOAD D'IMAGE
+    // ============================================
+    const imageUploadZone = document.getElementById('imageUploadZone');
+    const imageInput = document.getElementById('imageInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
 
-	imageUploadZone.addEventListener('click', () => imageInput.click());
+    imageUploadZone.addEventListener('click', () => imageInput.click());
 
-	imageUploadZone.addEventListener('dragover', (e) => {
-		e.preventDefault();
-		imageUploadZone.classList.add('dragover');
-	});
+    imageUploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        imageUploadZone.classList.add('dragover');
+    });
 
-	imageUploadZone.addEventListener('dragleave', () => {
-		imageUploadZone.classList.remove('dragover');
-	});
+    imageUploadZone.addEventListener('dragleave', () => {
+        imageUploadZone.classList.remove('dragover');
+    });
 
-	imageUploadZone.addEventListener('drop', (e) => {
-		e.preventDefault();
-		imageUploadZone.classList.remove('dragover');
-		if (e.dataTransfer.files.length) {
-			imageInput.files = e.dataTransfer.files;
-			previewImage(e.dataTransfer.files[0]);
-		}
-	});
+    imageUploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        imageUploadZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+            imageInput.files = e.dataTransfer.files;
+            previewImage(e.dataTransfer.files[0]);
+        }
+    });
 
-	imageInput.addEventListener('change', (e) => {
-		if (e.target.files.length) {
-			previewImage(e.target.files[0]);
-		}
-	});
+    imageInput.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+            previewImage(e.target.files[0]);
+        }
+    });
 
-	function previewImage(file) {
-		const reader = new FileReader();
-		reader.onload = (e) => {
-			// Afficher l'image
-			imagePreview.src = e.target.result;
-			imagePreview.classList.remove('preview-hidden');
-			imagePreview.classList.add('preview-visible');
-			
-			// Masquer le placeholder avec transition
-			uploadPlaceholder.style.transition = 'opacity 0.3s ease';
-			uploadPlaceholder.style.opacity = '0';
-			setTimeout(() => {
-				uploadPlaceholder.style.display = 'none';
-			}, 300);
-			
-			// Ajouter une indication de succès
-			if (!document.getElementById('uploadSuccess')) {
-				const successIndicator = document.createElement('div');
-				successIndicator.id = 'uploadSuccess';
-				successIndicator.style.cssText = 'position: absolute; top: 10px; right: 10px; background: rgba(40, 167, 69, 0.95); color: white; padding: 8px 16px; border-radius: 25px; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); z-index: 10; animation: slideInRight 0.4s ease;';
-				successIndicator.innerHTML = '<i class="bi bi-check-circle-fill"></i> Photo ajoutée';
-				imageUploadZone.querySelector('.photo-preview-zone').appendChild(successIndicator);
-				
-				// Faire disparaître l'indicateur après 3 secondes
-				setTimeout(() => {
-					successIndicator.style.opacity = '0';
-					successIndicator.style.transition = 'opacity 0.3s ease';
-					setTimeout(() => successIndicator.remove(), 300);
-				}, 3000);
-			}
-		};
-		reader.readAsDataURL(file);
-	}
+    function previewImage(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imagePreview.src = e.target.result;
+            imagePreview.classList.remove('preview-hidden');
+            imagePreview.classList.add('preview-visible');
+            
+            uploadPlaceholder.style.transition = 'opacity 0.3s ease';
+            uploadPlaceholder.style.opacity = '0';
+            setTimeout(() => {
+                uploadPlaceholder.style.display = 'none';
+            }, 300);
+            
+            if (!document.getElementById('uploadSuccess')) {
+                const successIndicator = document.createElement('div');
+                successIndicator.id = 'uploadSuccess';
+                successIndicator.style.cssText = 'position: absolute; top: 10px; right: 10px; background: rgba(40, 167, 69, 0.95); color: white; padding: 8px 16px; border-radius: 25px; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); z-index: 10; animation: slideInRight 0.4s ease;';
+                successIndicator.innerHTML = '<i class="bi bi-check-circle-fill"></i> Photo ajoutée';
+                imageUploadZone.querySelector('.photo-preview-zone').appendChild(successIndicator);
+                
+                setTimeout(() => {
+                    successIndicator.style.opacity = '0';
+                    successIndicator.style.transition = 'opacity 0.3s ease';
+                    setTimeout(() => successIndicator.remove(), 300);
+                }, 3000);
+            }
+        };
+        reader.readAsDataURL(file);
+    }
 
-    // Ajout d'ingrédients
+    // ============================================
+    // AJOUT ET SUPPRESSION D'INGRÉDIENTS / ÉTAPES
+    // ============================================
     function addIngredient() {
         const container = document.getElementById('ingredientsList');
         const newItem = document.createElement('div');
@@ -663,7 +646,6 @@
         updateIngredientCounter();
     }
 
-    // Ajout d'étapes
     function addStep() {
         const container = document.getElementById('stepsList');
         const stepCount = container.querySelectorAll('.step-item-premium').length + 1;
@@ -682,7 +664,6 @@
         updateStepNumbers();
     }
 
-    // Suppression de ligne
     function removeRow(btn) {
         const item = btn.closest('.ingredient-item-premium, .step-item-premium');
         if (item) {
@@ -696,7 +677,6 @@
         }
     }
 
-    // Mise à jour des numéros d'étapes
     function updateStepNumbers() {
         document.querySelectorAll('.step-item-premium').forEach((item, index) => {
             const circle = item.querySelector('.step-number-circle');
@@ -705,494 +685,470 @@
         updateStepCounter();
     }
 
-    // Mise à jour du compteur d'ingrédients
     function updateIngredientCounter() {
         const count = document.querySelectorAll('.ingredient-item-premium').length;
         const counter = document.querySelector('[data-section="2"] .counter-number');
         if (counter) counter.textContent = count;
     }
 
-    // Mise à jour du compteur d'étapes
     function updateStepCounter() {
         const count = document.querySelectorAll('.step-item-premium').length;
         const counter = document.querySelector('[data-section="3"] .counter-number');
         if (counter) counter.textContent = count;
     }
 
-        // Compteur de caractères pour description
-        const descriptionTextarea = document.querySelector('textarea[name="description"]');
-        if (descriptionTextarea) {
-            const charCount = document.querySelector('.char-count');
-            descriptionTextarea.addEventListener('input', (e) => {
-                charCount.textContent = e.target.value.length;
-            });
-            // Init
-            charCount.textContent = descriptionTextarea.value.length;
-        }
+    // ============================================
+    // COMPTEUR DE CARACTÈRES POUR DESCRIPTION
+    // ============================================
+    const descriptionTextarea = document.querySelector('textarea[name="description"]');
+    if (descriptionTextarea) {
+        const charCount = document.querySelector('.char-count');
+        descriptionTextarea.addEventListener('input', (e) => {
+            charCount.textContent = e.target.value.length;
+        });
+        charCount.textContent = descriptionTextarea.value.length;
+    }
 
-        // ============================================
-        // CALCULATEUR DE GLUCIDES INTÉGRÉ
-        // ============================================
-        document.addEventListener('DOMContentLoaded', function() {
-            const foodSearch = document.getElementById('foodSearch');
-            const searchResults = document.getElementById('searchResults');
-            const foodQuantity = document.getElementById('foodQuantity');
-            const addBtn = document.getElementById('addCalculatedIngredient');
-            const calculatedContainer = document.getElementById('calculatedIngredients');
-            const calculatedTotal = document.getElementById('calculatedTotal');
-            const copyBtn = document.getElementById('copyToIngredients');
+    // ============================================
+    // CALCULATEUR DE GLUCIDES INTÉGRÉ
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const foodSearch = document.getElementById('foodSearch');
+        const searchResults = document.getElementById('searchResults');
+        const foodQuantity = document.getElementById('foodQuantity');
+        const addBtn = document.getElementById('addCalculatedIngredient');
+        const calculatedContainer = document.getElementById('calculatedIngredients');
+        const calculatedTotal = document.getElementById('calculatedTotal');
+        const copyBtn = document.getElementById('copyToIngredients');
+        
+        let calculatedItems = [];
+        
+        // Recherche d'aliments via l'API
+        let searchTimeout;
+        foodSearch.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
             
-            let calculatedItems = [];
-            
-            // Recherche d'aliments via l'API
-            let searchTimeout;
-            foodSearch.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                const query = this.value.trim();
-                
-                if (query.length < 2) {
-                    searchResults.style.display = 'none';
-                    searchResults.innerHTML = '';
-                    return;
-                }
-                
-                searchTimeout = setTimeout(() => {
-                    // Appel à l'API de recherche (à adapter selon votre backend)
-                    fetch(`/api/foods/search?q=${encodeURIComponent(query)}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.length === 0) {
-                                searchResults.innerHTML = '<div class="list-group-item text-muted">Aucun aliment trouvé</div>';
-                                searchResults.style.display = 'block';
-                                return;
-                            }
-                            
-                            searchResults.innerHTML = data.map(food => 
-                                `<button class="list-group-item list-group-item-action" 
-                                        data-id="${food.id}" 
-                                        data-name="${food.name}" 
-                                        data-carbs="${food.carbs_per_100g}">
-                                    ${food.name} <span class="badge bg-warning text-dark">${food.carbs_per_100g} g/100g</span>
-                                </button>`
-                            ).join('');
-                            searchResults.style.display = 'block';
-                        })
-                        .catch(error => {
-                            console.error('Erreur de recherche:', error);
-                            searchResults.innerHTML = '<div class="list-group-item text-danger">Erreur de recherche</div>';
-                            searchResults.style.display = 'block';
-                        });
-                }, 300);
-            });
-            
-            // Sélection d'un aliment dans les résultats
-            searchResults.addEventListener('click', function(e) {
-                const btn = e.target.closest('.list-group-item');
-                if (!btn) return;
-                
-                const name = btn.dataset.name;
-                const carbs = parseFloat(btn.dataset.carbs);
-                
-                foodSearch.value = name;
+            if (query.length < 2) {
                 searchResults.style.display = 'none';
                 searchResults.innerHTML = '';
-                
-                // Focus sur la quantité
-                foodQuantity.focus();
-                foodQuantity.select();
-            });
-            
-            // Ajouter un ingrédient calculé
-            addBtn.addEventListener('click', function() {
-                const name = foodSearch.value.trim();
-                const qty = parseFloat(foodQuantity.value) || 100;
-                
-                if (!name) {
-                    alert('Veuillez rechercher un aliment d\'abord !');
-                    return;
-                }
-                
-                // Récupérer les glucides depuis la dernière recherche
-                // On cherche dans les résultats affichés
-                const resultBtns = searchResults.querySelectorAll('.list-group-item');
-                let carbs = 0;
-                let found = false;
-                
-                resultBtns.forEach(btn => {
-                    if (btn.dataset.name.toLowerCase() === name.toLowerCase()) {
-                        carbs = parseFloat(btn.dataset.carbs);
-                        found = true;
-                    }
-                });
-                
-                if (!found) {
-                    // Fallback : appeler l'API directement
-                    fetch(`/api/foods/search?q=${encodeURIComponent(name)}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.length > 0) {
-                                const food = data[0];
-                                addCalculatedItem(food.name, food.carbs_per_100g, qty);
-                            } else {
-                                alert('Aliment non trouvé dans la base CIQUAL.');
-                            }
-                        });
-                    return;
-                }
-                
-                addCalculatedItem(name, carbs, qty);
-            });
-            
-            // Ajouter un élément calculé
-            function addCalculatedItem(name, carbsPer100g, qty) {
-                const total = (carbsPer100g * qty) / 100;
-                
-                const existing = calculatedItems.findIndex(item => item.name === name);
-                if (existing !== -1) {
-                    calculatedItems[existing].qty += qty;
-                    calculatedItems[existing].total = (calculatedItems[existing].carbsPer100g * calculatedItems[existing].qty) / 100;
-                } else {
-                    calculatedItems.push({ name, carbsPer100g, qty, total });
-                }
-                
-                updateCalculatedList();
-                
-                // Reset
-                foodSearch.value = '';
-                foodQuantity.value = 100;
-            }
-            
-            // Mettre à jour la liste des ingrédients calculés
-            function updateCalculatedList() {
-                if (calculatedItems.length === 0) {
-                    calculatedContainer.innerHTML = '<small class="text-muted">Aucun ingrédient calculé</small>';
-                    calculatedTotal.textContent = '0.0';
-                    return;
-                }
-                
-                calculatedContainer.innerHTML = calculatedItems.map((item, index) => 
-                    `<div class="d-flex justify-content-between align-items-center py-1 border-bottom">
-                        <div>
-                            <strong>${item.name}</strong>
-                            <small class="text-muted ms-2">${item.qty}g (${item.carbsPer100g} g/100g)</small>
-                        </div>
-                        <div>
-                            <span class="badge bg-warning text-dark">${item.total.toFixed(1)} g</span>
-                            <button class="btn btn-sm btn-outline-danger ms-2" onclick="removeCalculatedItem(${index})">
-                                <i class="bi bi-x-circle"></i>
-                            </button>
-                        </div>
-                    </div>`
-                ).join('');
-                
-                const total = calculatedItems.reduce((sum, item) => sum + item.total, 0);
-                calculatedTotal.textContent = total.toFixed(1);
-            }
-            
-            // Supprimer un élément calculé
-            window.removeCalculatedItem = function(index) {
-                calculatedItems.splice(index, 1);
-                updateCalculatedList();
-            };
-            
-            // Copier vers la liste d'ingrédients du formulaire
-            copyBtn.addEventListener('click', function() {
-                if (calculatedItems.length === 0) {
-                    alert('Aucun ingrédient à copier !');
-                    return;
-                }
-                
-                // Ajouter chaque ingrédient à la liste du formulaire
-                const ingredientsList = document.getElementById('ingredientsList');
-                
-                calculatedItems.forEach(item => {
-                    // Créer un nouvel élément d'ingrédient
-                    const newItem = document.createElement('div');
-                    newItem.className = 'ingredient-item-premium';
-                    newItem.style.opacity = '0';
-                    newItem.style.transform = 'translateY(10px)';
-                    
-                    newItem.innerHTML = `
-                        <div class="ingredient-drag-handle">
-                            <i class="bi bi-grip-vertical"></i>
-                        </div>
-                        <div class="ingredient-inputs">
-                            <input type="text" name="ingredient_name[]" class="form-control-premium ingredient-name" 
-                                value="${item.name}" placeholder="Ingrédient" required>
-                            <div class="ingredient-quantity-group">
-                                <input type="number" name="ingredient_quantity[]" class="form-control-premium ingredient-qty" 
-                                    value="${item.qty}" placeholder="Qté" step="0.1">
-                                <select name="ingredient_unit[]" class="form-select-premium ingredient-unit">
-                                    <option value="g" selected>g</option>
-                                    <option value="kg">kg</option>
-                                    <option value="ml">ml</option>
-                                    <option value="L">L</option>
-                                    <option value="pièce">pièce</option>
-                                    <option value="c.à.s">c.à.s</option>
-                                    <option value="c.à.c">c.à.c</option>
-                                    <option value="pincée">pincée</option>
-                                    <option value="tasse">tasse</option>
-                                    <option value="cup">cup</option>
-                                    <option value="teaspoon">teaspoon</option>
-                                    <option value="tablespoon">tablespoon</option>
-                                    <option value="sachet">sachet</option>
-                                </select>
-                            </div>
-                        </div>
-                        <button type="button" class="btn-remove-premium" onclick="removeRow(this)">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    `;
-                    
-                    ingredientsList.appendChild(newItem);
-                    
-                    // Animation d'apparition
-                    setTimeout(() => {
-                        newItem.style.transition = 'all 0.3s ease';
-                        newItem.style.opacity = '1';
-                        newItem.style.transform = 'translateY(0)';
-                    }, 50);
-                });
-                
-                updateIngredientCounter();
-                
-                // Vider la liste calculée
-                calculatedItems = [];
-                updateCalculatedList();
-                
-                // Feedback visuel
-                copyBtn.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Copié !';
-                setTimeout(() => {
-                    copyBtn.innerHTML = '<i class="bi bi-clipboard"></i> Copier';
-                }, 2000);
-            });
-            
-            // Gestion de la touche Entrée dans la recherche
-            foodSearch.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addBtn.click();
-                }
-            });
-            
-            // Gestion de la touche Entrée dans la quantité
-            foodQuantity.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addBtn.click();
-                }
-            });
-        });
-
-        // Fonction Aperçu Réaliste
-        function previewRecipe() {
-            // 1. Récupération des valeurs simples
-            const title = document.querySelector('input[name="title"]').value || 'Sans titre';
-            const description = document.querySelector('textarea[name="description"]').value;
-            const category = document.querySelector('select[name="category"]').value || 'Recette';
-            const difficulty = document.querySelector('select[name="difficulty"]').value;
-            const prepTime = parseInt(document.querySelector('input[name="prep_time"]').value || 0);
-            const cookTime = parseInt(document.querySelector('input[name="cook_time"]').value || 0);
-            const servings = document.querySelector('input[name="servings"]').value || 4;
-            const carbs = parseFloat(document.querySelector('input[name="total_carbs"]').value || 0).toFixed(0);
-            const tips = document.querySelector('textarea[name="tips"]').value;
-
-            // 2. Injection dans la modale
-            document.getElementById('previewTitle').textContent = title;
-            document.getElementById('previewDescription').textContent = description ? '"' + description + '"' : '';
-            document.getElementById('previewCategory').textContent = category;
-            document.getElementById('previewDifficulty').textContent = difficulty;
-            document.getElementById('previewTime').textContent = prepTime + cookTime;
-            document.getElementById('previewServings').textContent = servings;
-            document.getElementById('previewCarbs').textContent = carbs;
-
-            // 3. Gestion de l'image
-            const fileInput = document.getElementById('imageInput');
-            const previewImg = document.getElementById('previewHeroImage');
-            const placeholder = document.getElementById('previewPlaceholder');
-            
-            // Priorité : 1. Nouvelle image uploadée, 2. Image existante (si mode edit), 3. Placeholder
-            if (fileInput.files && fileInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImg.src = e.target.result;
-                    previewImg.style.display = 'block';
-                    placeholder.style.display = 'none';
-                }
-                reader.readAsDataURL(fileInput.files[0]);
-            } else {
-                // Vérifier si une image existe déjà (via la preview du formulaire)
-                const existingImg = document.getElementById('imagePreview');
-                if (existingImg && !existingImg.classList.contains('preview-hidden') && existingImg.src) {
-                    previewImg.src = existingImg.src;
-                    previewImg.style.display = 'block';
-                    placeholder.style.display = 'none';
-                } else {
-                    previewImg.style.display = 'none';
-                    placeholder.style.display = 'flex';
-                }
-            }
-
-            // 4. Gestion des Ingrédients (Boucle)
-            const ingList = document.getElementById('previewIngredientsList');
-            ingList.innerHTML = '';
-            const ingNames = document.querySelectorAll('input[name="ingredient_name[]"]');
-            const ingQties = document.querySelectorAll('input[name="ingredient_quantity[]"]');
-            const ingUnits = document.querySelectorAll('select[name="ingredient_unit[]"]');
-
-            ingNames.forEach((input, index) => {
-                if (input.value.trim()) {
-                    const qty = ingQties[index].value;
-                    const unit = ingUnits[index].value;
-                    const li = document.createElement('li');
-                    li.className = 'mb-2 border-bottom pb-2';
-                    li.innerHTML = '<span class="fw-bold text-terracotta">' + (qty || '') + ' ' + unit + '</span> ' + input.value;
-                    ingList.appendChild(li);
-                }
-            });
-
-            // 5. Gestion des Étapes (Boucle)
-            const stepList = document.getElementById('previewStepsList');
-            stepList.innerHTML = '';
-            const stepInstr = document.querySelectorAll('textarea[name="step_instruction[]"]');
-            const stepDur = document.querySelectorAll('input[name="step_duration[]"]');
-
-            stepInstr.forEach((input, index) => {
-                if (input.value.trim()) {
-                    const duration = stepDur[index].value;
-                    const div = document.createElement('div');
-                    div.className = 'd-flex gap-3 mb-3';
-                    div.innerHTML = '<div class="flex-shrink-0">' +
-                        '<span class="badge rounded-circle bg-terracotta" style="width:25px;height:25px;display:flex;align-items:center;justify-content:center;">' + (index + 1) + '</span>' +
-                        '</div><div>' +
-                        '<p class="mb-1 small">' + input.value + '</p>' +
-                        (duration ? '<small class="text-muted"><i class="bi bi-clock"></i> ' + duration + ' min</small>' : '') +
-                        '</div>';
-                    stepList.appendChild(div);
-                }
-            });
-
-            // 6. Gestion des Astuces
-            const tipsContainer = document.getElementById('previewTipsContainer');
-            if (tips.trim()) {
-                document.getElementById('previewTips').textContent = tips;
-                tipsContainer.classList.remove('d-none');
-            } else {
-                tipsContainer.classList.add('d-none');
-            }
-
-            // 7. Affichage de la modale
-            const modal = new bootstrap.Modal(document.getElementById('previewModal'));
-            modal.show();
-        }
-
-        // Observer pour les sections visibles (indicateur de progression)
-        const observerOptions = {
-            threshold: 0.5,
-            rootMargin: '-100px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const section = entry.target.dataset.section;
-                    document.querySelectorAll('.progress-step').forEach(step => {
-                        step.classList.remove('active');
-                    });
-                    const activeStep = document.querySelector('.progress-step[data-step="' + section + '"]');
-                    if (activeStep) activeStep.classList.add('active');
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('[data-section]').forEach(section => {
-            observer.observe(section);
-        });
-
-        // Animation d'entrée
-        document.addEventListener('DOMContentLoaded', () => {
-            const cards = document.querySelectorAll('.form-card-modern');
-            cards.forEach((card, index) => {
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 150);
-            });
-        });
-
-        // Calcul automatique des glucides (bouton magique)
-        async function autoCalculateCarbs() {
-            const btn = document.getElementById('btnCalcCarbs');
-            const hint = document.getElementById('calcCarbsHint');
-            const input = document.getElementById('totalCarbsInput');
-            
-            // Récupérer ingrédients du formulaire
-            const names = document.querySelectorAll('input[name="ingredient_name[]"]');
-            const qties = document.querySelectorAll('input[name="ingredient_quantity[]"]');
-            const units = document.querySelectorAll('select[name="ingredient_unit[]"]');
-            
-            let ingredients = [];
-            names.forEach((nameInput, index) => {
-                const name = nameInput.value.trim();
-                if (name !== '') {
-                    // CORRECTION ICI : convertir en nombre avec fallback
-                    let qty = parseFloat(qties[index].value);
-                    if (isNaN(qty) || qty <= 0) {
-                        qty = 1; // Valeur par défaut
-                    }
-                    
-                    ingredients.push({
-                        name: name,
-                        qty: qty,
-                        unit: units[index].value
-                    });
-                }
-            });
-
-            if (ingredients.length === 0) {
-                alert("Ajoute des ingrédients d'abord !");
                 return;
             }
-
-            // Animation chargement
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Calcul...';
-            btn.disabled = true;
-
-            try {
-                console.log("📤 Envoi:", ingredients);
-                const response = await fetch('/api/calculate-carbs', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ ingredients: ingredients })
-                });
-
-                // Vérifier si la réponse est OK
-                if (!response.ok) {
-                    const text = await response.text();
-                    console.error("❌ Réponse du serveur:", text);
-                    throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+            
+            searchTimeout = setTimeout(() => {
+                fetch(`/api/foods/search?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length === 0) {
+                            searchResults.innerHTML = '<div class="list-group-item text-muted">Aucun aliment trouvé</div>';
+                            searchResults.style.display = 'block';
+                            return;
+                        }
+                        
+                        searchResults.innerHTML = data.map(food => 
+                            `<button class="list-group-item list-group-item-action" 
+                                     data-id="${food.id}" 
+                                     data-name="${food.name}" 
+                                     data-carbs="${food.carbs_per_100g}">
+                                ${food.name} <span class="badge bg-warning text-dark">${food.carbs_per_100g} g/100g</span>
+                            </button>`
+                        ).join('');
+                        searchResults.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Erreur de recherche:', error);
+                        searchResults.innerHTML = '<div class="list-group-item text-danger">Erreur de recherche</div>';
+                        searchResults.style.display = 'block';
+                    });
+            }, 300);
+        });
+        
+        // Sélection d'un aliment dans les résultats
+        searchResults.addEventListener('click', function(e) {
+            const btn = e.target.closest('.list-group-item');
+            if (!btn) return;
+            
+            const name = btn.dataset.name;
+            const carbs = parseFloat(btn.dataset.carbs);
+            
+            foodSearch.value = name;
+            searchResults.style.display = 'none';
+            searchResults.innerHTML = '';
+            
+            foodQuantity.focus();
+            foodQuantity.select();
+        });
+        
+        // Ajouter un ingrédient calculé
+        addBtn.addEventListener('click', function() {
+            const name = foodSearch.value.trim();
+            const qty = parseFloat(foodQuantity.value) || 100;
+            
+            if (!name) {
+                alert('Veuillez rechercher un aliment d\'abord !');
+                return;
+            }
+            
+            const resultBtns = searchResults.querySelectorAll('.list-group-item');
+            let carbs = 0;
+            let found = false;
+            
+            resultBtns.forEach(btn => {
+                if (btn.dataset.name.toLowerCase() === name.toLowerCase()) {
+                    carbs = parseFloat(btn.dataset.carbs);
+                    found = true;
                 }
+            });
+            
+            if (!found) {
+                fetch(`/api/foods/search?q=${encodeURIComponent(name)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            const food = data[0];
+                            addCalculatedItem(food.name, food.carbs_per_100g, qty);
+                        } else {
+                            alert('Aliment non trouvé dans la base CIQUAL.');
+                        }
+                    });
+                return;
+            }
+            
+            addCalculatedItem(name, carbs, qty);
+        });
+        
+        function addCalculatedItem(name, carbsPer100g, qty) {
+            const total = (carbsPer100g * qty) / 100;
+            
+            const existing = calculatedItems.findIndex(item => item.name === name);
+            if (existing !== -1) {
+                calculatedItems[existing].qty += qty;
+                calculatedItems[existing].total = (calculatedItems[existing].carbsPer100g * calculatedItems[existing].qty) / 100;
+            } else {
+                calculatedItems.push({ name, carbsPer100g, qty, total });
+            }
+            
+            updateCalculatedList();
+            
+            foodSearch.value = '';
+            foodQuantity.value = 100;
+        }
+        
+        function updateCalculatedList() {
+            if (calculatedItems.length === 0) {
+                calculatedContainer.innerHTML = '<small class="text-muted">Aucun ingrédient calculé</small>';
+                calculatedTotal.textContent = '0.0';
+                return;
+            }
+            
+            calculatedContainer.innerHTML = calculatedItems.map((item, index) => 
+                `<div class="d-flex justify-content-between align-items-center py-1 border-bottom">
+                    <div>
+                        <strong>${item.name}</strong>
+                        <small class="text-muted ms-2">${item.qty}g (${item.carbsPer100g} g/100g)</small>
+                    </div>
+                    <div>
+                        <span class="badge bg-warning text-dark">${item.total.toFixed(1)} g</span>
+                        <button class="btn btn-sm btn-outline-danger ms-2" onclick="removeCalculatedItem(${index})">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </div>
+                </div>`
+            ).join('');
+            
+            const total = calculatedItems.reduce((sum, item) => sum + item.total, 0);
+            calculatedTotal.textContent = total.toFixed(1);
+        }
+        
+        window.removeCalculatedItem = function(index) {
+            calculatedItems.splice(index, 1);
+            updateCalculatedList();
+        };
+        
+        copyBtn.addEventListener('click', function() {
+            if (calculatedItems.length === 0) {
+                alert('Aucun ingrédient à copier !');
+                return;
+            }
+            
+            const ingredientsList = document.getElementById('ingredientsList');
+            
+            calculatedItems.forEach(item => {
+                const newItem = document.createElement('div');
+                newItem.className = 'ingredient-item-premium';
+                newItem.style.opacity = '0';
+                newItem.style.transform = 'translateY(10px)';
+                
+                newItem.innerHTML = `
+                    <div class="ingredient-drag-handle">
+                        <i class="bi bi-grip-vertical"></i>
+                    </div>
+                    <div class="ingredient-inputs">
+                        <input type="text" name="ingredient_name[]" class="form-control-premium ingredient-name" 
+                               value="${item.name}" placeholder="Ingrédient" required>
+                        <div class="ingredient-quantity-group">
+                            <input type="number" name="ingredient_quantity[]" class="form-control-premium ingredient-qty" 
+                                   value="${item.qty}" placeholder="Qté" step="0.1">
+                            <select name="ingredient_unit[]" class="form-select-premium ingredient-unit">
+                                <option value="g" selected>g</option>
+                                <option value="kg">kg</option>
+                                <option value="ml">ml</option>
+                                <option value="L">L</option>
+                                <option value="pièce">pièce</option>
+                                <option value="c.à.s">c.à.s</option>
+                                <option value="c.à.c">c.à.c</option>
+                                <option value="pincée">pincée</option>
+                                <option value="tasse">tasse</option>
+                                <option value="cup">cup</option>
+                                <option value="teaspoon">teaspoon</option>
+                                <option value="tablespoon">tablespoon</option>
+                                <option value="sachet">sachet</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-remove-premium" onclick="removeRow(this)">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                `;
+                
+                ingredientsList.appendChild(newItem);
+                
+                setTimeout(() => {
+                    newItem.style.transition = 'all 0.3s ease';
+                    newItem.style.opacity = '1';
+                    newItem.style.transform = 'translateY(0)';
+                }, 50);
+            });
+            
+            updateIngredientCounter();
+            
+            calculatedItems = [];
+            updateCalculatedList();
+            
+            copyBtn.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Copié !';
+            setTimeout(() => {
+                copyBtn.innerHTML = '<i class="bi bi-clipboard"></i> Copier';
+            }, 2000);
+        });
+        
+        foodSearch.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addBtn.click();
+            }
+        });
+        
+        foodQuantity.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addBtn.click();
+            }
+        });
+    });
 
-                const data = await response.json();
-                console.log("✅ Réponse:", data);
+    // ============================================
+    // FONCTION APERÇU RÉALISTE
+    // ============================================
+    function previewRecipe() {
+        const title = document.querySelector('input[name="title"]').value || 'Sans titre';
+        const description = document.querySelector('textarea[name="description"]').value;
+        const category = document.querySelector('select[name="category"]').value || 'Recette';
+        const difficulty = document.querySelector('select[name="difficulty"]').value;
+        const prepTime = parseInt(document.querySelector('input[name="prep_time"]').value || 0);
+        const cookTime = parseInt(document.querySelector('input[name="cook_time"]').value || 0);
+        const servings = document.querySelector('input[name="servings"]').value || 4;
+        const carbs = parseFloat(document.querySelector('input[name="total_carbs"]').value || 0).toFixed(0);
+        const tips = document.querySelector('textarea[name="tips"]').value;
 
-                if (data.success) {
-                    input.value = data.total_carbs;
-                    hint.innerHTML = '<i class="bi bi-check-circle text-success"></i> Calculé avec succès !';
-                    input.style.backgroundColor = '#d4edda';
-                    setTimeout(() => input.style.backgroundColor = '', 1000);
-                } else {
-                    alert("Erreur : " + data.message);
-                }
-            } catch (error) {
-                console.error("❌ Erreur calcul:", error);
-                alert(`Erreur de connexion au serveur : ${error.message}\nVérifiez la console (F12) pour plus de détails.`);
-            } finally {
-                btn.innerHTML = '<i class="bi bi-magic"></i> Calcul Auto';
-                btn.disabled = false;
+        document.getElementById('previewTitle').textContent = title;
+        document.getElementById('previewDescription').textContent = description ? '"' + description + '"' : '';
+        document.getElementById('previewCategory').textContent = category;
+        document.getElementById('previewDifficulty').textContent = difficulty;
+        document.getElementById('previewTime').textContent = prepTime + cookTime;
+        document.getElementById('previewServings').textContent = servings;
+        document.getElementById('previewCarbs').textContent = carbs;
+
+        const fileInput = document.getElementById('imageInput');
+        const previewImg = document.getElementById('previewHeroImage');
+        const placeholder = document.getElementById('previewPlaceholder');
+        
+        if (fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                previewImg.style.display = 'block';
+                placeholder.style.display = 'none';
+            }
+            reader.readAsDataURL(fileInput.files[0]);
+        } else {
+            const existingImg = document.getElementById('imagePreview');
+            if (existingImg && !existingImg.classList.contains('preview-hidden') && existingImg.src) {
+                previewImg.src = existingImg.src;
+                previewImg.style.display = 'block';
+                placeholder.style.display = 'none';
+            } else {
+                previewImg.style.display = 'none';
+                placeholder.style.display = 'flex';
             }
         }
-    </script>
-    {% endblock %}
+
+        const ingList = document.getElementById('previewIngredientsList');
+        ingList.innerHTML = '';
+        const ingNames = document.querySelectorAll('input[name="ingredient_name[]"]');
+        const ingQties = document.querySelectorAll('input[name="ingredient_quantity[]"]');
+        const ingUnits = document.querySelectorAll('select[name="ingredient_unit[]"]');
+
+        ingNames.forEach((input, index) => {
+            if (input.value.trim()) {
+                const qty = ingQties[index].value;
+                const unit = ingUnits[index].value;
+                const li = document.createElement('li');
+                li.className = 'mb-2 border-bottom pb-2';
+                li.innerHTML = '<span class="fw-bold text-terracotta">' + (qty || '') + ' ' + unit + '</span> ' + input.value;
+                ingList.appendChild(li);
+            }
+        });
+
+        const stepList = document.getElementById('previewStepsList');
+        stepList.innerHTML = '';
+        const stepInstr = document.querySelectorAll('textarea[name="step_instruction[]"]');
+        const stepDur = document.querySelectorAll('input[name="step_duration[]"]');
+
+        stepInstr.forEach((input, index) => {
+            if (input.value.trim()) {
+                const duration = stepDur[index].value;
+                const div = document.createElement('div');
+                div.className = 'd-flex gap-3 mb-3';
+                div.innerHTML = '<div class="flex-shrink-0">' +
+                    '<span class="badge rounded-circle bg-terracotta" style="width:25px;height:25px;display:flex;align-items:center;justify-content:center;">' + (index + 1) + '</span>' +
+                    '</div><div>' +
+                    '<p class="mb-1 small">' + input.value + '</p>' +
+                    (duration ? '<small class="text-muted"><i class="bi bi-clock"></i> ' + duration + ' min</small>' : '') +
+                    '</div>';
+                stepList.appendChild(div);
+            }
+        });
+
+        const tipsContainer = document.getElementById('previewTipsContainer');
+        if (tips.trim()) {
+            document.getElementById('previewTips').textContent = tips;
+            tipsContainer.classList.remove('d-none');
+        } else {
+            tipsContainer.classList.add('d-none');
+        }
+
+        const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+        modal.show();
+    }
+
+    // ============================================
+    // OBSERVER POUR LES SECTIONS VISIBLES
+    // ============================================
+    const observerOptions = {
+        threshold: 0.5,
+        rootMargin: '-100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const section = entry.target.dataset.section;
+                document.querySelectorAll('.progress-step').forEach(step => {
+                    step.classList.remove('active');
+                });
+                const activeStep = document.querySelector('.progress-step[data-step="' + section + '"]');
+                if (activeStep) activeStep.classList.add('active');
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('[data-section]').forEach(section => {
+        observer.observe(section);
+    });
+
+    // ============================================
+    // ANIMATION D'ENTRÉE
+    // ============================================
+    document.addEventListener('DOMContentLoaded', () => {
+        const cards = document.querySelectorAll('.form-card-modern');
+        cards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 150);
+        });
+    });
+
+    // ============================================
+    // CALCUL AUTOMATIQUE DES GLUCIDES (bouton magique)
+    // ============================================
+    async function autoCalculateCarbs() {
+        const btn = document.getElementById('btnCalcCarbs');
+        const hint = document.getElementById('calcCarbsHint');
+        const input = document.getElementById('totalCarbsInput');
+        
+        const names = document.querySelectorAll('input[name="ingredient_name[]"]');
+        const qties = document.querySelectorAll('input[name="ingredient_quantity[]"]');
+        const units = document.querySelectorAll('select[name="ingredient_unit[]"]');
+        
+        let ingredients = [];
+        names.forEach((nameInput, index) => {
+            const name = nameInput.value.trim();
+            if (name !== '') {
+                let qty = parseFloat(qties[index].value);
+                if (isNaN(qty) || qty <= 0) {
+                    qty = 1;
+                }
+                ingredients.push({
+                    name: name,
+                    qty: qty,
+                    unit: units[index].value
+                });
+            }
+        });
+
+        if (ingredients.length === 0) {
+            alert("Ajoute des ingrédients d'abord !");
+            return;
+        }
+
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Calcul...';
+        btn.disabled = true;
+
+        try {
+            console.log("📤 Envoi:", ingredients);
+            const response = await fetch('/api/calculate-carbs', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ ingredients: ingredients })
+            });
+
+            if (!response.ok) {
+                const text = await response.text();
+                console.error("❌ Réponse du serveur:", text);
+                throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            console.log("✅ Réponse:", data);
+
+            if (data.success) {
+                input.value = data.total_carbs;
+                hint.innerHTML = '<i class="bi bi-check-circle text-success"></i> Calculé avec succès !';
+                input.style.backgroundColor = '#d4edda';
+                setTimeout(() => input.style.backgroundColor = '', 1000);
+            } else {
+                alert("Erreur : " + data.message);
+            }
+        } catch (error) {
+            console.error("❌ Erreur calcul:", error);
+            alert(`Erreur de connexion au serveur : ${error.message}\nVérifiez la console (F12) pour plus de détails.`);
+        } finally {
+            btn.innerHTML = '<i class="bi bi-magic"></i> Calcul Auto';
+            btn.disabled = false;
+        }
+    }
+</script>
+{% endblock %}
