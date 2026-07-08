@@ -7,6 +7,7 @@ from app.forms import RecipeForm
 from app.utils.helpers import save_image, safe_int, safe_float, safe_str
 from mistralai import Mistral
 from app.utils.nutrition_conversion import convert_to_grams
+from app.utils.ciqual_matching import find_best_ciqual_match
 import os
 import random
 import logging
@@ -580,13 +581,7 @@ def calculate_carbs():
                 })
                 continue
 
-            food = CiqualFood.query.filter(
-                func.lower(CiqualFood.name) == name.lower()
-            ).first()
-            if not food:
-                food = CiqualFood.query.filter(
-                    CiqualFood.name.ilike(f"%{name}%")
-                ).order_by(func.length(CiqualFood.name)).first()
+            food = find_best_ciqual_match(name)
 
             if not food:
                 unresolved.append({
