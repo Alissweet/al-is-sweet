@@ -6,6 +6,7 @@ from app.models import Recipe, Ingredient, Step, Category, Tag, CookingHistory, 
 from app.forms import RecipeForm
 from app.utils.helpers import save_image, safe_int, safe_float, safe_str
 from mistralai import Mistral
+from app.utils.nutrition_conversion import convert_to_grams
 import os
 import random
 import logging
@@ -543,57 +544,74 @@ def search_foods():
 def calculate_carbs():
     data = request.json
     ingredients = data.get('ingredients', [])
-    
+
     if not ingredients:
         return jsonify({'success': False, 'message': 'Aucun ingrédient'}), 400
 
-    # 1. Préparer texte pour Mistral
-    text_ingredients = "\n".join([f"{i['qty']} {i['unit']} {i['name']}" for i in ingredients])
-    
-    # 2. Appeler Mistral
-    api_key = os.environ.get("MISTRAL_API_KEY")
-    if not api_key:
-        return jsonify({'success': False, 'message': 'Clé API manquante'}), 500
-    
-    prompt = f"""
-    Tu es un expert en nutrition. Voici une liste d'ingrédients de recette.
-    Convertis chaque ingrédient en grammes.
-    Trouve le nom générique simple (ex: "farine de blé", "sucre blanc", "pomme").
-    Réponds UNIQUEMENT en JSON strict avec ce format :
-    {{"items": [{{"name": "nom simple", "weight_g": 100}}]}}
-    
-    Ingrédients :
-    {text_ingredients}
-    """
-    
     try:
-        client = Mistral(api_key=api_key)
-        response = client.chat.complete(
-            model="mistral-small-latest",
-            response_format={"type": "json_object"},
-            messages=[{"role": "user", "content": prompt}]
-        )
-        raw = response.choices[0].message.content.strip()
-        raw = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-        result_json = json.loads(raw)
-        items = result_json.get('items', [])
-        
-        # 3. Calculer avec base CIQUAL
+        details = []
         total_carbs = 0.0
-        
-        for item in items:
-            name = item.get('name', '').lower()
-            weight = float(item.get('weight_g', 0))
-            
-            # Chercher aliment dans base (recherche approximative)
-            food = CiqualFood.query.filter(CiqualFood.name.ilike(f"%{name}%")).first()
-            
-            if food:
-                carbs = (weight * food.carbs_per_100g) / 100.0
-                total_carbs += carbs
-                
-        return jsonify({'success': True, 'total_carbs': round(total_carbs, 1)})
-        
+        unresolved = []
+
+        for ing in ingredients:
+            name = (ing.get('name') or '').strip()
+            unit = (ing.get('unit') or '').strip()
+            try:
+                qty = float(ing.get('qty', 0))
+            except (TypeError, ValueError):
+                qty = 0
+
+            if not name or qty <= 0:
+                continue
+
+            manual_weight = ing.get('manual_weight_g')
+            if manual_weight is not None:
+                try:
+                    weight_g = float(manual_weight)
+                except (TypeError, ValueError):
+                    weight_g = None
+            else:
+                weight_g = convert_to_grams(name, qty, unit)
+
+            if weight_g is None:
+                unresolved.append({
+                    'name': name, 'qty': qty, 'unit': unit,
+                    'reason': 'unite_non_convertible'
+                })
+                continue
+
+            food = CiqualFood.query.filter(
+                func.lower(CiqualFood.name) == name.lower()
+            ).first()
+            if not food:
+                food = CiqualFood.query.filter(
+                    CiqualFood.name.ilike(f"%{name}%")
+                ).order_by(func.length(CiqualFood.name)).first()
+
+            if not food:
+                unresolved.append({
+                    'name': name, 'qty': qty, 'unit': unit,
+                    'weight_g': round(weight_g, 1),
+                    'reason': 'aliment_non_trouve'
+                })
+                continue
+
+            carbs = (weight_g * food.carbs_per_100g) / 100.0
+            total_carbs += carbs
+            details.append({
+                'ingredient': name,
+                'matched_food': food.name,
+                'weight_g': round(weight_g, 1),
+                'carbs_g': round(carbs, 1)
+            })
+
+        return jsonify({
+            'success': True,
+            'total_carbs': round(total_carbs, 1),
+            'details': details,
+            'unresolved': unresolved
+        })
+
     except Exception as e:
-        logger.error(f"Erreur Mistral: {e}")
-        return jsonify({'success': False, 'message': f'Erreur calcul IA : {repr(e)}'}), 500
+        logger.error(f"Erreur calculate_carbs: {e}")
+        return jsonify({'success': False, 'message': f'Erreur calcul : {repr(e)}'}), 500

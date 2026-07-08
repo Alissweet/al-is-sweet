@@ -818,27 +818,19 @@
         const btn = document.getElementById('btnCalcCarbs');
         const hint = document.getElementById('calcCarbsHint');
         const input = document.getElementById('totalCarbsInput');
-        
-        // Récupérer le token CSRF (à ajouter dans <head> si pas fait)
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         const names = document.querySelectorAll('input[name="ingredient_name[]"]');
         const qties = document.querySelectorAll('input[name="ingredient_quantity[]"]');
         const units = document.querySelectorAll('select[name="ingredient_unit[]"]');
-        
+
         let ingredients = [];
         names.forEach((nameInput, index) => {
             const name = nameInput.value.trim();
             if (name !== '') {
                 let qty = parseFloat(qties[index].value);
-                if (isNaN(qty) || qty <= 0) {
-                    qty = 1;
-                }
-                ingredients.push({
-                    name: name,
-                    qty: qty,
-                    unit: units[index].value
-                });
+                if (isNaN(qty) || qty <= 0) qty = 1;
+                ingredients.push({ name: name, qty: qty, unit: units[index].value });
             }
         });
 
@@ -847,32 +839,27 @@
             return;
         }
 
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Calcul...';
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Calcul...';
         btn.disabled = true;
 
         try {
-            const response = await fetch('/api/calculate-carbs', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({ ingredients: ingredients })
-            });
+            const result = await callCalculateCarbs(ingredients, csrfToken);
 
-            const data = await response.json().catch(() => null);
-
-            if (!response.ok) {
-                throw new Error(data?.message || `HTTP ${response.status} - ${response.statusText}`);
-            }
-
-            if (data.success) {
-                input.value = data.total_carbs;
-                hint.innerHTML = '<i class="bi bi-check-circle text-success"></i> Calculé avec succès !';
-                input.style.backgroundColor = '#d4edda';
-                setTimeout(() => input.style.backgroundColor = '', 1000);
+            if (result.unresolved && result.unresolved.length > 0) {
+                const manualWeights = await askManualWeights(result.unresolved);
+                if (manualWeights === null) {
+                    hint.innerHTML = '<i class="bi bi-exclamation-triangle text-warning"></i> Calcul annulé, complétez les poids manquants.';
+                    return;
+                }
+                ingredients = ingredients.map(ing => {
+                    const manual = manualWeights.find(m => m.name === ing.name && m.unit === ing.unit);
+                    if (manual) return { ...ing, manual_weight_g: manual.weight_g };
+                    return ing;
+                });
+                const finalResult = await callCalculateCarbs(ingredients, csrfToken);
+                applyResult(finalResult, input, hint);
             } else {
-                alert("Erreur : " + data.message);
+                applyResult(result, input, hint);
             }
         } catch (error) {
             alert(`Erreur : ${error.message}\nVérifiez la console (F12).`);
@@ -880,6 +867,111 @@
             btn.innerHTML = '<i class="bi bi-magic"></i> Calcul Auto';
             btn.disabled = false;
         }
+    }
+
+    async function callCalculateCarbs(ingredients, csrfToken) {
+        const response = await fetch('/api/calculate-carbs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+            body: JSON.stringify({ ingredients: ingredients })
+        });
+        const data = await response.json().catch(() => null);
+        if (!response.ok || !data || !data.success) {
+            throw new Error(data?.message || `HTTP ${response.status} - ${response.statusText}`);
+        }
+        return data;
+    }
+
+    function applyResult(result, input, hint) {
+        input.value = result.total_carbs;
+        input.style.backgroundColor = '#d4edda';
+        setTimeout(() => input.style.backgroundColor = '', 1000);
+
+        const detailLines = result.details.map(d =>
+            `${d.ingredient} → ${d.matched_food} (${d.weight_g} g) = ${d.carbs_g} g glucides`
+        ).join('\n');
+
+        hint.innerHTML = `<i class="bi bi-check-circle text-success"></i> Calculé avec succès.
+            <button type="button" class="btn btn-link btn-sm p-0 ms-2" id="btnShowDetail">Voir le détail</button>
+            <br><small class="text-muted">⚠️ Estimation CIQUAL/USDA — vérifiez avec une balance pour un dosage d'insuline.</small>`;
+
+        document.getElementById('btnShowDetail').addEventListener('click', () => alert(detailLines));
+    }
+
+    function askManualWeights(unresolvedList) {
+        return new Promise((resolve) => {
+            const modalId = 'manualWeightModal';
+            document.getElementById(modalId)?.remove();
+
+            const rows = unresolvedList.map((ing) => {
+                const reasonText = ing.reason === 'aliment_non_trouve'
+                    ? "aliment introuvable dans CIQUAL"
+                    : "unité non convertible automatiquement";
+                return `
+                    <div class="mb-3 border-bottom pb-2">
+                        <strong>${ing.name}</strong>
+                        <span class="text-muted small">(${ing.qty} ${ing.unit} — ${reasonText})</span>
+                        <div class="input-group mt-1">
+                            <input type="number" min="0" step="0.1" class="form-control manual-weight-input"
+                                data-name="${ing.name}" data-unit="${ing.unit}"
+                                placeholder="Poids en grammes" required>
+                            <span class="input-group-text">g</span>
+                        </div>
+                    </div>`;
+            }).join('');
+
+            const modalHtml = `
+            <div class="modal fade" id="${modalId}" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-warning">
+                            <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill"></i> Ingrédients à préciser</h5>
+                        </div>
+                        <div class="modal-body">
+                            <p class="text-muted small">Ces ingrédients n'ont pas pu être convertis automatiquement.
+                            Merci de renseigner leur poids réel en grammes (pesée recommandée).</p>
+                            ${rows}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" id="cancelManualWeights">Annuler le calcul</button>
+                            <button type="button" class="btn btn-warning" id="confirmManualWeights">Valider les poids</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            const modalEl = document.getElementById(modalId);
+            const modal = new bootstrap.Modal(modalEl);
+
+            document.getElementById('confirmManualWeights').addEventListener('click', () => {
+                const inputs = modalEl.querySelectorAll('.manual-weight-input');
+                let allValid = true;
+                const weights = [];
+                inputs.forEach(inp => {
+                    const val = parseFloat(inp.value);
+                    if (isNaN(val) || val <= 0) {
+                        inp.classList.add('is-invalid');
+                        allValid = false;
+                    } else {
+                        inp.classList.remove('is-invalid');
+                        weights.push({ name: inp.dataset.name, unit: inp.dataset.unit, weight_g: val });
+                    }
+                });
+                if (!allValid) return;
+                modal.hide();
+                modalEl.remove();
+                resolve(weights);
+            });
+
+            document.getElementById('cancelManualWeights').addEventListener('click', () => {
+                modal.hide();
+                modalEl.remove();
+                resolve(null);
+            });
+
+            modal.show();
+        });
     }
 </script>
 {% endblock %}
