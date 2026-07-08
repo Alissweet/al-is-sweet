@@ -202,7 +202,7 @@ def import_data():
 
     return redirect(url_for('admin.dashboard'))
 
-@admin_bp.route('/admin/reseed-ciqual-temp')
+@admin_bp.route('/reseed-ciqual-temp')
 @login_required
 def reseed_ciqual_temp():
     # Protection supplémentaire : un secret dans l'URL, en plus du login_required
