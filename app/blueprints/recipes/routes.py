@@ -5,8 +5,7 @@ from app import db
 from app.models import Recipe, Ingredient, Step, Category, Tag, CookingHistory, CiqualFood
 from app.forms import RecipeForm
 from app.utils.helpers import save_image, safe_int, safe_float, safe_str
-from mistralai.client import MistralClient
-from mistralai.models.chat_completion import ChatMessage
+from mistralai import Mistral
 import os
 import random
 import logging
@@ -568,10 +567,11 @@ def calculate_carbs():
     """
     
     try:
-        client = MistralClient(api_key=api_key)
-        response = client.chat(
+        client = Mistral(api_key=api_key)
+        response = client.chat.complete(
             model="mistral-small-latest",
-            messages=[ChatMessage(role="user", content=prompt)]
+            response_format={"type": "json_object"},
+            messages=[{"role": "user", "content": prompt}]
         )
         raw = response.choices[0].message.content.strip()
         raw = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
