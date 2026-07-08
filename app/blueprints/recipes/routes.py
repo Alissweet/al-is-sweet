@@ -2,12 +2,16 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 from sqlalchemy import func, case
 from app import db
-from app.models import Recipe, Ingredient, Step, Category, Tag, CookingHistory
+from app.models import Recipe, Ingredient, Step, Category, Tag, CookingHistory, CiqualFood
 from app.forms import RecipeForm
 from app.utils.helpers import save_image, safe_int, safe_float, safe_str
+from mistralai.client import MistralClient
+from mistralai.models.chat_completion import ChatMessage
 import os
 import random
 import logging
+import json
+
 
 recipes_bp = Blueprint('recipes', __name__)
 logger = logging.getLogger(__name__)
@@ -551,8 +555,6 @@ def calculate_carbs():
     api_key = os.environ.get("MISTRAL_API_KEY")
     if not api_key:
         return jsonify({'success': False, 'message': 'Clé API manquante'}), 500
-        
-    client = MistralClient(api_key=api_key)
     
     prompt = f"""
     Tu es un expert en nutrition. Voici une liste d'ingrédients de recette.
@@ -566,6 +568,7 @@ def calculate_carbs():
     """
     
     try:
+        client = MistralClient(api_key=api_key)
         response = client.chat(
             model="mistral-small-latest",
             response_format={"type": "json_object"},
