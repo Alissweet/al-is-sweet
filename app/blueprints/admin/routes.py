@@ -8,6 +8,7 @@ import json
 import io
 import difflib
 import logging
+import os
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 logger = logging.getLogger(__name__)
@@ -200,3 +201,53 @@ def import_data():
         flash(f"Erreur : {str(e)}", 'danger')
 
     return redirect(url_for('admin.dashboard'))
+
+@admin_bp.route('/admin/reseed-ciqual-temp')
+@login_required
+def reseed_ciqual_temp():
+    # Protection supplémentaire : un secret dans l'URL, en plus du login_required
+    secret = request.args.get('key')
+    if secret != os.environ.get('RESEED_SECRET'):
+        return "Non autorisé", 403
+
+    from app.models import CiqualFood
+    from app import db
+    import csv
+
+    CiqualFood.query.delete()
+    db.session.commit()
+
+    csv_path = os.path.join(current_app.root_path, 'static', 'data', 'ciqual.csv')
+    GLUCIDES_KEY = 'Glucides\n(g\n100 g)'
+
+    def parse_carbs(raw):
+        val = (raw or '').strip()
+        if not val or val == '-':
+            return 0.0
+        if val.lower() == 'traces':
+            return 0.05
+        if val.startswith('<'):
+            val = val.replace('<', '').strip()
+        val = val.replace(',', '.')
+        try:
+            return float(val)
+        except ValueError:
+            return 0.0
+
+    foods = []
+    skipped = 0
+    with open(csv_path, 'r', encoding='latin-1') as f:
+        reader = csv.DictReader(f, delimiter=';')
+        for row in reader:
+            name = row.get('alim_nom_fr', '').strip()
+            if not name:
+                skipped += 1
+                continue
+            carbs = parse_carbs(row.get(GLUCIDES_KEY, ''))
+            foods.append(CiqualFood(name=name, carbs_per_100g=carbs))
+
+    if foods:
+        db.session.bulk_save_objects(foods)
+        db.session.commit()
+
+    return f"✅ {len(foods)} aliments réimportés, {skipped} ignorés."
